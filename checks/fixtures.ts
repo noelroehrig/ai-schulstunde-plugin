@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { AGENT_TOOLS, AGENTS, type AgentName } from "./permissions.ts";
 import { BOARD_GUIDE } from "./rules/agent-bodies.ts";
 import { LANGUAGE_SENTENCE, REVIEWER_SENTENCE } from "./rules/agents.ts";
+import { AGENT_TYPES, CHECKPOINT_QUESTION, ESCALATION_LABELS, ORCHESTRATION_TOKENS } from "./rules/orchestration.ts";
 import { PRIVACY_SENTENCE } from "./rules/templates.ts";
 import {
   ASSIGNMENT_KEYS,
@@ -76,6 +77,19 @@ export function conventionsSkillBody(): string {
     ),
     ...REVIEW_HEADINGS,
     TOKENS.join(" "),
+    "",
+  ].join("\n");
+}
+
+/** An orchestration guide holding every constant the orchestration rule requires. */
+export function orchestrationFile(): string {
+  return [
+    "# Orchestration",
+    "",
+    CHECKPOINT_QUESTION,
+    ...ESCALATION_LABELS,
+    ...AGENT_TYPES,
+    ORCHESTRATION_TOKENS.join(" "),
     "",
   ].join("\n");
 }
@@ -204,11 +218,11 @@ export function completeRepoFiles(): Record<string, string> {
   for (const name of [
     "board.md",
     "lesson-folder.md",
-    "orchestration.md",
     "examples/NOTES.md",
   ]) {
     files[`plugin/skills/lesson-conventions/${name}`] = "Text.\n";
   }
+  files["plugin/skills/lesson-conventions/orchestration.md"] = orchestrationFile();
   files["plugin/skills/lesson-conventions/examples/plan.md"] = examplePlanFile();
   files["plugin/skills/lesson-conventions/examples/board.json"] = exampleBoardFile();
   Object.assign(files, templateFiles());

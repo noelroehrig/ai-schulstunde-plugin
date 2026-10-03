@@ -11,6 +11,7 @@ import { jsonValid } from "./rules/json.ts";
 import { manifest, userConfigRefs } from "./rules/manifest.ts";
 import { marketplace } from "./rules/marketplace.ts";
 import { mcp } from "./rules/mcp.ts";
+import { orchestration } from "./rules/orchestration.ts";
 import { paths } from "./rules/paths.ts";
 import { pluginDir } from "./rules/plugin-dir.ts";
 import { server } from "./rules/server.ts";
@@ -32,6 +33,7 @@ export const RULES: Rule[] = [
   skills,
   conventions,
   examples,
+  orchestration,
   templates,
   server,
   completeness,

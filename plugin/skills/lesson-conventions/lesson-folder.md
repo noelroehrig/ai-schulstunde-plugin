@@ -18,9 +18,10 @@ Every lesson gets one folder in `Stunden/` of the working folder.
 | `stunde.md` | orchestrator | Request, overrides, status, OneNote location (format below). |
 | `planung_vN.md` | `lesson-planner` | Plan draft N. |
 | `review_vN.md` | `plan-reviewer` | Review of `planung_vN.md`. |
-| `rueckmeldung_vN.md` | orchestrator | The teacher's checkpoint feedback that led to `planung_vN.md`. |
+| `rueckmeldung_vN.md` | orchestrator | The teacher's feedback at the checkpoint, or guidance at the planning cap, that led to `planung_vN.md`. |
 | `tafelbild_vN.json` | `board-author` | The exact `replace_page` payload of board round N. |
 | `tafelbild-review_vN.md` | `board-reviewer` | Review of board round N. |
+| `tafelbild-rueckmeldung_vN.md` | orchestrator | The teacher's guidance at the board cap that led to `tafelbild_vN.json`. |
 
 Rules:
 
@@ -28,6 +29,8 @@ Rules:
 - `review_vN.md` always judges `planung_vN.md`.
 - `rueckmeldung_vN.md` carries the N of the draft it leads to: feedback on `planung_v2.md` is saved as `rueckmeldung_v3.md`, then `planung_v3.md` is written.
 - Board versions count separately, starting at 1: `tafelbild-review_vN.md` judges `tafelbild_vN.json`.
+- `tafelbild-rueckmeldung_vN.md` carries the board version it leads to: guidance on `tafelbild_v3.json` is saved as `tafelbild-rueckmeldung_v4.md`, then `tafelbild_v4.json` is written.
+- The orchestrator saves the teacher's words verbatim, under the heading `# Rückmeldung zu planung_v<N-1>.md` or `# Rückmeldung zu tafelbild_v<N-1>.json`.
 - Never overwrite an existing versioned file. The next version gets the next number.
 - Pass every path explicitly in the assignment. Agents never pick "the latest" file.
 
