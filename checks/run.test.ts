@@ -122,6 +122,7 @@ test("the CLI registers every rule", () => {
       "orchestration",
       "docs",
       "templates",
+      "workflows",
       "server",
       "completeness",
     ],
