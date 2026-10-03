@@ -43,7 +43,7 @@ Every outline has `x` 48 and `width` 928: `48 + 928 = 976`, at most 1024. A marg
 
 ### Estimated heights
 
-Line height is `1.3 * font_size`: 41.6 at 32 pt, 31.2 at 24 pt, 26 at 20 pt. Every line fits on one line at width 928; the longest is `Nenner (8): in wie viele gleich große Teile geteilt`, 51 characters: `ceil(51 * 0.5 * 20 / 928) = ceil(0.55) = 1`.
+Line height is `1.3 * font_size`: 41.6 at 32 pt, 31.2 at 24 pt, 26 at 20 pt. Every line fits on one line at width 928; the longest is `Nenner (8): in wie viele gleich große Teile das Ganze geteilt ist`, 65 characters: `ceil(65 * 0.5 * 20 / 928) = ceil(0.70) = 1`.
 
 | Outline | y | Estimated height | Estimated end |
 |---|---|---|---|

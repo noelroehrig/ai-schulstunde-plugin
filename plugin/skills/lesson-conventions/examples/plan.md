@@ -5,7 +5,7 @@
 Klasse: 6a · Fach: Mathematik · Datum: offen · Stundenlänge: 45 Minuten
 
 ## Einordnung
-Erste Stunde der Reihe zur Bruchrechnung. Die Schülerinnen und Schüler kennen das Teilen in gleich große Teile aus dem Alltag, aber noch keine Bruchschreibweise. Die Stunde legt die Grundvorstellung „Bruch als Anteil eines Ganzen“, auf der die folgenden Stunden (Erweitern und Kürzen) aufbauen.
+Erste Stunde der Reihe zur Bruchrechnung. Die Schülerinnen und Schüler kennen das Teilen in gleich große Teile aus dem Alltag, aber noch keine Bruchschreibweise. Die Stunde legt die Grundvorstellung „Bruch als Anteil eines Ganzen“ an, auf der die folgenden Stunden (Erweitern und Kürzen) aufbauen.
 
 ## Lernziele
 Die Schülerinnen und Schüler
@@ -36,7 +36,7 @@ Buch S. 52, Nr. 1 bis 3: Anteile in Figuren ablesen und selbst eine Figur zu 3/4
 
 ## Tafelbild (Inhalt)
 - Einstieg: Stundenthema „Brüche als Anteile“; Pizza in 8 Stücke geteilt, 5 von 8 Stücken übrig
-- Erarbeitung: Bruch 5/8 mit Pfeilen „Zähler: Anzahl der Teile“ und „Nenner: in wie viele gleich große Teile geteilt“
+- Erarbeitung: Bruch 5/8 mit Pfeilen „Zähler: wie viele dieser Teile gemeint sind“ und „Nenner: in wie viele gleich große Teile das Ganze geteilt ist“
 - Sicherung: Merksatz „Ein Bruch beschreibt einen Anteil an einem Ganzen.“; Beispiele 1/2, 1/4, 3/4
 
 ## Besondere Regeln

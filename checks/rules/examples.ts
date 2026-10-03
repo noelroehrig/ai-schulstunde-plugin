@@ -75,10 +75,14 @@ function listFontSizeProblems(entries: JsonObject[], path: string): string[] {
   ]);
 }
 
-/** Checks the size of `text` on the element itself, or the size of each of its runs. */
+/**
+ * Checks the size of `text` on the element itself, or the size of each of its runs. With runs,
+ * an element's own `font_size` is optional, but when it is set it must not be below the minimum.
+ */
 function contentFontSizeProblems(element: JsonObject, path: string): string[] {
   if (element.segments === undefined) return sizeProblem(element, path);
-  return (element.segments as JsonObject[]).flatMap((run, index) => sizeProblem(run, `${path}.segments[${index}]`));
+  const own = element.font_size === undefined ? [] : sizeProblem(element, path);
+  return [...own, ...(element.segments as JsonObject[]).flatMap((run, index) => sizeProblem(run, `${path}.segments[${index}]`))];
 }
 
 /** One problem when `element` has no `font_size` or one below the example minimum. */

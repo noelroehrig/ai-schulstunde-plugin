@@ -129,3 +129,9 @@ test("examples checks the font size of runs and list items", () => {
     ],
   );
 });
+
+test("examples checks the paragraph's own font size when it has segments", () => {
+  const value = board();
+  value.outlines[0].items.push({ type: "paragraph", font_size: 12, segments: [{ text: "a", font_size: 20 }] });
+  assertOneBoardFinding(value, /^outlines\[0\]\.items\[1\]: font_size 12 is less than 20$/);
+});

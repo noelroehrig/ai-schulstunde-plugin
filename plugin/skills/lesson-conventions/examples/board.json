@@ -28,14 +28,14 @@
           "type": "paragraph",
           "segments": [
             { "text": "Zähler (5): ", "font_size": 20, "bold": true, "color": "#C00000" },
-            { "text": "Anzahl der Teile", "font_size": 20 }
+            { "text": "wie viele dieser Teile gemeint sind", "font_size": 20 }
           ]
         },
         {
           "type": "paragraph",
           "segments": [
             { "text": "Nenner (8): ", "font_size": 20, "bold": true, "color": "#C00000" },
-            { "text": "in wie viele gleich große Teile geteilt", "font_size": 20 }
+            { "text": "in wie viele gleich große Teile das Ganze geteilt ist", "font_size": 20 }
           ]
         }
       ]
