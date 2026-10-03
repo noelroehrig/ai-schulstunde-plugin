@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { completeRepoFiles } from "../fixtures.ts";
 import { createMemoryRepo } from "../repo.ts";
-import { completeness } from "./completeness.ts";
+import { completeness, REQUIRED_FILES } from "./completeness.ts";
 
 test("completeness passes on a complete repository", () => {
   assert.deepEqual(completeness.run(createMemoryRepo(completeRepoFiles()), "release"), []);
@@ -31,6 +31,10 @@ test("completeness reports each missing component on its own", () => {
 test("completeness lists every component of SPEC.md section 5.1", () => {
   const findings = completeness.run(createMemoryRepo({}), "release");
   assert.equal(findings.length, 20);
-  assert.ok(findings.some((finding) => finding.file === "plugin/templates/onenote.md"));
-  assert.ok(findings.some((finding) => finding.file === "plugin/skills/einrichten/SKILL.md"));
+  assert.deepEqual(
+    findings.map((finding) => [finding.rule, finding.file]),
+    REQUIRED_FILES.map((file) => ["completeness", file]),
+  );
+  assert.ok(REQUIRED_FILES.includes("plugin/templates/onenote.md"));
+  assert.ok(REQUIRED_FILES.includes("plugin/skills/einrichten/SKILL.md"));
 });

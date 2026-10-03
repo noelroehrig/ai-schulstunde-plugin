@@ -128,6 +128,8 @@ test("user-config-refs reports an undeclared key with file and key", () => {
 test("user-config-refs treats every key as undeclared without a readable manifest", () => {
   const repo = createMemoryRepo({ "plugin/.mcp.json": '{ "x": "${user_config.notebook}" }' });
   const findings = userConfigRefs.run(repo, "build");
-  assert.equal(findings.length, 1);
+  assert.equal(findings.length, 1, JSON.stringify(findings));
+  assert.equal(findings[0].rule, "user-config-refs");
   assert.equal(findings[0].file, "plugin/.mcp.json");
+  assert.match(findings[0].message, /notebook/);
 });

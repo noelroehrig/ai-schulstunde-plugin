@@ -35,17 +35,21 @@ for (const entry of ["bin/tool", "commands/x.md", "hooks/hooks.json", "CLAUDE.md
 
 test("plugin-dir reports each forbidden entry once", () => {
   const findings = check(["plugin/hooks/a.json", "plugin/hooks/b.json"]);
-  assert.equal(findings.length, 1);
+  assert.equal(findings.length, 1, JSON.stringify(findings));
+  assert.equal(findings[0].rule, "plugin-dir");
+  assert.equal(findings[0].file, "plugin/hooks");
 });
 
 test("plugin-dir reports a directory named like the MCP config", () => {
   const findings = check(["plugin/.mcp.json/x"]);
-  assert.equal(findings.length, 1);
+  assert.equal(findings.length, 1, JSON.stringify(findings));
+  assert.equal(findings[0].rule, "plugin-dir");
   assert.equal(findings[0].file, "plugin/.mcp.json");
 });
 
 test("plugin-dir reports a file named like an allowed directory", () => {
   const findings = check(["plugin/skills"]);
-  assert.equal(findings.length, 1);
+  assert.equal(findings.length, 1, JSON.stringify(findings));
+  assert.equal(findings[0].rule, "plugin-dir");
   assert.equal(findings[0].file, "plugin/skills");
 });
