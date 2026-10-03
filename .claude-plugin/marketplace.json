@@ -1,0 +1,12 @@
+{
+  "name": "schulstunde",
+  "description": "Plugins für die Unterrichtsplanung mit Claude.",
+  "owner": { "name": "Noel Röhrig" },
+  "plugins": [
+    {
+      "name": "unterricht",
+      "source": "./plugin",
+      "description": "Plant Unterrichtsstunden mit Prüfschleifen und legt das Tafelbild in OneNote an."
+    }
+  ]
+}

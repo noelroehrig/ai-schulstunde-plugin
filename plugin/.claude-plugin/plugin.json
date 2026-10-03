@@ -1,0 +1,20 @@
+{
+  "name": "unterricht",
+  "version": "0.1.0",
+  "description": "Plant Unterrichtsstunden mit Prüfschleifen und legt das Tafelbild in OneNote an.",
+  "author": { "name": "Noel Röhrig" },
+  "userConfig": {
+    "notebook": {
+      "type": "string",
+      "title": "OneNote-Notizbuch",
+      "description": "Name des Notizbuchs, in dem das Plugin Tafelbilder lesen und anlegen darf.",
+      "default": "Unterricht"
+    },
+    "plan_checkpoint": {
+      "type": "boolean",
+      "title": "Plan vor dem Tafelbild prüfen",
+      "description": "Vor dem Tafelbild fragen, ob der Plan so passt.",
+      "default": true
+    }
+  }
+}
