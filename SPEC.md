@@ -608,6 +608,7 @@ Server behavior (B4): `ping` never fails and reports `onenote_responsive: true|f
 | Configured notebook not found | Stop before writing. Name the configured notebook (exact, case-sensitive) and say where to change the setting. Never create a notebook. |
 | Target section missing | Ask the teacher to create it in OneNote or to choose another. Never create sections. |
 | OneNote not installed for COM | Stop and explain in German that the OneNote desktop app is needed. |
+| The plugin's OneNote tools are missing (the server did not start, for example because Windows blocked the unsigned exe) | Treated like `onenote_responsive: false`. The German message says that the OneNote connection of the plugin is not running, to restart the app, and to check whether Windows Defender or SmartScreen blocks `onenote-mcp.exe`. |
 
 ## 12. Installation, onboarding, updates (Decided, O21, O22)
 
