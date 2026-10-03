@@ -25,8 +25,9 @@ Common rules for every phase:
 
 ## Phase 1: `orchestration.md`
 
-Files: `plugin/skills/lesson-conventions/orchestration.md`, `checks/rules/orchestration.ts`, and its
-test.
+Files: `plugin/skills/lesson-conventions/orchestration.md`,
+`plugin/skills/lesson-conventions/lesson-folder.md` (the board guidance file of AC8),
+`checks/rules/orchestration.ts`, and its test.
 
 Acceptance criteria:
 
@@ -42,10 +43,12 @@ Acceptance criteria:
    error handled like a bad result line. Never infer a verdict from the review text. Read the whole
    review only to escalate.
 4. **Planning loop** exactly as `SPEC.md` section 6.2: round 1 to 3, versions as in
-   `lesson-folder.md`, the inputs of each round (round 1: `schulkontext.md`, `kriterien.md`,
-   `stunde.md`; later rounds also the previous plan and review; after feedback also the
-   `rueckmeldung_vN.md`). After every agent run, update `## Stand` and append to `## Verlauf` in
-   `stunde.md`.
+   `lesson-folder.md`, the inputs of each round. Planner: round 1 of a new lesson gets
+   `schulkontext.md`, `kriterien.md`, `stunde.md`; every later round, and round 1 of a loop that
+   starts after teacher input (checkpoint feedback or `Ich gebe Hinweise`), also gets the previous
+   plan and its review, and after teacher input the `rueckmeldung_vN.md` that holds it. Reviewer:
+   the same files plus the plan it judges. After every agent run, update `## Stand` and append to
+   `## Verlauf` in `stunde.md`.
 5. **Checkpoint** exactly as `SPEC.md` section 6.3, skipped when `plan_checkpoint` is `false`. The
    question is exactly `Passt der Plan so? Antworte mit „weiter“, oder schreib, was geändert werden soll.`
    Feedback is saved verbatim as `rueckmeldung_vN.md` under the heading
@@ -59,11 +62,23 @@ Acceptance criteria:
    `stunde.md`). A missing section: ask the teacher to create it in OneNote or name another, then
    check again.
 7. **Board loop** exactly as `SPEC.md` section 6.4. Board versions count separately; the
-   `page_id` from round 1's result line goes into `stunde.md` before the reviewer runs.
+   `page_id` from round 1's result line goes into `stunde.md` before the reviewer runs. Author:
+   `schulkontext.md`, `kriterien.md`, `onenote.md`, and the approved plan; later rounds also the
+   previous `tafelbild_vM.json` and `tafelbild-review_vM.md`, and after teacher guidance the
+   `tafelbild-rueckmeldung_vM.md` that holds it. Reviewer: `schulkontext.md`, `kriterien.md`,
+   `onenote.md`, the approved plan, the payload it judges, and the guidance file when there is one.
 8. **Escalation** exactly as `SPEC.md` section 6.5: show the open Muss-Mängel of the last review in
    German and offer exactly `So übernehmen`, `Ich gebe Hinweise`, `Abbrechen`. Accepted Mängel go to
-   `## Übernommene Mängel`.
-9. **Failure handling:** the rows of `SPEC.md` section 11.3 that concern the orchestrator.
+   `## Übernommene Mängel`. Guidance is saved verbatim like checkpoint feedback: in the planning
+   loop as `rueckmeldung_vN.md`, in the board loop as `tafelbild-rueckmeldung_vM.md` under the
+   heading `# Rückmeldung zu tafelbild_v<M-1>.json` (M is the board version it leads to). Then
+   the loop starts again with a fresh cap. `lesson-folder.md` lists the board guidance file and its
+   version rule.
+9. **Failure handling:** the rows of `SPEC.md` section 11.3 that concern the orchestrator. A
+   `FAILED` result of the board reviewer whose reason contains the code `timeout` is the read
+   timeout of section 11.3: tell the teacher that OneNote is busy or shows a dialog, `ping`, run the
+   reviewer once more with the same assignment; a second failure stops the board loop, keeps the
+   plan, and explains how to resume.
 10. **Status lines:** one German line before every agent run, in the form
     `<Planung | Tafelbild>, Runde <n> von 3: <was gerade passiert>.`, for example
     `Planung, Runde 2 von 3: Der Entwurf wird überarbeitet.`
@@ -140,8 +155,8 @@ Acceptance criteria:
      `replace_page`: outlines with the labels `100`, `200`, ... at `x` = 100, 200, ... up to 2000 on
      the top row, and at `y` = 100, 200, ... up to 1500 down the left edge. The teacher reports the
      last fully visible label in each direction; Breite and Höhe go into `onenote.md` with the
-     Mindestschriftgröße and colors she names, after a yes. It reminds her to delete the
-     calibration page.
+     Mindestschriftgröße and colors the teacher names, after a yes. It reminds the teacher to delete
+     the calibration page.
    - Offers the allow rules of `SPEC.md` section 10 for `.claude/settings.json`: shows them, merges
      them into an existing file without removing anything, and writes only after a yes.
    - Ends with a German summary of what is set up, what is missing, and the commands.

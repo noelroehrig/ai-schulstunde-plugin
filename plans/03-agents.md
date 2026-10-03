@@ -63,25 +63,31 @@ Acceptance criteria:
 
 1. `board-author`:
    - Reads `schulkontext.md`, `kriterien.md`, `onenote.md` (Ansicht), the approved plan
-     (`## Tafelbild (Inhalt)` and the phase order of `## Verlaufsplan`), the previous board review
-     and the previous payload when listed, then `board.md` and the examples.
+     (`## Tafelbild (Inhalt)` and the phase order of `## Verlaufsplan`), the previous board review,
+     the previous payload, and the teacher's guidance (`tafelbild-rueckmeldung_vM.md`) when listed,
+     then `board.md` and the examples.
    - Builds the payload by the rules of `board.md`, checks `x + width`, font sizes, and colors
-     against the Ansicht itself, and fixes every Muss-Mangel of a previous board review.
-   - With an empty `page_id`: `create_page(section_id, page_title)`, then writes the payload to
+     against the Ansicht itself, fixes every Muss-Mangel of a previous board review, and addresses
+     every point of the teacher's guidance.
+   - With an empty `page_id`: `list_pages(section_id)` first, noting the IDs of the pages already
+     titled `page_title`; then `create_page(section_id, page_title)`, then writes the payload to
      `output`, then `replace_page`. With a `page_id`: writes the payload, then `replace_page` on that
      page only. It never reads or writes any other page.
    - Error handling (`SPEC.md` section 11.3); the error code is found inside the text
      `Error executing tool <tool>: <code>: <message>`, and an error without a code counts as
      `bad_request`:
      - `timeout` on `create_page`: never retry blindly. `ping`, then `list_pages(section_id)`; reuse
-       a page with exactly `page_title` if it exists, otherwise call `create_page` once more.
+       a page titled exactly `page_title` whose ID was not noted before `create_page`, otherwise call
+       `create_page` once more. A page that existed before is never reused, because `replace_page`
+       would delete the teacher's content on it.
      - `timeout` or `backend_error` on `replace_page`: send the same payload once more; if that
        fails too, `FAILED` with a German reason that says the page may be empty.
      - `bad_request`: correct the call once; then `FAILED` with the error text.
    - Result line: `DONE <output path> page_id=<id>`.
 2. `board-reviewer`:
-   - Reads `schulkontext.md`, `kriterien.md`, `onenote.md`, the approved plan, and the payload file,
-     then calls `get_page(page_id)` once. A tool error ends with `FAILED` and the error text.
+   - Reads `schulkontext.md`, `kriterien.md`, `onenote.md`, the approved plan, the payload file, and
+     the teacher's guidance when listed, then calls `get_page(page_id)` once. A tool error ends with
+     `FAILED` and the error text, which contains the error code.
    - Checks as `board.md` and `SPEC.md` section 8.3 describe: on the read-back the structure (title,
      phase blocks in plan order, every item of `## Tafelbild (Inhalt)` present, nothing invented),
      German and glossary terms, brevity, `x + width` within the Breite (with its Nachrechnung), and
@@ -91,7 +97,8 @@ Acceptance criteria:
      The vertical estimate is reported as an estimate and is a Soll-Hinweis unless `kriterien.md`
      makes it a Muss-Kriterium.
    - Applies every Tafelbild criterion of `kriterien.md` and follows the review rules of
-     `lesson-conventions`.
+     `lesson-conventions`. An unaddressed point of the teacher's guidance is a Muss-Mangel; a
+     conflict between the guidance and `kriterien.md` is a Soll-Hinweis.
    - Writes the review to `output` with the verdict token on line 1. It has no OneNote write tools
      and never changes the payload file.
 3. With all four agents present, `npm run verify` passes, and the `agents` and `agent-bodies` rules

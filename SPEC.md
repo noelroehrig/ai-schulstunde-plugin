@@ -289,8 +289,15 @@ REVISE
 
 ## Soll-Hinweise
 - Die Sicherung könnte ein Beispiel aus dem Einstieg aufgreifen.
+
+## Nachrechnung
+- 7,5 + 25 + 22,5 + 7,5 = 62,5 (Stundenlänge 67,5): nicht erfüllt
+
+## Frühere Muss-Mängel
+- Die Lernziele fehlen: behoben
 ```
 
+- `## Muss-Mängel` lists only the defects open now. `## Frühere Muss-Mängel` says for each Muss-Mangel of the previous review whether it is `behoben` or `offen`, or holds `- keine`. The exact format is in `lesson-conventions`.
 - Verdict rule: `APPROVED` exactly when there are no Muss-Mängel. Soll-Hinweise never block.
 - Which criteria are Muss and which are Soll is defined in the teacher's `kriterien.md` (section 9.1).
 - For every criterion that is a number (for example the time sum), the reviewer lists the values, computes the result, and writes the computation into the review (O12).
@@ -428,7 +435,7 @@ The teacher owns the content; the plugin owns the behavior.
 
 - Every agent reads `schulkontext.md` and `kriterien.md` first.
 - **Lesson folder name:** the page title scheme from `onenote.md`, so folder and page match. Default if there is no scheme: `JJJJ-MM-TT Klasse Thema`, with the lesson date if known, else today. Characters invalid in Windows file names are removed; umlauts are kept.
-- **Version numbers:** N counts plan drafts. `review_vN` judges `planung_vN`. `rueckmeldung_vN` is the feedback that led to `planung_vN`. Board versions (`tafelbild_vN.json`, `tafelbild-review_vN.md`) count separately.
+- **Version numbers:** N counts plan drafts. `review_vN` judges `planung_vN`. `rueckmeldung_vN` is the feedback that led to `planung_vN`. Board versions (`tafelbild_vN.json`, `tafelbild-review_vN.md`) count separately; `tafelbild-rueckmeldung_vN.md` is the teacher's guidance at the board cap that led to `tafelbild_vN.json`.
 - **The teacher's files are theirs:** the plugin never overwrites `CLAUDE.md`, `schulkontext.md`, `kriterien.md`, `onenote.md`, or anything in `material/`. `einrichten` only adds missing files, or changes existing ones after showing the change and getting a yes.
 - **Material formats:** the file tools read Markdown, text, PDF, and images. Word files are not assumed readable; `einrichten` asks the teacher to save them as PDF.
 - **Contract changes:** when a plugin update needs a new file in the working folder, the preflight of every entry point detects it and asks the teacher to run `einrichten`, which adds what is missing.
@@ -593,7 +600,7 @@ Server behavior (B4): `ping` never fails and reports `onenote_responsive: true|f
 | `onenote_responsive` false at the start of `stunde-planen` | Warn in German, plan anyway, check again before the board loop. |
 | `onenote_responsive` false before the board loop | Ask the teacher to open OneNote and close any dialog, `ping` again once; then stop, keep the plan, explain how to resume with `stunde-ueberarbeiten`. |
 | `timeout` on a read | Tell the teacher OneNote is busy or shows a dialog. `ping`, retry once. On a second failure, stop the board loop, keep the plan, explain how to resume. |
-| `timeout` on `create_page` | Never retry blindly. After `ping`, `list_pages` on the target section shows whether the page exists after all; reuse it if so. |
+| `timeout` on `create_page` | Never retry blindly. The author lists the section's pages before `create_page`. After `ping`, `list_pages` on the target section shows whether the page exists after all; reuse it if so, but never a page with that title that existed before. |
 | `timeout` or `backend_error` on `replace_page` | Re-send the same payload once. If that fails, stop and tell the teacher the page may be empty. |
 | Other `backend_error` | Stop the board loop, show the error, keep the plan, explain how to resume. |
 | `bad_request` | Treated as a plugin bug. The author may correct its call once; then stop, show the error, and ask the teacher to forward it to the maintainer. |
