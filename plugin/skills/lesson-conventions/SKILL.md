@@ -30,7 +30,7 @@ These German terms are never translated. Use them verbatim, also inside English 
 | Sicherung | Phase that consolidates and records the results. |
 | Lernziel | A learning objective of the lesson. |
 | Differenzierung | Adapting tasks or support to different groups of learners. |
-| Stundenthema | The topic of the lesson; the title of plan and page. |
+| Stundenthema | The topic of the lesson: the title of the plan and the first line of the Tafelbild. The OneNote page title is the assignment's `page_title`, not the Stundenthema. |
 | Verlaufsplan | The timed table of the lesson's phases. |
 | Sozialform | The grouping of students in a phase. |
 | Einzelarbeit | Students work alone. |
@@ -61,12 +61,14 @@ The working folder belongs to the teacher. Its files and their roles:
 | `tafelbild_vN.json` | The exact page payload the board author sent in board round N. |
 | `tafelbild-review_vN.md` | Review of board round N. |
 
-Rules:
+Rules for agents:
 
 - Read `schulkontext.md`, then `kriterien.md`, before anything else.
 - Write only the `output` named in your assignment.
 - Never change the teacher's own files: `CLAUDE.md`, `schulkontext.md`, `kriterien.md`, `onenote.md`, and anything in `material/`.
 - Use only the paths your assignment lists. Never pick "the latest" file yourself.
+
+Entry points have no assignment. They follow `lesson-folder.md` and `orchestration.md` instead. They never overwrite the teacher's own files either; only `einrichten` may change one, and only after showing the change and getting a yes.
 
 ## Assignment and result line
 
@@ -142,15 +144,19 @@ REVISE
 
 ## Nachrechnung
 - <Rechnung>: <erfüllt oder nicht erfüllt>
+
+## Frühere Muss-Mängel
+- <Mangel>: <behoben oder offen>
 ```
 
 Rules:
 
 - Line 1 is exactly `APPROVED` or `REVISE`.
+- After line 1 come exactly these headings in this order: `## Muss-Mängel`, `## Soll-Hinweise`, `## Nachrechnung`, `## Frühere Muss-Mängel`.
 - `APPROVED` exactly when there are no Muss-Mängel. Soll-Hinweise never block.
-- Muss-Mängel are numbered. An empty section holds `- keine`.
+- `## Muss-Mängel` lists only the defects that are open now, numbered. An empty section holds `- keine`.
 - Under `## Nachrechnung`, every criterion that is a number gets one line with the computation, for example `7,5 + 25 + 12,5 = 45 (Stundenlänge 45): erfüllt`.
-- When you get a previous review, state for each of its Muss-Mängel whether it is fixed.
+- `## Frühere Muss-Mängel` has one line per Muss-Mangel of the previous review: `- <Mangel>: behoben` or `- <Mangel>: offen`. An open one is also listed under `## Muss-Mängel`. When your assignment lists no previous review, the section holds `- keine`.
 - Raise a new Muss-Mangel only for an actual violation of `kriterien.md` or `schulkontext.md`.
 - A conflict between teacher feedback and `kriterien.md` is a Soll-Hinweis, never a Muss-Mangel. The teacher's feedback wins.
 

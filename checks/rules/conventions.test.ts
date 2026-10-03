@@ -55,6 +55,11 @@ test("conventions reports a missing review heading", () => {
   assertOneFinding(conventionsSkillBody().replace("## Nachrechnung\n", ""), /review heading "## Nachrechnung"/);
 });
 
+test("conventions reports a missing Frühere Muss-Mängel heading", () => {
+  const body = conventionsSkillBody().replace("## Frühere Muss-Mängel\n", "## Frühere Mängel\n");
+  assertOneFinding(body, /review heading "## Frühere Muss-Mängel"/);
+});
+
 test("conventions reports a missing assignment key", () => {
   assertOneFinding(conventionsSkillBody().replace("page_title:", "title:"), /assignment key "page_title"/);
 });
@@ -65,6 +70,6 @@ test("conventions reports a missing token", () => {
 
 test("conventions reports each missing item separately", () => {
   const findings = check({ [SKILL]: "---\nname: lesson-conventions\n---\n" });
-  assert.equal(findings.length, 15 + 8 + 1 + 3 + 8 + 4);
+  assert.equal(findings.length, 15 + 8 + 1 + 4 + 8 + 4);
   assert.ok(findings.every((finding) => finding.rule === "conventions" && finding.file === SKILL));
 });

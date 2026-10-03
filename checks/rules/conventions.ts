@@ -37,8 +37,13 @@ export const PLAN_HEADINGS = [
 
 export const VERLAUFSPLAN_HEADER = "| Zeit (Min.) | Phase | Unterrichtsgeschehen | Sozialform | Material/Medien |";
 
-/** The headings of a review, below the verdict line. */
-export const REVIEW_HEADINGS = ["## Muss-Mängel", "## Soll-Hinweise", "## Nachrechnung"];
+/** The headings of a review, below the verdict line, in order. */
+export const REVIEW_HEADINGS = [
+  "## Muss-Mängel",
+  "## Soll-Hinweise",
+  "## Nachrechnung",
+  "## Frühere Muss-Mängel",
+];
 
 /** The assignment keys of `SPEC.md` section 3.1. */
 export const ASSIGNMENT_KEYS = [
