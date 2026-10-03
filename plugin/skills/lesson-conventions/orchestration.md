@@ -22,10 +22,10 @@ All paths in an assignment are absolute: the working folder or the lesson folder
 
 `stunde.md` holds the state, in the format of `lesson-folder.md`. Keep it current, so that a new conversation can continue with `/unterricht:stunde-ueberarbeiten` at any point.
 
-- After every agent run that ends with `DONE`, update `## Stand` and append one line to `## Verlauf` that names the file written and, for a review, its verdict, for example `- 2026-10-07: review_v2.md geschrieben, Ergebnis REVISE (Planung, Runde 2 von 3).`
+- After every agent run that ends with `DONE`, update `## Stand` and append one line to `## Verlauf` that names the file written, the loop and round, and, for a review, its verdict, for example `- 2026-10-07: review_v2.md geschrieben, Ergebnis REVISE (Planung, Runde 2 von 3).`
 - `Planversion: N` means `planung_vN.md` is done. Its review counts as done only when `## Verlauf` records it with its verdict. The same holds for `Tafelbildversion: M` and `tafelbild-review_vM.md`.
 - A versioned file with a higher number than `## Stand` records, or a review that `## Verlauf` does not record with its verdict, comes from an interrupted or failed agent run. It is never an input; the agent's next run, with the same `output` path, overwrites it (`lesson-folder.md`). A run once more after a protocol error therefore keeps the same `output`.
-- Append a `## Verlauf` line as well when you save the teacher's feedback, when the checkpoint passes, at an escalation answer, at a stop, and at the finish.
+- Append a `## Verlauf` line as well when you save the teacher's feedback (naming the file, for example `- 2026-10-07: Rückmeldung als rueckmeldung_v3.md gespeichert.`), when the checkpoint passes, at an escalation answer, at a stop, and at the finish.
 
 ## Talking to the teacher
 
@@ -120,7 +120,7 @@ Before the board loop, check, in this order. When you come to the gate from the 
 3. Call `get_notebooks`. The notebook whose name is exactly the `notebook` setting, case-sensitive, must be in the list. Otherwise stop before writing, with `Das Notizbuch „<notebook>“ wurde in OneNote nicht gefunden. Der Name muss genau stimmen, auch bei Groß- und Kleinschreibung. Du kannst ihn mit /config in der Einstellung „OneNote-Notizbuch“ ändern. Ich lege nie ein Notizbuch an.`
 4. The section: read `Abschnitt` under `## Ablage` in `onenote.md`. `Abschnitt: Klasse` means the section named exactly like the `Klasse` in `## Auftrag` of `stunde.md`; any other value is the section name itself. When `## OneNote` of `stunde.md` already records an `Abschnitt` other than `offen`, use that one. The section must be one of the notebook's sections in the `get_notebooks` answer, with exactly that name; note its ID as `section_id`. When it is missing, ask `Im Notizbuch „<notebook>“ gibt es keinen Abschnitt „<Abschnitt>“. Bitte lege ihn in OneNote an und antworte mit „weiter“, oder nenne einen anderen vorhandenen Abschnitt.` and end your turn. Then call `get_notebooks` again and check again, with the section the teacher named, if any. Never create a section, and never change `onenote.md`.
 5. The page title: when `## OneNote` of `stunde.md` already records a `Seitentitel` other than `offen`, use it. Otherwise fill the `Seitentitel` scheme of `## Ablage` in `onenote.md`: `JJJJ-MM-TT` is the lesson date when `stunde.md` names one, else the date the lesson folder name starts with, else today; `Klasse` and `Thema` come from `## Auftrag` of `stunde.md`. Keep every other text of the scheme as it is.
-6. Record `Abschnitt` and `Seitentitel` in `## OneNote` of `stunde.md`, and append a `## Verlauf` line.
+6. When the board loop starts fresh, record `Abschnitt` and `Seitentitel` in `## OneNote` of `stunde.md` and append a `## Verlauf` line. On a resumed board loop, write nothing to `stunde.md` here.
 
 A `get_notebooks` error is handled as Failure handling says.
 
@@ -151,12 +151,16 @@ Set `Runde: <n> von 3` in `## Stand` at the start of every round. The board agen
 
 ## Resuming a loop
 
-When the entry point resumes a lesson with `Schritt: Planung` or `Schritt: Tafelbild`, never reset `Runde` and never start a fresh cap. Take the state from `## Stand` and `## Verlauf`. Below, V is `Planversion` (planning loop) or `Tafelbildversion` (board loop), and the review is `review_vV.md` or `tafelbild-review_vV.md`:
+When the entry point resumes a lesson with `Schritt: Planung` or `Schritt: Tafelbild`, never reset `Runde` and never start a fresh cap. Take the state from `## Stand`, `## Verlauf`, and the files of the lesson folder; which line of `## Verlauf` comes last does not matter, because stops and other steps append lines too. Below, V is `Planversion` (planning loop) or `Tafelbildversion` (board loop), `keine` counting as 0; the review is `review_vV.md` or `tafelbild-review_vV.md`; the guidance file of version K is `rueckmeldung_vK.md` or `tafelbild-rueckmeldung_vK.md`.
 
-- The last `## Verlauf` line of this loop records saved feedback or guidance (`rueckmeldung_v<V+1>.md` or `tafelbild-rueckmeldung_v<V+1>.md`): start the loop after teacher input at round 1, as after saving it.
-- V is `keine`: run the first agent of the loop in round `Runde` with version 1.
-- The review of version V is not recorded in `## Verlauf`: run the reviewer of round `Runde` on version V.
-- The review of version V is recorded with its verdict: apply the verdict as steps 5 to 7 of the planning loop or steps 6 to 8 of the board loop say, with the round named in that `## Verlauf` line.
+Decide where to continue, checking in this order:
+
+1. The guidance file of version V plus 1 exists and `## Verlauf` records it as saved: the teacher's feedback or guidance was saved, and its loop has not written a version yet. Start the loop after teacher input at round 1 with version V plus 1, as after saving it, even when `## Verlauf` records the review of version V with its verdict.
+2. V is 0: run the first agent of the loop in round 1 with version 1.
+3. The review of version V is not recorded in `## Verlauf` with its verdict: run the reviewer on version V, in the round named in the `## Verlauf` line that records version V as written.
+4. The review of version V is recorded with its verdict: apply the verdict as steps 5 to 7 of the planning loop or steps 6 to 8 of the board loop say, with the round named in that `## Verlauf` line.
+
+Inputs of a resumed round: a round n that works on version W belongs to a loop after teacher input exactly when the guidance file of version W minus n plus 1 (the first version of that loop) exists and `## Verlauf` records it as saved. That file is the `rueckmeldung_vK.md` or `tafelbild-rueckmeldung_vK.md` of every round of the loop; pass it in every round of the loop, exactly as the planning loop and the board loop say. Otherwise the loop is not after teacher input. For example, a resumed round 2 that writes `planung_v4.md` gets `rueckmeldung_v3.md` when it was saved, besides `planung_v3.md` and `review_v3.md`.
 
 `Schritt: Prüfpunkt` resumes at step 2 of the checkpoint.
 
