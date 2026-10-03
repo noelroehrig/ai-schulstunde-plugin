@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { orchestrationFile, skillFile } from "../fixtures.ts";
+import { lessonFolderFile, orchestrationFile, skillFile } from "../fixtures.ts";
 import { createMemoryRepo } from "../repo.ts";
 import {
   AGENT_TYPES,
@@ -8,6 +8,7 @@ import {
   ENTRY_POINT_REFERENCES,
   ESCALATION_LABELS,
   SETTINGS_ALLOW_RULES,
+  STATE_LINES,
   orchestration,
 } from "./orchestration.ts";
 
@@ -135,4 +136,33 @@ test("orchestration does not count an allow rule that appears only inside a long
   const findings = check({ [entryFile("einrichten")]: text });
   assert.equal(findings.length, 1, JSON.stringify(findings));
   assert.ok(findings[0].message.includes("mcp__plugin_unterricht_onenote__get_page"), findings[0].message);
+});
+
+const LESSON_FOLDER = "plugin/skills/lesson-conventions/lesson-folder.md";
+
+test("STATE_LINES are the state-model lines the rule requires in lesson-folder.md", () => {
+  assert.deepEqual(STATE_LINES, ["Prüfbericht:", "Rückmeldung:", "Alte Seite:"]);
+});
+
+test("orchestration passes on a lesson-folder.md that holds every state line", () => {
+  assert.deepEqual(check({ [LESSON_FOLDER]: lessonFolderFile() }), []);
+  assert.deepEqual(check({ [LESSON_FOLDER]: lessonFolderFile().replace(/\n/g, "\r\n") }), []);
+});
+
+test("orchestration reports each state line missing from lesson-folder.md", () => {
+  for (const line of STATE_LINES) {
+    const findings = check({ [LESSON_FOLDER]: lessonFolderFile().split(line).join("x") });
+    assert.equal(findings.length, 1, JSON.stringify(findings));
+    assert.equal(findings[0].rule, "orchestration");
+    assert.equal(findings[0].file, LESSON_FOLDER);
+    assert.ok(findings[0].message.includes(line), findings[0].message);
+  }
+});
+
+test("orchestration does not count a state label that is not at the start of a line", () => {
+  const text = lessonFolderFile().replace(/^Alte Seite:/m, "Die Alte Seite: steht hier");
+  const findings = check({ [LESSON_FOLDER]: text });
+  assert.equal(findings.length, 1, JSON.stringify(findings));
+  assert.equal(findings[0].file, LESSON_FOLDER);
+  assert.ok(findings[0].message.includes("Alte Seite:"), findings[0].message);
 });

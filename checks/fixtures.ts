@@ -11,6 +11,7 @@ import {
   ESCALATION_LABELS,
   ORCHESTRATION_TOKENS,
   SETTINGS_ALLOW_RULES,
+  STATE_LINES,
 } from "./rules/orchestration.ts";
 import { PRIVACY_SENTENCE } from "./rules/templates.ts";
 import {
@@ -106,6 +107,11 @@ export function orchestrationFile(): string {
     ORCHESTRATION_TOKENS.join(" "),
     "",
   ].join("\n");
+}
+
+/** A lesson-folder guide holding every state line the orchestration rule requires, one per line. */
+export function lessonFolderFile(): string {
+  return ["# Lesson folder", "", "```markdown", ...STATE_LINES.map((line) => `${line} keine`), "```", ""].join("\n");
 }
 
 /** An example plan that satisfies the examples rule: every plan heading, durations adding up to 45. */
@@ -231,11 +237,11 @@ export function completeRepoFiles(): Record<string, string> {
   }
   for (const name of [
     "board.md",
-    "lesson-folder.md",
     "examples/NOTES.md",
   ]) {
     files[`plugin/skills/lesson-conventions/${name}`] = "Text.\n";
   }
+  files["plugin/skills/lesson-conventions/lesson-folder.md"] = lessonFolderFile();
   files["plugin/skills/lesson-conventions/orchestration.md"] = orchestrationFile();
   files["plugin/skills/lesson-conventions/examples/plan.md"] = examplePlanFile();
   files["plugin/skills/lesson-conventions/examples/board.json"] = exampleBoardFile();

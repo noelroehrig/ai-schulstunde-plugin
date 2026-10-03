@@ -5,6 +5,11 @@ const RULE = "orchestration";
 
 const GUIDE_FILE = "plugin/skills/lesson-conventions/orchestration.md";
 
+const LESSON_FOLDER_FILE = "plugin/skills/lesson-conventions/lesson-folder.md";
+
+/** Labels of the state model that `lesson-folder.md` must show, each at the start of a line of the `stunde.md` format. */
+export const STATE_LINES = ["Prüfbericht:", "Rückmeldung:", "Alte Seite:"];
+
 /** The checkpoint question of `SPEC.md` section 6.3, verbatim. */
 export const CHECKPOINT_QUESTION = "Passt der Plan so? Antworte mit „weiter“, oder schreib, was geändert werden soll.";
 
@@ -47,7 +52,8 @@ export const SETTINGS_ALLOW_RULES = [
 /**
  * Checks that `orchestration.md`, once it exists, states every constant the procedure relies on, and that
  * each existing entry point following it references the guide and the settings it needs, and that
- * `einrichten`, once it exists, offers every allow rule.
+ * `einrichten`, once it exists, offers every allow rule, and that `lesson-folder.md`, once it exists, shows the
+ * state lines.
  */
 export const orchestration: Rule = {
   name: RULE,
@@ -61,12 +67,25 @@ export const orchestration: Rule = {
       if (!files.includes(file)) continue;
       for (const message of entryPointProblems(repo.readText(file))) findings.push({ file, rule: RULE, message });
     }
+    if (files.includes(LESSON_FOLDER_FILE)) {
+      for (const message of lessonFolderProblems(repo.readText(LESSON_FOLDER_FILE))) {
+        findings.push({ file: LESSON_FOLDER_FILE, rule: RULE, message });
+      }
+    }
     if (files.includes(SETUP_FILE)) {
       for (const message of setupProblems(repo.readText(SETUP_FILE))) findings.push({ file: SETUP_FILE, rule: RULE, message });
     }
     return findings;
   },
 };
+
+/** Lists every state line missing from `lesson-folder.md`. */
+function lessonFolderProblems(text: string): string[] {
+  const lines = text.split(/\r?\n/);
+  return STATE_LINES.filter((label) => !lines.some((line) => line.startsWith(label))).map(
+    (label) => `state line "${label}" missing`,
+  );
+}
 
 /** Lists every allow rule missing from `einrichten`. */
 function setupProblems(text: string): string[] {
