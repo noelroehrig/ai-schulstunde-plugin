@@ -100,8 +100,9 @@ Acceptance criteria:
    to `${user_config.notebook}` and `ONENOTE_DISABLE_RAW_XML` set to `"1"`.
 7. Rule `user-config-refs`: every `${user_config.KEY}` in any file under `plugin/` names an option
    declared in `plugin.json`; an undeclared key is a finding naming file and key.
-8. Script `validate` runs `claude plugin validate . --strict` at the repo root (the marketplace root,
-   which validates the marketplace and the plugin's own files), and `verify` now runs `typecheck`,
+8. Script `validate` runs `claude plugin validate . --strict` at the repo root (the marketplace and
+   the manifest), then `claude plugin validate plugin --strict` (the agents and skills, which the
+   root run does not scan), and `verify` now runs `typecheck`,
    `test`, `check`, `validate`. If `claude` cannot run in the container (for example it needs a
    login), stop and report PARTIAL with the exact error; never drop `validate` from `verify`.
 9. `npm run verify` passes.
