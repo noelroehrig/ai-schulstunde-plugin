@@ -84,6 +84,31 @@ export function examplePlanFile(): string {
   ].join("\n");
 }
 
+/** An example board that satisfies the examples rule: inside 1024 pt, every font size at least 20. */
+export function exampleBoardFile(): string {
+  const text = (value: string, fields: Record<string, unknown> = {}) => ({ type: "paragraph", text: value, font_size: 20, ...fields });
+  return JSON.stringify(
+    {
+      page_id: "beispiel",
+      title: "Thema",
+      outlines: [
+        { position: { x: 48, y: 24 }, width: 928, items: [text("Thema", { style: "h1", font_size: 32, color: "#1F4E79" })] },
+        {
+          position: { x: 48, y: 90 },
+          width: 928,
+          items: [
+            text("Block", { style: "h2", font_size: 24 }),
+            { type: "paragraph", segments: [{ text: "wichtig", font_size: 20, color: "#C00000" }] },
+            { type: "list", style: "bullet", items: [{ segments: [{ text: "Punkt", font_size: 20 }] }] },
+          ],
+        },
+      ],
+    },
+    null,
+    2,
+  );
+}
+
 /** Renders frontmatter lines, leaving out keys whose value is undefined. */
 function frontmatter(fields: Record<string, string | undefined>): string {
   const lines = Object.entries(fields)
@@ -132,7 +157,7 @@ export function completeRepoFiles(): Record<string, string> {
     files[`plugin/skills/lesson-conventions/${name}`] = "Text.\n";
   }
   files["plugin/skills/lesson-conventions/examples/plan.md"] = examplePlanFile();
-  files["plugin/skills/lesson-conventions/examples/board.json"] = "{}";
+  files["plugin/skills/lesson-conventions/examples/board.json"] = exampleBoardFile();
   for (const name of ["CLAUDE.md", "schulkontext.md", "kriterien.md", "onenote.md"]) {
     files[`plugin/templates/${name}`] = "# [Titel]\n";
   }

@@ -1,0 +1,62 @@
+{
+  "page_id": "beispiel",
+  "title": "6a Brüche als Anteile",
+  "outlines": [
+    {
+      "position": { "x": 48, "y": 24 },
+      "width": 928,
+      "items": [
+        { "type": "paragraph", "text": "Brüche als Anteile", "style": "h1", "font_size": 32, "bold": true, "color": "#1F4E79" }
+      ]
+    },
+    {
+      "position": { "x": 48, "y": 89.6 },
+      "width": 928,
+      "items": [
+        { "type": "paragraph", "text": "Die Pizza", "style": "h2", "font_size": 24, "bold": true, "color": "#1F4E79" },
+        { "type": "paragraph", "text": "in 8 Stücke geteilt", "font_size": 20 },
+        { "type": "paragraph", "text": "5 von 8 Stücken übrig", "font_size": 20 }
+      ]
+    },
+    {
+      "position": { "x": 48, "y": 196.8 },
+      "width": 928,
+      "items": [
+        { "type": "paragraph", "text": "Zähler und Nenner", "style": "h2", "font_size": 24, "bold": true, "color": "#1F4E79" },
+        { "type": "paragraph", "text": "5/8", "font_size": 32, "bold": true },
+        {
+          "type": "paragraph",
+          "segments": [
+            { "text": "Zähler (5): ", "font_size": 20, "bold": true, "color": "#C00000" },
+            { "text": "Anzahl der Teile", "font_size": 20 }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "segments": [
+            { "text": "Nenner (8): ", "font_size": 20, "bold": true, "color": "#C00000" },
+            { "text": "in wie viele gleich große Teile geteilt", "font_size": 20 }
+          ]
+        }
+      ]
+    },
+    {
+      "position": { "x": 48, "y": 345.6 },
+      "width": 928,
+      "items": [
+        { "type": "paragraph", "text": "Merksatz", "style": "h2", "font_size": 24, "bold": true, "color": "#1F4E79" },
+        { "type": "paragraph", "text": "Ein Bruch beschreibt einen Anteil an einem Ganzen.", "font_size": 20, "bold": true, "color": "#C00000" },
+        { "type": "paragraph", "text": "Beispiele:", "font_size": 20 },
+        {
+          "type": "list",
+          "style": "bullet",
+          "items": [
+            { "segments": [{ "text": "1/2", "font_size": 20 }] },
+            { "segments": [{ "text": "1/4", "font_size": 20 }] },
+            { "segments": [{ "text": "3/4", "font_size": 20 }] }
+          ]
+        }
+      ]
+    }
+  ]
+}
