@@ -3,6 +3,15 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { AGENT_TOOLS, AGENTS, type AgentName } from "./permissions.ts";
 import { LANGUAGE_SENTENCE, REVIEWER_SENTENCE } from "./rules/agents.ts";
+import { PRIVACY_SENTENCE } from "./rules/templates.ts";
+import {
+  ASSIGNMENT_KEYS,
+  GLOSSARY_TERMS,
+  PLAN_HEADINGS,
+  REVIEW_HEADINGS,
+  TOKENS,
+  VERLAUFSPLAN_HEADER,
+} from "./rules/conventions.ts";
 
 /** Test fixtures: repository contents that satisfy the rules. Imported by tests only. */
 
@@ -29,7 +38,109 @@ export function skillFile(name: string, fields: Record<string, string | undefine
     name === "lesson-conventions"
       ? { name, description: "Shared conventions.", "user-invocable": "false" }
       : { name, description: "Startet etwas.", "disable-model-invocation": "true" };
-  return frontmatter({ ...defaults, ...fields }) + "Instructions.\n";
+  const body = name === "lesson-conventions" ? conventionsSkillBody() : "Instructions.\n";
+  return frontmatter({ ...defaults, ...fields }) + body;
+}
+
+/** A conventions skill body holding every item the conventions rule requires. */
+export function conventionsSkillBody(): string {
+  return [
+    "## Glossary",
+    "| Begriff | Meaning |",
+    "|---|---|",
+    ...GLOSSARY_TERMS.map((term) => `| ${term} | Meaning. |`),
+    "",
+    ...ASSIGNMENT_KEYS.map((key) => `${key}: value`),
+    "",
+    ...PLAN_HEADINGS.flatMap((heading) =>
+      heading === "## Verlaufsplan" ? [heading, VERLAUFSPLAN_HEADER] : [heading],
+    ),
+    ...REVIEW_HEADINGS,
+    TOKENS.join(" "),
+    "",
+  ].join("\n");
+}
+
+/** An example plan that satisfies the examples rule: every plan heading, durations adding up to 45. */
+export function examplePlanFile(): string {
+  return [
+    "# Thema",
+    "",
+    "Klasse: 6a · Fach: Mathematik · Datum: offen · Stundenlänge: 45 Minuten",
+    "",
+    ...PLAN_HEADINGS.flatMap((heading) =>
+      heading === "## Verlaufsplan"
+        ? [
+            heading,
+            VERLAUFSPLAN_HEADER,
+            "|---|---|---|---|---|",
+            "| 7,5 | Einstieg | Frage | Plenum | Tafelbild |",
+            "| 25 | Erarbeitung | Aufgaben | Partnerarbeit | Arbeitsblatt |",
+            "| 12,5 | Sicherung | Vergleich | Plenum | Tafelbild |",
+            "| **45** | | | | |",
+            "",
+          ]
+        : [heading, "- keine", ""],
+    ),
+  ].join("\n");
+}
+
+/** An example board that satisfies the examples rule: inside 1024 pt, every font size at least 20. */
+export function exampleBoardFile(): string {
+  const text = (value: string, fields: Record<string, unknown> = {}) => ({ type: "paragraph", text: value, font_size: 20, ...fields });
+  return JSON.stringify(
+    {
+      page_id: "beispiel",
+      title: "Thema",
+      outlines: [
+        { position: { x: 48, y: 24 }, width: 928, items: [text("Thema", { style: "h1", font_size: 32, color: "#1F4E79" })] },
+        {
+          position: { x: 48, y: 90 },
+          width: 928,
+          items: [
+            text("Block", { style: "h2", font_size: 24 }),
+            { type: "paragraph", segments: [{ text: "wichtig", font_size: 20, color: "#C00000" }] },
+            { type: "list", style: "bullet", items: [{ segments: [{ text: "Punkt", font_size: 20 }] }] },
+          ],
+        },
+      ],
+    },
+    null,
+    2,
+  );
+}
+
+/** Templates that satisfy the templates rule: required headings, lines, and the privacy sentence. */
+export function templateFiles(): Record<string, string> {
+  const file = (lines: string[]) => [...lines, "", PRIVACY_SENTENCE, ""].join("\n");
+  return {
+    "plugin/templates/CLAUDE.md": file(["# Arbeitsordner"]),
+    "plugin/templates/schulkontext.md": file([
+      "# Schulkontext",
+      "## Schule",
+      "## Zeitraster",
+      "Stundenlänge: [Minuten eintragen] Minuten",
+      "## Phasenmodell",
+      "## Fächer und Klassen",
+      "## Ausstattung im Unterricht",
+      "## Was jede Planung beachten soll",
+    ]),
+    "plugin/templates/kriterien.md": file([
+      "# Meine Kriterien",
+      "## Planung",
+      "### Muss (sonst wird überarbeitet)",
+      "- Die Phasen ergeben zusammen genau die Stundenlänge.",
+      "### Soll",
+      "## Tafelbild",
+    ]),
+    "plugin/templates/onenote.md": file([
+      "# OneNote",
+      "## Ablage",
+      "Abschnitt: [Name]",
+      "Seitentitel: [Schema]",
+      "## Ansicht",
+    ]),
+  };
 }
 
 /** Renders frontmatter lines, leaving out keys whose value is undefined. */
@@ -75,15 +186,13 @@ export function completeRepoFiles(): Record<string, string> {
     "board.md",
     "lesson-folder.md",
     "orchestration.md",
-    "examples/plan.md",
     "examples/NOTES.md",
   ]) {
     files[`plugin/skills/lesson-conventions/${name}`] = "Text.\n";
   }
-  files["plugin/skills/lesson-conventions/examples/board.json"] = "{}";
-  for (const name of ["CLAUDE.md", "schulkontext.md", "kriterien.md", "onenote.md"]) {
-    files[`plugin/templates/${name}`] = "# [Titel]\n";
-  }
+  files["plugin/skills/lesson-conventions/examples/plan.md"] = examplePlanFile();
+  files["plugin/skills/lesson-conventions/examples/board.json"] = exampleBoardFile();
+  Object.assign(files, templateFiles());
   files["README.md"] = "# Anleitung\n";
   files["CHANGELOG.md"] = "# Änderungen\n";
   return files;

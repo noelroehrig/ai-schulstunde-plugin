@@ -4,6 +4,8 @@ import { createFsRepo, type Finding, type Mode, type Repo, type Rule } from "./r
 import { noDashes } from "./rules/dashes.ts";
 import { agents } from "./rules/agents.ts";
 import { completeness } from "./rules/completeness.ts";
+import { conventions } from "./rules/conventions.ts";
+import { examples } from "./rules/examples.ts";
 import { jsonValid } from "./rules/json.ts";
 import { manifest, userConfigRefs } from "./rules/manifest.ts";
 import { marketplace } from "./rules/marketplace.ts";
@@ -12,6 +14,7 @@ import { paths } from "./rules/paths.ts";
 import { pluginDir } from "./rules/plugin-dir.ts";
 import { server } from "./rules/server.ts";
 import { skills } from "./rules/skills.ts";
+import { templates } from "./rules/templates.ts";
 
 /** Every rule the CLI runs, in output order. */
 export const RULES: Rule[] = [
@@ -25,6 +28,9 @@ export const RULES: Rule[] = [
   paths,
   agents,
   skills,
+  conventions,
+  examples,
+  templates,
   server,
   completeness,
 ];
