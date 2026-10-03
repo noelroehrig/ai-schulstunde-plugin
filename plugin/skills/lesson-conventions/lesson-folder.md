@@ -7,7 +7,7 @@ How the orchestrators create and keep a lesson folder. Read together with `SKILL
 Every lesson gets one folder in `Stunden/` of the working folder.
 
 - Name it with the `Seitentitel` scheme from `## Ablage` in `onenote.md`, so that folder and OneNote page match.
-- Without a scheme, use `JJJJ-MM-TT Klasse Thema`: the lesson date if known, else today. Example: `2026-10-07 6b Bruchrechnung`.
+- When `Seitentitel` is missing, empty, or still a placeholder in square brackets, use the default scheme `JJJJ-MM-TT Klasse Thema`: the lesson date if known, else today. The OneNote gate then titles the page with the same default scheme. Example: `2026-10-07 6b Bruchrechnung`.
 - Remove characters that are invalid in Windows file names (`< > : " / \ | ? *`). Keep umlauts and ß.
 - If a folder with that name already exists, append ` (2)`, ` (3)`, and so on: the first free one. Never reuse or write into an existing lesson folder of another lesson.
 

@@ -72,8 +72,16 @@ test("parseChecksumLine reads the sha256sum format with LF, CRLF, or no line end
   assert.equal(parseChecksumLine(`${EXE_SHA.toUpperCase()}  onenote-mcp.exe\n`), EXE_SHA);
 });
 
+test("parseChecksumLine reads the binary marker that sha256sum writes on Windows", () => {
+  assert.equal(parseChecksumLine(`${EXE_SHA} *onenote-mcp.exe\n`), EXE_SHA);
+  assert.equal(parseChecksumLine(`${EXE_SHA} *onenote-mcp.exe\r\n`), EXE_SHA);
+  assert.equal(parseChecksumLine(`${EXE_SHA.toUpperCase()} *onenote-mcp.exe`), EXE_SHA);
+});
+
 test("parseChecksumLine rejects other files, short hashes, and extra lines", () => {
   assert.equal(parseChecksumLine(`${EXE_SHA}  other.exe\n`), undefined);
+  assert.equal(parseChecksumLine(`${EXE_SHA} *other.exe\n`), undefined);
+  assert.equal(parseChecksumLine(`${EXE_SHA}  *onenote-mcp.exe\n`), undefined);
   assert.equal(parseChecksumLine(`${EXE_SHA.slice(1)}  onenote-mcp.exe\n`), undefined);
   assert.equal(parseChecksumLine(`${EXE_SHA} onenote-mcp.exe\n`), undefined);
   assert.equal(parseChecksumLine(`${EXE_SHA}  onenote-mcp.exe\nmore\n`), undefined);
@@ -166,6 +174,23 @@ test("main resolves --from relative to --root, and --root to the current directo
     const { code } = runMain(["--tag", "v1.0.1", "--from", "../download"], fixture.root);
     assert.equal(code, 0);
     assert.equal(readFileSync(join(fixture.root, "plugin", "server", "VERSION"), "utf8"), "v1.0.1\n");
+  } finally {
+    fixture.cleanup();
+  }
+});
+
+test("main writes the checksum file in the text format whatever the input format", () => {
+  const fixture = makeFixture(`${EXE_SHA.toUpperCase()} *onenote-mcp.exe\r\n`);
+  try {
+    const { code, errors } = runMain(
+      ["--tag", "v1.0.1", "--from", fixture.download, "--root", fixture.root],
+      fixture.root,
+    );
+    assert.equal(code, 0, errors.join("\n"));
+    assert.equal(
+      readFileSync(join(fixture.root, "plugin", "server", "onenote-mcp.exe.sha256"), "utf8"),
+      `${EXE_SHA}  onenote-mcp.exe\n`,
+    );
   } finally {
     fixture.cleanup();
   }

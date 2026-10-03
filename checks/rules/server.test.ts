@@ -64,6 +64,20 @@ test("server reports a malformed VERSION", () => {
   assertOneFinding({ ...serverFiles(), [VERSION]: "1.0.1\n" }, VERSION, /VERSION/);
 });
 
+test("server accepts the binary marker that sha256sum writes on Windows", () => {
+  const files = serverFiles();
+  files[SHA] = files[SHA].replace("  onenote-mcp.exe", " *onenote-mcp.exe");
+  assert.deepEqual(check(files), []);
+});
+
+test("server reports a checksum line for another file in either format", () => {
+  for (const separator of ["  ", " *"]) {
+    const files = serverFiles();
+    files[SHA] = files[SHA].replace("  onenote-mcp.exe", `${separator}other.exe`);
+    assertOneFinding(files, SHA, /one line/);
+  }
+});
+
 test("server reports a malformed checksum file", () => {
   const files = serverFiles();
   files[SHA] = files[SHA].toUpperCase();

@@ -159,15 +159,16 @@ test("the CLI starts the exe with ONENOTE_DISABLE_RAW_XML=1 and passes a complet
 
 test("the CLI prints the findings and exits 1 on a broken contract", async () => {
   await withExe(async (dir) => {
+    // Differs from the default file of evaluateContract, so the CLI must pass its own --exe value.
     const { code, lines } = await runMain(
-      ["--exe", "onenote-mcp.exe"],
+      ["--exe", "./onenote-mcp.exe"],
       dir,
       fakeList([...REQUIRED.slice(1), "get_page_xml"], []),
     );
     assert.equal(code, 1);
     assert.deepEqual(lines.slice(-3), [
-      "onenote-mcp.exe: tool-contract: required tool ping is missing",
-      "onenote-mcp.exe: tool-contract: forbidden tool get_page_xml is listed",
+      "./onenote-mcp.exe: tool-contract: required tool ping is missing",
+      "./onenote-mcp.exe: tool-contract: forbidden tool get_page_xml is listed",
       "2 findings (tool contract)",
     ]);
   });

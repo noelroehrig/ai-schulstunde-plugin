@@ -158,7 +158,8 @@ Rules:
 - `## Muss-Mängel` lists only the defects that are open now, numbered. An empty section holds `- keine`.
 - Under `## Nachrechnung`, every criterion that is a number gets one line with the computation, for example `7,5 + 25 + 12,5 = 45 (Stundenlänge 45): erfüllt`.
 - `## Frühere Muss-Mängel` has one line per Muss-Mangel of the previous review: `- <Mangel>: behoben` or `- <Mangel>: offen`. An open one is also listed under `## Muss-Mängel`. When your assignment lists no previous review, the section holds `- keine`.
-- Raise a new Muss-Mangel only for an actual violation of `kriterien.md` or `schulkontext.md`.
+- A new Muss-Mangel (one the previous review did not raise) needs an actual violation of `kriterien.md`, `schulkontext.md`, the plan format of this skill, or the conventions of `board.md`. Never raise one for anything else, such as taste or a better idea; that is a Soll-Hinweis.
+- The one exception: a point of the teacher feedback listed in your assignment that the plan or the Tafelbild does not address is a Muss-Mangel, because the reviewer checks that the feedback was addressed.
 - A conflict between teacher feedback and `kriterien.md` is a Soll-Hinweis, never a Muss-Mangel. The teacher's feedback wins.
 
 ## Personal data

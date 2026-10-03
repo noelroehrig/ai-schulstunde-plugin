@@ -67,6 +67,8 @@ Unterricht/
         └── ...
 ```
 
+Du musst `onenote.md` nicht vorher ausfüllen, Claude plant die Stunde trotzdem. Steht dort noch kein Seitentitel, heißen der Stundenordner und die Seite in OneNote nach dem Schema `JJJJ-MM-TT Klasse Thema`. Steht dort noch kein Abschnitt, fragt dich Claude vor dem Tafelbild, in welchen Abschnitt die Seite soll.
+
 Die Dateien gehören dir. Das Plugin überschreibt `schulkontext.md`, `kriterien.md`, `onenote.md`, `CLAUDE.md` und deinen `material/`-Ordner nie. Änderungen daran schlägt `/unterricht:einrichten` nur vor und schreibt sie erst nach deinem Ja.
 
 Wenn OneDrive deinen Arbeitsordner synchronisiert, lade Dateien, die nur online liegen, vorher herunter, sonst kann Claude sie nicht lesen.

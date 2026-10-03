@@ -4,9 +4,12 @@ import { lessonFolderFile, orchestrationFile, skillFile } from "../fixtures.ts";
 import { createMemoryRepo } from "../repo.ts";
 import {
   AGENT_TYPES,
+  BAD_REQUEST_MESSAGE,
   CHECKPOINT_QUESTION,
+  CONVENTIONS_REFERENCE,
   ENTRY_POINT_REFERENCES,
   ESCALATION_LABELS,
+  MAIN_SESSION_TOOLS_SENTENCE,
   SERVER_EXE,
   SERVER_NOT_RUNNING_MESSAGE,
   SETTINGS_ALLOW_RULES,
@@ -86,7 +89,7 @@ test("SERVER_NOT_RUNNING_MESSAGE names the exe and the advice of SPEC.md section
 
 test("orchestration reports each missing item separately", () => {
   const findings = check({ [GUIDE]: "# Orchestration\n" });
-  assert.equal(findings.length, 1 + 3 + 4 + 5 + 1);
+  assert.equal(findings.length, 1 + 3 + 4 + 5 + 1 + 1 + 1 + 1);
   assert.ok(findings.every((finding) => finding.rule === "orchestration" && finding.file === GUIDE));
 });
 
@@ -199,4 +202,52 @@ test("orchestration does not count a state label that is not at the start of a l
   assert.equal(findings.length, 1, JSON.stringify(findings));
   assert.equal(findings[0].file, LESSON_FOLDER);
   assert.ok(findings[0].message.includes("Alte Seite:"), findings[0].message);
+});
+
+test("orchestration reports a guide that refers to SPEC.md, which does not ship with the plugin", () => {
+  assertOneFinding(orchestrationFile() + "The rows of `SPEC.md` section 11.3.\n", /SPEC\.md/);
+});
+
+test("orchestration reports a guide that does not name the conventions skill by its path", () => {
+  assertOneFinding(orchestrationFile().split(CONVENTIONS_REFERENCE).join("`lesson-conventions`"), /lesson-conventions\/SKILL\.md/);
+});
+
+test("orchestration reports a guide without the sentence naming the OneNote tools of the main session", () => {
+  const text = orchestrationFile()
+    .split(/\r?\n/)
+    .filter((line) => !line.includes(MAIN_SESSION_TOOLS_SENTENCE))
+    .join("\n");
+  assertOneFinding(text, /OneNote tools of the main session/);
+});
+
+test("orchestration reports a OneNote tool an entry point calls that the main-session sentence leaves out", () => {
+  const listPages = "mcp__plugin_unterricht_onenote__list_pages";
+  const entry = skillFile("stunde-ueberarbeiten") + `Call \`${listPages}\` on the target section.\n`;
+  const sentence = orchestrationFile().split(/\r?\n/).find((line) => line.includes(MAIN_SESSION_TOOLS_SENTENCE)) ?? "";
+  const guide = orchestrationFile().split(sentence).join(sentence.split(`, \`${listPages}\``).join(""));
+  const findings = check({ [GUIDE]: guide, [entryFile("stunde-ueberarbeiten")]: entry });
+  assert.equal(findings.length, 1, JSON.stringify(findings));
+  assert.equal(findings[0].file, GUIDE);
+  assert.ok(findings[0].message.includes(listPages), findings[0].message);
+  assert.deepEqual(check({ [GUIDE]: orchestrationFile(), [entryFile("stunde-ueberarbeiten")]: entry }), []);
+});
+
+test("orchestration reports a OneNote tool the guide itself calls that the main-session sentence leaves out", () => {
+  const getPage = "mcp__plugin_unterricht_onenote__get_page";
+  const findings = check({ [GUIDE]: orchestrationFile() + `Call \`${getPage}\`.\n` });
+  assert.equal(findings.length, 1, JSON.stringify(findings));
+  assert.ok(findings[0].message.includes(getPage), findings[0].message);
+});
+
+test("BAD_REQUEST_MESSAGE shows the error and asks to forward it to the maintainer, as SPEC.md section 11.3 says", () => {
+  assert.equal(
+    BAD_REQUEST_MESSAGE,
+    "Ich habe angehalten, weil das Plugin einen Fehler gemeldet hat: <Grund>. Das ist ein Fehler im Plugin. Bitte leite diese Meldung an die Person weiter, die das Plugin betreut. Die bisherigen Dateien bleiben im Ordner <Name des Stundenordners>. Wenn der Fehler behoben ist, setze mit /unterricht:stunde-ueberarbeiten fort.",
+  );
+});
+
+test("orchestration reports a missing or changed bad_request message", () => {
+  assertOneFinding(orchestrationFile().split(BAD_REQUEST_MESSAGE).join("x"), /bad_request message/);
+  const changed = BAD_REQUEST_MESSAGE.replace("weiter, die das Plugin betreut", "weiter");
+  assertOneFinding(orchestrationFile().split(BAD_REQUEST_MESSAGE).join(changed), /bad_request message/);
 });
