@@ -240,7 +240,27 @@ export function completeRepoFiles(): Record<string, string> {
   files["plugin/skills/lesson-conventions/examples/plan.md"] = examplePlanFile();
   files["plugin/skills/lesson-conventions/examples/board.json"] = exampleBoardFile();
   Object.assign(files, templateFiles());
-  files["README.md"] = "# Anleitung\n";
-  files["CHANGELOG.md"] = "# Änderungen\n";
+  files["README.md"] = readmeFile();
+  files["CHANGELOG.md"] = changelogFile();
   return files;
+}
+
+/** A README that names the three commands and the marketplace repository. */
+export function readmeFile(): string {
+  return [
+    "# Unterricht",
+    "",
+    "Marktplatz in claude.ai hinzufügen: `noelroehrig/schulstunde-plugin`.",
+    "",
+    "- `/unterricht:einrichten` richtet den Arbeitsordner ein.",
+    "- `/unterricht:stunde-planen` plant eine neue Stunde.",
+    "- `/unterricht:stunde-ueberarbeiten` setzt eine Stunde fort oder überarbeitet sie.",
+    "",
+  ].join("\n");
+}
+
+/** A CHANGELOG with an entry for the version of the repository's own `plugin.json`. */
+export function changelogFile(): string {
+  const manifest = JSON.parse(manifestFiles()["plugin/.claude-plugin/plugin.json"]) as { version: string };
+  return `# Änderungen\n\n## ${manifest.version} (2026-10-03)\n\n- Erste Version.\n`;
 }

@@ -6,6 +6,7 @@ import { agentBodies } from "./rules/agent-bodies.ts";
 import { agents } from "./rules/agents.ts";
 import { completeness } from "./rules/completeness.ts";
 import { conventions } from "./rules/conventions.ts";
+import { docs } from "./rules/docs.ts";
 import { examples } from "./rules/examples.ts";
 import { jsonValid } from "./rules/json.ts";
 import { manifest, userConfigRefs } from "./rules/manifest.ts";
@@ -34,6 +35,7 @@ export const RULES: Rule[] = [
   conventions,
   examples,
   orchestration,
+  docs,
   templates,
   server,
   completeness,
