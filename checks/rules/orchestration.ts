@@ -36,6 +36,12 @@ export const SERVER_NOT_RUNNING_MESSAGE =
   SERVER_EXE +
   " blockiert.";
 
+/** The German stop message for a `FAILED` result whose reason contains `bad_request` (`SPEC.md` section 11.3). */
+export const BAD_REQUEST_MESSAGE =
+  "Ich habe angehalten, weil das Plugin einen Fehler gemeldet hat: <Grund>. Das ist ein Fehler im Plugin. " +
+  "Bitte leite diese Meldung an die Person weiter, die das Plugin betreut. Die bisherigen Dateien bleiben im Ordner " +
+  "<Name des Stundenordners>. Wenn der Fehler behoben ist, setze mit /unterricht:stunde-ueberarbeiten fort.";
+
 /** The path through which the guide names the conventions skill, which defines the assignment shape and the conventions. */
 export const CONVENTIONS_REFERENCE = "<plugin root>/skills/lesson-conventions/SKILL.md";
 
@@ -153,6 +159,7 @@ function guideProblems(text: string): string[] {
   const problems: string[] = [];
   if (!text.includes(CHECKPOINT_QUESTION)) problems.push("checkpoint question missing or changed");
   if (!text.includes(SERVER_NOT_RUNNING_MESSAGE)) problems.push("server-not-running message missing or changed");
+  if (!text.includes(BAD_REQUEST_MESSAGE)) problems.push("bad_request message missing or changed");
   if (!text.includes(CONVENTIONS_REFERENCE)) problems.push(`reference "${CONVENTIONS_REFERENCE}" missing`);
   if (text.includes("SPEC.md")) problems.push("refers to SPEC.md, which does not ship with the plugin");
   for (const label of ESCALATION_LABELS) {

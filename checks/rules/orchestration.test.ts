@@ -4,6 +4,7 @@ import { lessonFolderFile, orchestrationFile, skillFile } from "../fixtures.ts";
 import { createMemoryRepo } from "../repo.ts";
 import {
   AGENT_TYPES,
+  BAD_REQUEST_MESSAGE,
   CHECKPOINT_QUESTION,
   CONVENTIONS_REFERENCE,
   ENTRY_POINT_REFERENCES,
@@ -88,7 +89,7 @@ test("SERVER_NOT_RUNNING_MESSAGE names the exe and the advice of SPEC.md section
 
 test("orchestration reports each missing item separately", () => {
   const findings = check({ [GUIDE]: "# Orchestration\n" });
-  assert.equal(findings.length, 1 + 3 + 4 + 5 + 1 + 1 + 1);
+  assert.equal(findings.length, 1 + 3 + 4 + 5 + 1 + 1 + 1 + 1);
   assert.ok(findings.every((finding) => finding.rule === "orchestration" && finding.file === GUIDE));
 });
 
@@ -236,4 +237,17 @@ test("orchestration reports a OneNote tool the guide itself calls that the main-
   const findings = check({ [GUIDE]: orchestrationFile() + `Call \`${getPage}\`.\n` });
   assert.equal(findings.length, 1, JSON.stringify(findings));
   assert.ok(findings[0].message.includes(getPage), findings[0].message);
+});
+
+test("BAD_REQUEST_MESSAGE shows the error and asks to forward it to the maintainer, as SPEC.md section 11.3 says", () => {
+  assert.equal(
+    BAD_REQUEST_MESSAGE,
+    "Ich habe angehalten, weil das Plugin einen Fehler gemeldet hat: <Grund>. Das ist ein Fehler im Plugin. Bitte leite diese Meldung an die Person weiter, die das Plugin betreut. Die bisherigen Dateien bleiben im Ordner <Name des Stundenordners>. Wenn der Fehler behoben ist, setze mit /unterricht:stunde-ueberarbeiten fort.",
+  );
+});
+
+test("orchestration reports a missing or changed bad_request message", () => {
+  assertOneFinding(orchestrationFile().split(BAD_REQUEST_MESSAGE).join("x"), /bad_request message/);
+  const changed = BAD_REQUEST_MESSAGE.replace("weiter, die das Plugin betreut", "weiter");
+  assertOneFinding(orchestrationFile().split(BAD_REQUEST_MESSAGE).join(changed), /bad_request message/);
 });

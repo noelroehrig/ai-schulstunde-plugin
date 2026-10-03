@@ -6,6 +6,7 @@ import { BOARD_GUIDE } from "./rules/agent-bodies.ts";
 import { LANGUAGE_SENTENCE, REVIEWER_SENTENCE } from "./rules/agents.ts";
 import {
   AGENT_TYPES,
+  BAD_REQUEST_MESSAGE,
   CHECKPOINT_QUESTION,
   CONVENTIONS_REFERENCE,
   ENTRY_POINT_REFERENCES,
@@ -106,6 +107,7 @@ export function orchestrationFile(): string {
     "",
     CHECKPOINT_QUESTION,
     SERVER_NOT_RUNNING_MESSAGE,
+    BAD_REQUEST_MESSAGE,
     ...ESCALATION_LABELS,
     ...AGENT_TYPES,
     ORCHESTRATION_TOKENS.join(" "),
