@@ -4,7 +4,13 @@ import { fileURLToPath } from "node:url";
 import { AGENT_TOOLS, AGENTS, type AgentName } from "./permissions.ts";
 import { BOARD_GUIDE } from "./rules/agent-bodies.ts";
 import { LANGUAGE_SENTENCE, REVIEWER_SENTENCE } from "./rules/agents.ts";
-import { AGENT_TYPES, CHECKPOINT_QUESTION, ESCALATION_LABELS, ORCHESTRATION_TOKENS } from "./rules/orchestration.ts";
+import {
+  AGENT_TYPES,
+  CHECKPOINT_QUESTION,
+  ENTRY_POINT_REFERENCES,
+  ESCALATION_LABELS,
+  ORCHESTRATION_TOKENS,
+} from "./rules/orchestration.ts";
 import { PRIVACY_SENTENCE } from "./rules/templates.ts";
 import {
   ASSIGNMENT_KEYS,
@@ -58,7 +64,12 @@ export function skillFile(name: string, fields: Record<string, string | undefine
     name === "lesson-conventions"
       ? { name, description: "Shared conventions.", "user-invocable": "false" }
       : { name, description: "Startet etwas.", "disable-model-invocation": "true" };
-  const body = name === "lesson-conventions" ? conventionsSkillBody() : "Instructions.\n";
+  const body =
+    name === "lesson-conventions"
+      ? conventionsSkillBody()
+      : ["stunde-planen", "stunde-ueberarbeiten"].includes(name)
+        ? ENTRY_POINT_REFERENCES.join("\n") + "\n"
+        : "Instructions.\n";
   return frontmatter({ ...defaults, ...fields }) + body;
 }
 

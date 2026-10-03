@@ -21,14 +21,42 @@ export const AGENT_TYPES = [
 /** Verdict tokens, result-line tokens, and the `ping` field the orchestrator reads. */
 export const ORCHESTRATION_TOKENS = ["APPROVED", "REVISE", "DONE", "FAILED", "onenote_responsive"];
 
-/** Checks that `orchestration.md`, once it exists, states every constant the procedure relies on. */
+/** The entry points that follow `orchestration.md`. */
+const ENTRY_POINT_FILES = ["plugin/skills/stunde-planen/SKILL.md", "plugin/skills/stunde-ueberarbeiten/SKILL.md"];
+
+/** What each entry point that follows the guide must reference: the guide's path and the two settings it passes on. */
+export const ENTRY_POINT_REFERENCES = [
+  "${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md",
+  "${user_config.notebook}",
+  "${user_config.plan_checkpoint}",
+];
+
+/**
+ * Checks that `orchestration.md`, once it exists, states every constant the procedure relies on, and that
+ * each existing entry point following it references the guide and the settings it needs.
+ */
 export const orchestration: Rule = {
   name: RULE,
   run(repo: Repo): Finding[] {
-    if (!repo.listFiles().includes(GUIDE_FILE)) return [];
-    return guideProblems(repo.readText(GUIDE_FILE)).map((message) => ({ file: GUIDE_FILE, rule: RULE, message }));
+    const files = repo.listFiles();
+    const findings: Finding[] = [];
+    if (files.includes(GUIDE_FILE)) {
+      for (const message of guideProblems(repo.readText(GUIDE_FILE))) findings.push({ file: GUIDE_FILE, rule: RULE, message });
+    }
+    for (const file of ENTRY_POINT_FILES) {
+      if (!files.includes(file)) continue;
+      for (const message of entryPointProblems(repo.readText(file))) findings.push({ file, rule: RULE, message });
+    }
+    return findings;
   },
 };
+
+/** Lists every reference missing from an entry point that follows the guide. */
+function entryPointProblems(text: string): string[] {
+  return ENTRY_POINT_REFERENCES.filter((reference) => !text.includes(reference)).map(
+    (reference) => `reference "${reference}" missing`,
+  );
+}
 
 /** Lists every constant missing from the orchestration guide. */
 function guideProblems(text: string): string[] {

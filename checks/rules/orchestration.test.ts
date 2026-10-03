@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { orchestrationFile } from "../fixtures.ts";
+import { orchestrationFile, skillFile } from "../fixtures.ts";
 import { createMemoryRepo } from "../repo.ts";
-import { AGENT_TYPES, CHECKPOINT_QUESTION, ESCALATION_LABELS, orchestration } from "./orchestration.ts";
+import { AGENT_TYPES, CHECKPOINT_QUESTION, ENTRY_POINT_REFERENCES, ESCALATION_LABELS, orchestration } from "./orchestration.ts";
 
 const GUIDE = "plugin/skills/lesson-conventions/orchestration.md";
 
@@ -64,4 +64,32 @@ test("orchestration reports each missing item separately", () => {
   const findings = check({ [GUIDE]: "# Orchestration\n" });
   assert.equal(findings.length, 1 + 3 + 4 + 5);
   assert.ok(findings.every((finding) => finding.rule === "orchestration" && finding.file === GUIDE));
+});
+
+const ENTRY_POINTS = ["stunde-planen", "stunde-ueberarbeiten"];
+
+/** The path of the `SKILL.md` of the entry point `name`. */
+function entryFile(name: string): string {
+  return `plugin/skills/${name}/SKILL.md`;
+}
+
+test("orchestration passes on entry points that reference the guide and both settings", () => {
+  const files = Object.fromEntries(ENTRY_POINTS.map((name) => [entryFile(name), skillFile(name)]));
+  assert.deepEqual(check(files), []);
+});
+
+test("orchestration passes when the entry points do not exist yet", () => {
+  assert.deepEqual(check({ [entryFile("einrichten")]: "Instructions.\n" }), []);
+});
+
+test("orchestration reports each missing entry-point reference", () => {
+  for (const name of ENTRY_POINTS) {
+    for (const reference of ENTRY_POINT_REFERENCES) {
+      const findings = check({ [entryFile(name)]: skillFile(name).split(reference).join("x") });
+      assert.equal(findings.length, 1, JSON.stringify(findings));
+      assert.equal(findings[0].rule, "orchestration");
+      assert.equal(findings[0].file, entryFile(name));
+      assert.ok(findings[0].message.includes(reference), findings[0].message);
+    }
+  }
 });
