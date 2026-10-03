@@ -29,9 +29,9 @@ The assignment of `lesson-conventions`, with the board lines `section_id`, `page
 
 1. Read `schulkontext.md`.
 2. Read `kriterien.md`.
-3. Read `onenote.md`. Decide by `board.md` whether the Ansicht is configured, and note its numbers and colors.
+3. Read `onenote.md` and note its `## Ansicht`, if any.
 4. Read the approved plan, then the payload, then the teacher's guidance when listed.
-5. Read `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/board.md`, then the examples `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/examples/board.json` and `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/examples/NOTES.md`.
+5. Read `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/board.md`, then the examples `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/examples/board.json` and `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/examples/NOTES.md`. Only now, after reading `board.md`, decide by its rule whether the Ansicht is configured, and note its numbers and colors.
 6. Call `get_page(page_id)` exactly once, with the `page_id` of the assignment. Read no other page. On a tool error, stop with `FAILED` and the error text, which contains the error code, for example `FAILED OneNote-Fehler beim Lesen der Seite: Error executing tool get_page: timeout: <message>`.
 7. Check the read-back. Each of these is a Muss-Mangel:
    - the title differs from `page_title`, or the Stundenthema is not the first line;

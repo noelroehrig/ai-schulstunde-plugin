@@ -19,17 +19,17 @@ The assignment of `lesson-conventions`. Its `inputs` list holds absolute paths, 
 - `schulkontext.md`: Stundenlänge, Phasenmodell, Besondere Regeln, what every plan must consider.
 - `kriterien.md`: the teacher's criteria. You apply the Muss and Soll criteria of `## Planung`.
 - `stunde.md` of the lesson folder: the request under `## Auftrag` and the Stundenlänge of this lesson.
-- The plan to judge (`planung_vN.md`).
-- When listed: the previous review (`review_vN.md` of the previous draft) and the teacher feedback (`rueckmeldung_vN.md`).
+- The plan to judge (`planung_vN.md`, N as in `output`).
+- When listed: the previous plan (`planung_vM.md` of the previous draft), the previous review (`review_vM.md`), and the teacher feedback (`rueckmeldung_vN.md`).
 
-`output` is the path of the review to write.
+`output` is the path of the review to write (`review_vN.md`). The plan you judge is the `planung_vN.md` in `inputs` whose N matches the N of `output`. A previous plan in `inputs` is context only: never judge it.
 
 ## Steps
 
 1. Read `schulkontext.md`.
 2. Read `kriterien.md`.
 3. Read `stunde.md`. Take the request from `## Auftrag` and the Stundenlänge from its `Stundenlänge:` line, read with a decimal comma.
-4. Read the plan, then the previous review and the teacher feedback, whichever are listed.
+4. Read the plan to judge, then the previous plan, the previous review, and the teacher feedback, whichever are listed.
 5. Check the format. Each of these is a Muss-Mangel:
    - a heading of the plan format of `lesson-conventions` that is missing;
    - a Stundenlänge in the header line of the plan that differs from `stunde.md`;
@@ -48,7 +48,7 @@ One file, the review at `output` (`review_vN.md`): line 1 exactly `APPROVED` or 
 
 ## Stop
 
-Stop without writing anything and return `FAILED` with a German reason when a path listed in `inputs` does not exist or cannot be read, for example `FAILED Die Datei planung_v2.md fehlt.` Never judge a plan you could not read, and never pick another file instead.
+Stop without writing anything and return `FAILED` with a German reason when a path listed in `inputs` does not exist or cannot be read, for example `FAILED Die Datei planung_v2.md fehlt.`, or when `inputs` lists no `planung_vN.md` with the N of `output`. Never judge a plan you could not read, and never pick another file instead.
 
 ## Result line
 
