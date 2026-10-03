@@ -42,32 +42,41 @@ Ask `Ich richte diesen Ordner als deinen Arbeitsordner ein: <absoluter Pfad>. Is
 
 ## 3. Configuration
 
-Read `schulkontext.md`, `kriterien.md`, and `onenote.md`. A placeholder is text in square brackets, for example `[Minuten eintragen]`.
+Read `schulkontext.md`, `kriterien.md`, and `onenote.md`. A placeholder is text in square brackets, for example `[Minuten eintragen]` or `[...]`.
 
-The values the templates need:
+The fields, each with its question and the rule for when it still needs a value:
 
-- `schulkontext.md`: the Schule (Schulform, Bundesland, Besonderheiten), the Stundenlänge in minutes, the Besondere Regeln, the Phasenmodell, the Fächer und Klassen (Klasse, Fach, Lehrplan or Kerncurriculum, Lehrwerk), the Ausstattung im Unterricht, and what every plan should take into account.
-- `kriterien.md`: the teacher's criteria for the Planung and the Tafelbild, each split into Muss and Soll.
+| Field | File and place | Needs a value when | Question |
+|---|---|---|---|
+| Schule | `schulkontext.md`, `## Schule` | the section holds a placeholder or is empty | 1 |
+| Stundenlänge | `schulkontext.md`, line `Stundenlänge:` | the value is not a number (decimal comma allowed) | 2 |
+| Phasenmodell | `schulkontext.md`, `## Phasenmodell` | always: the template's default is only a suggestion, so the teacher confirms it at every run | 3 |
+| Besondere Regeln | `schulkontext.md`, list under `Besondere Regeln:` | the list holds a placeholder or is empty | 4 |
+| Fächer und Klassen | `schulkontext.md`, table of `## Fächer und Klassen` | the table has no row below its header and separator, or a row holds a placeholder | 5 |
+| Ausstattung | `schulkontext.md`, `## Ausstattung im Unterricht` | the section holds a placeholder or is empty | 6 |
+| Was jede Planung beachten soll | `schulkontext.md`, `## Was jede Planung beachten soll` | the list holds a placeholder or is empty | 7 |
+| Kriterien | `kriterien.md`, the Muss and Soll lists of `## Planung` and `## Tafelbild` | a list holds a placeholder | 8 |
 
 The Ablage and Ansicht of `onenote.md` are filled in steps 4 and 5.
 
-1. When no placeholder is left in either file, tell the teacher the Stundenlänge, the Phasenmodell, and the classes you found, and ask `Die Angaben in schulkontext.md und kriterien.md sind ausgefüllt. Möchtest du etwas ändern? Antworte mit „weiter“, oder schreib, was sich ändern soll.` and end your turn. On `weiter`, go to step 4.
-2. Otherwise ask, and end your turn:
+1. When no field needs a value other than the Phasenmodell, the files are complete. Tell the teacher the Stundenlänge, the Phasenmodell, and the classes you found, and ask `Die Angaben in schulkontext.md und kriterien.md sind ausgefüllt. Passt das Phasenmodell so, und möchtest du sonst etwas ändern? Antworte mit „weiter“, oder schreib, was sich ändern soll.` and end your turn.
+   - `weiter`: the Phasenmodell is confirmed; change nothing and go to step 4.
+   - Feedback: build the change as in item 4 and propose it as in item 5.
+2. Otherwise ask the questions of every field that needs a value, the Phasenmodell always included, and end your turn. Start with `Jetzt brauche ich ein paar Angaben zu deiner Schule. Wenn du Anweisungen aus einem Claude-Projekt hast, kannst du sie einfach hier einfügen. Sonst beantworte bitte diese Fragen:`, then list the questions in this order, numbered from 1, verbatim:
 
-   ```
-   Jetzt brauche ich ein paar Angaben zu deiner Schule. Wenn du Anweisungen aus einem Claude-Projekt hast, kannst du sie einfach hier einfügen. Sonst beantworte bitte diese Fragen:
-   1. An welcher Schule unterrichtest du (Schulform, Bundesland, Besonderheiten)?
-   2. Wie viele Minuten dauert eine Unterrichtsstunde?
-   3. Welche Phasen hat eine Stunde bei dir (zum Beispiel Einstieg, Erarbeitung, Sicherung)?
-   4. Gibt es besondere Regeln, zum Beispiel feste Rituale?
-   5. Welche Klassen und Fächer unterrichtest du, mit welchem Lehrplan und Lehrwerk?
-   6. Was muss eine gute Planung und ein gutes Tafelbild für dich erfüllen, und was wäre nur schön?
-   ```
+   1. `An welcher Schule unterrichtest du (Schulform, Bundesland, Besonderheiten)?`
+   2. `Wie viele Minuten dauert eine Unterrichtsstunde?`
+   3. `Welche Phasen hat eine Stunde bei dir? Bisher steht dort: <Phasenmodell aus schulkontext.md>. Passt das?`
+   4. `Gibt es besondere Regeln, zum Beispiel feste Rituale? Sonst schreib „keine“.`
+   5. `Welche Klassen und Fächer unterrichtest du, mit welchem Lehrplan und Lehrwerk?`
+   6. `Welche Ausstattung hast du im Unterricht, zum Beispiel Beamer, Tablet mit Spiegelung oder Tafel?`
+   7. `Gibt es etwas, das jede Planung beachten soll? Sonst schreib „nichts“.`
+   8. `Was muss eine gute Planung und ein gutes Tafelbild für dich erfüllen, und was wäre nur schön? Sonst schreib „nichts weiter“.`
 
-   Ask only for values that still hold a placeholder. Use the questions verbatim.
-3. Pasted instructions from a Claude project: sort what they say into `schulkontext.md` (school, lesson length, phases, rules, classes, equipment, what every plan should take into account), `kriterien.md` (Muss and Soll for the Planung and the Tafelbild), and `onenote.md` (where pages go, page titles, visible area, colors). Do not invent values the instructions do not contain; ask for what is still missing. Leave out student names and other personal data, and tell the teacher you did.
-4. Keep every heading, the privacy note, and the line formats of the templates, for example `Stundenlänge: 45 Minuten` with a decimal comma when needed. Remove the example lines (`[...]`) the teacher's values replace. Keep `Die Phasen ergeben zusammen genau die Stundenlänge.` and `Alles, was die Klasse gleichzeitig sehen soll, passt in die sichtbare Breite.` unless the teacher asks to remove them.
-5. Show the change of each file you would change: the new lines, and the lines they replace. Ask `Soll ich das so in <Dateien> eintragen? Antworte mit „ja“, oder schreib, was anders sein soll.` and end your turn. Write only after a yes. On feedback, change the proposal and ask again.
+   When the answer leaves a field open, ask once more for that field only. A field the teacher explicitly leaves open stays as it is and is listed as missing in the summary.
+3. Pasted instructions from a Claude project: sort what they say into `schulkontext.md` (school, lesson length, phases, rules, classes, equipment, what every plan should take into account), `kriterien.md` (Muss and Soll for the Planung and the Tafelbild), and `onenote.md` (where pages go, page titles, visible area, colors). Do not invent values the instructions do not contain; ask the questions of the fields that still need a value, the Phasenmodell included when the instructions do not name the phases. Leave out student names and other personal data, and tell the teacher you did.
+4. Build the change. Keep every heading, the privacy note, and the line formats of the templates, for example `Stundenlänge: 45 Minuten` with a decimal comma when needed. Replace each placeholder line the teacher's answer covers. An answer of `keine` or `nichts` becomes the line `- keine`, so that the field no longer needs a value. Keep `Die Phasen ergeben zusammen genau die Stundenlänge.` and `Alles, was die Klasse gleichzeitig sehen soll, passt in die sichtbare Breite.` unless the teacher asks to remove them.
+5. Show the change of each file you would change: the new lines, and the lines they replace. When nothing changes (the Phasenmodell confirmed, nothing else asked), say so and go to step 4. Otherwise ask `Soll ich das so in <Dateien> eintragen? Antworte mit „ja“, oder schreib, was anders sein soll.` and end your turn. Write only after a yes, then go to step 4. On feedback, change the proposal and ask again. On a no without feedback, ask what to change; when the teacher wants to skip, write nothing and list the open fields as missing.
 
 ## 4. OneNote
 
@@ -80,8 +89,10 @@ On a OneNote error, or `onenote_responsive: false`, in this step or in step 5: t
 5. Draft the `## Ablage` of `onenote.md` from the section names and the page titles:
    - `Abschnitt:` `Klasse` when the sections are named like the classes (one section per class), else the name of the section the lessons go into.
    - `Seitentitel:` the scheme the existing page titles follow, written with `JJJJ-MM-TT` for the date, `Klasse` for the class, and `Thema` for the topic, for example `JJJJ-MM-TT Klasse Thema`. When the titles show no scheme, propose `JJJJ-MM-TT Klasse Thema`.
-6. When `## Ablage` is already filled, compare it with the notebook: name a section it needs that does not exist. Ask whether it should stay.
-7. Show the draft with the sections and a few page titles it is based on, and ask `Soll ich die Ablage so in onenote.md eintragen? Antworte mit „ja“, oder schreib, was anders sein soll.` and end your turn. Write only after a yes. When `Abschnitt` names a section that does not exist yet, say `Bitte lege den Abschnitt „<Abschnitt>“ in OneNote an. Ich lege keine Abschnitte an.`
+6. When `## Ablage` is already filled (no placeholder in `Abschnitt` or `Seitentitel`), do not draft a new one. Show it, name a section it needs that does not exist in the notebook, and ask `In onenote.md steht diese Ablage. Soll sie so bleiben? Antworte mit „weiter“, oder schreib, was sich ändern soll.` and end your turn.
+   - `weiter`: change nothing, record the Ablage as set up (with a missing section as missing), and go to step 5.
+   - Feedback: draft the change from the teacher's words and the notebook, and continue with item 7.
+7. Show the draft with the sections and a few page titles it is based on, and ask `Soll ich die Ablage so in onenote.md eintragen? Antworte mit „ja“, oder schreib, was anders sein soll.` and end your turn. Write only after a yes, then go to step 5. On feedback, change the draft and ask again. On a no without feedback, ask what to change; when the teacher wants to skip, write nothing and list the Ablage as missing. When `Abschnitt` names a section that does not exist yet, say `Bitte lege den Abschnitt „<Abschnitt>“ in OneNote an. Ich lege keine Abschnitte an.`
 
 ## 5. Visible area (Ansicht)
 
@@ -129,8 +140,10 @@ Offer allow rules for `.claude/settings.json` in the working folder, so that the
 ```
 
 1. When `.claude/settings.json` is missing, the proposal is exactly the block above.
-2. When it exists and is valid JSON, the proposal is the file with every rule above that is missing appended to `permissions.allow`. Keep everything else unchanged: other keys, other rules, and their order. When every rule is already there, say `Die Berechtigungen in .claude/settings.json sind schon eingetragen.` and go to step 7.
-3. When it exists and is not valid JSON, or `permissions.allow` is not a list, do not change it. Say `Die Datei .claude/settings.json kann ich nicht sicher ergänzen, weil sie kein gültiges JSON enthält. Ich ändere sie nicht. Wenn du die Regeln selbst eintragen möchtest, gehören diese Einträge in die Liste „allow“ unter „permissions“:`, show the rules, and go to step 7.
+2. When it exists and is valid JSON, the proposal is the file with every rule above that is missing appended to `permissions.allow`. When the file has no `permissions` key, add `"permissions": { "allow": [...] }`; when `permissions` has no `allow` key, add `"allow": [...]` to it. Keep everything else unchanged: other keys, other rules, and their order. When every rule is already there, say `Die Berechtigungen in .claude/settings.json sind schon eingetragen.` and go to step 7.
+3. Do not change the file in two cases; show the rules, and go to step 7:
+   - It is not valid JSON. Say `Die Datei .claude/settings.json kann ich nicht sicher ergänzen, weil sie kein gültiges JSON enthält. Ich ändere sie nicht. Wenn du die Regeln selbst eintragen möchtest, gehören diese Einträge in die Liste „allow“ unter „permissions“:`
+   - It is valid JSON, but the file itself is not an object, `permissions` is not an object, or `permissions.allow` is not a list. Say `Die Datei .claude/settings.json hat einen unerwarteten Aufbau: „permissions“ oder „allow“ hat nicht die erwartete Form. Ich ändere sie nicht. Wenn du die Regeln selbst eintragen möchtest, gehören diese Einträge in die Liste „allow“ unter „permissions“:`
 4. Show the proposal and say which rules are new, then ask `Damit du nicht bei jedem Schritt eine Erlaubnis bestätigen musst, kann ich diese Regeln in .claude/settings.json in deinem Arbeitsordner eintragen. Sie erlauben das Schreiben in Stunden/, das Lesen der Plugin-Dateien und die OneNote-Werkzeuge des Plugins. Soll ich sie eintragen? Antworte mit „ja“ oder „nein“.` and end your turn. Write only after a yes; create `.claude/` when it is missing. On a no, write nothing and list the permissions as not set up.
 
 ## 7. Summary
@@ -138,7 +151,7 @@ Offer allow rules for `.claude/settings.json` in the working folder, so that the
 End with a German summary:
 
 - **Eingerichtet:** the files and folders, the values in `schulkontext.md` and `kriterien.md`, the Ablage, the Ansicht, and the permissions that are in place.
-- **Fehlt noch:** every placeholder that is left (file and line), every skipped OneNote step with the reason, an Ansicht that was not measured when the teacher projects with a fixed visible area, permissions the teacher declined, and a section to create in OneNote. When nothing is missing, say `Alles ist eingerichtet.`
+- **Fehlt noch:** every field of step 3 that still needs a value by the rules of its table (the Phasenmodell counts as set once confirmed), with file and line, a placeholder left in the `## Ablage` of `onenote.md`, every skipped OneNote step with the reason, an Ansicht that was not measured when the teacher projects with a fixed visible area, permissions the teacher declined, and a section to create in OneNote. When nothing is missing, say `Alles ist eingerichtet.`
 - **Befehle:**
 
   ```
