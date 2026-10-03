@@ -27,7 +27,7 @@ Common rules for every phase:
 - Answers are read by meaning, not by exact spelling: `weiter`, `ja`, `passt`, or `ok` alone
   continue; an answer that asks for a change is feedback; when an answer is unclear, Claude asks
   once more.
-- **State model.** The procedure reads its state only from `## Stand` and `## OneNote` of
+- **State model** (refined and binding in `plans/fixes/04-fix-1.md`). The procedure reads its state only from `## Stand` and `## OneNote` of
   `stunde.md`, never from `## Verlauf` (a log for the teacher) and never by looking for the newest
   file. `## Stand` has these lines, and `lesson-folder.md` shows them in the `stunde.md` format:
   `Schritt`, `Runde`, `Planversion`, `Freigegebener Plan`, `Tafelbildversion`, plus
