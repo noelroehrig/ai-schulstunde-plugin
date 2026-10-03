@@ -39,7 +39,7 @@ The assignment of `lesson-conventions`. Its `inputs` list holds absolute paths, 
 8. Check `## Besondere Regeln` against `schulkontext.md`: every special rule there must be named with how the plan respects it, or the section says `keine` and `schulkontext.md` has none. A missing or wrong entry is a Muss-Mangel.
 9. Teacher feedback, when listed: check every point. A point the plan does not address is a Muss-Mangel, as the review rules of `lesson-conventions` say. Handle a conflict between the feedback and `kriterien.md` as the review rules of `lesson-conventions` say.
 10. Previous review, when listed: fill `## Frühere Muss-Mängel` by the review rules of `lesson-conventions`.
-11. Follow every other review rule of `lesson-conventions`, in particular the verdict rule and the rule on new Muss-Mängel: a Muss-Mangel the previous review did not raise needs an actual violation of `kriterien.md`, `schulkontext.md`, or the plan format of `lesson-conventions`; anything else is a Soll-Hinweis.
+11. Follow every other review rule of `lesson-conventions`, in particular the rule on new Muss-Mängel, with its exception for the teacher's feedback, and the verdict rule.
 12. Write the review to `output` in the review format of `lesson-conventions`. Never change the plan or any other file.
 
 ## Output
