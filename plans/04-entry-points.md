@@ -27,9 +27,29 @@ Common rules for every phase:
 - Answers are read by meaning, not by exact spelling: `weiter`, `ja`, `passt`, or `ok` alone
   continue; an answer that asks for a change is feedback; when an answer is unclear, Claude asks
   once more.
-- The state lives in `## Stand` of `stunde.md`. A file with a higher version than `## Stand`
-  records comes from an interrupted agent run: it is never an input, and the agent's next run
-  overwrites it.
+- **State model.** The procedure reads its state only from `## Stand` and `## OneNote` of
+  `stunde.md`, never from `## Verlauf` (a log for the teacher) and never by looking for the newest
+  file. `## Stand` has these lines, and `lesson-folder.md` shows them in the `stunde.md` format:
+  `Schritt`, `Runde`, `Planversion`, `Freigegebener Plan`, `Tafelbildversion`, plus
+  `Prüfbericht: <Dateiname oder „keiner“>` (the last review whose verdict was read) and
+  `Rückmeldung: <Dateiname oder „keine“>` (the teacher input that started the current loop; an
+  input of every round of that loop; `keine` when a loop starts without teacher input).
+  - A step writes its result to `## Stand` or `## OneNote` only after it completed: an agent
+    returned `DONE`, a verdict was read, the teacher answered, the OneNote gate passed. An
+    interrupted step leaves both sections unchanged, so a resume repeats exactly that step.
+  - `Runde` is the round in progress. A resume continues it: when the round's draft is recorded
+    (`Planversion` or `Tafelbildversion`) and `Prüfbericht` is not that draft's review, the reviewer
+    runs; otherwise the author runs. A resume never starts a fresh cap.
+  - A versioned file that `## Stand` does not record comes from an interrupted agent run. It is
+    never an input, and the agent's next run writes the same path again; this is the only case in
+    which a versioned file is overwritten, and `lesson-folder.md` says so.
+  - `Schritt: Tafelbild` is written together with `Abschnitt` and `Seitentitel` in `## OneNote`,
+    after the OneNote gate passed. A gate that stops leaves `Schritt` as it was, so a resume runs
+    the gate again. A resumed board loop resolves `section_id` from the recorded `Abschnitt` name
+    (not from `onenote.md` again), keeps the recorded title, round, and page, and writes nothing
+    new to `## OneNote` except `Seiten-ID` after round 1's author.
+  - Resuming at `Prüfpunkt` asks the checkpoint question again (or goes straight to the OneNote gate
+    when `plan_checkpoint` is `false`).
 - Every mechanical requirement gets its check first. `npm run verify` passes at the end of every
   phase.
 
