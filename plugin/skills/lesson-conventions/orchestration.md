@@ -24,7 +24,7 @@ All paths in an assignment are absolute: the working folder or the lesson folder
 
 - After every agent run that ends with `DONE`, update `## Stand` and append one line to `## Verlauf` that names the file written and, for a review, its verdict, for example `- 2026-10-07: review_v2.md geschrieben, Ergebnis REVISE (Planung, Runde 2 von 3).`
 - `Planversion: N` means `planung_vN.md` is done. Its review counts as done only when `## Verlauf` records it with its verdict. The same holds for `Tafelbildversion: M` and `tafelbild-review_vM.md`.
-- A versioned file with a higher number than `## Stand` records comes from an interrupted agent run. It is never an input; the agent's next run writes the same path again.
+- A versioned file with a higher number than `## Stand` records, or a review that `## Verlauf` does not record with its verdict, comes from an interrupted or failed agent run. It is never an input; the agent's next run, with the same `output` path, overwrites it (`lesson-folder.md`). A run once more after a protocol error therefore keeps the same `output`.
 - Append a `## Verlauf` line as well when you save the teacher's feedback, when the checkpoint passes, at an escalation answer, at a stop, and at the finish.
 
 ## Talking to the teacher
@@ -113,7 +113,7 @@ When `plan_checkpoint` is `false`, skip the checkpoint: the plan is approved, go
 
 ## OneNote gate
 
-Before the board loop, set `Schritt: Tafelbild`, `Runde: 1 von 3`, and `Freigegebener Plan`, and check, in this order. The OneNote tools of the main session are `mcp__plugin_unterricht_onenote__ping` and `mcp__plugin_unterricht_onenote__get_notebooks`.
+Before the board loop, check, in this order. When you come to the gate from the checkpoint or the planning escalation, the board loop starts fresh: first set `Schritt: Tafelbild`, `Runde: 1 von 3`, and `Freigegebener Plan`. When you resume a board loop (`Schritt` was already `Tafelbild`), change nothing in `## Stand`: the gate only rebuilds `section_id`, and the loop continues with the recorded round and versions (see Resuming a loop). The OneNote tools of the main session are `mcp__plugin_unterricht_onenote__ping` and `mcp__plugin_unterricht_onenote__get_notebooks`.
 
 1. The `notebook` setting is not blank and has no comma. Otherwise stop before any OneNote call, with `Die Einstellung „OneNote-Notizbuch“ ist leer oder enthält ein Komma. Trag dort mit /config genau den Namen eines Notizbuchs ein. Setze dann mit /unterricht:stunde-ueberarbeiten fort.`
 2. Call `ping`. When it reports `onenote_responsive: true`, go on. When it reports `onenote_responsive: false`, ask `OneNote reagiert gerade nicht. Bitte öffne OneNote und schließe alle offenen Dialoge. Antworte dann mit „weiter“.` and end your turn. After the answer, call `ping` once more; when it still reports `onenote_responsive: false`, stop and say that the plan is kept and that the board can be made later with `/unterricht:stunde-ueberarbeiten`.
@@ -128,7 +128,7 @@ A `get_notebooks` error is handled as Failure handling says.
 
 The loop has a cap of 3 rounds. M is the board version: `Tafelbildversion` plus 1, or 1 when there is none. Board versions count separately from plan versions and never restart. `page_id` is the `Seiten-ID` of `stunde.md`, or empty when it is `keine`.
 
-A loop starts at round 1 after the OneNote gate, and after `Ich gebe Hinweise` at the board cap; in that case the guidance is saved as `tafelbild-rueckmeldung_vM.md` before the loop starts (see Escalation), and this loop is a loop after teacher guidance. It keeps the same page.
+A fresh loop starts at round 1 after the OneNote gate; a resumed loop continues at the recorded round (see Resuming a loop). A loop also starts at round 1 after `Ich gebe Hinweise` at the board cap; in that case the guidance is saved as `tafelbild-rueckmeldung_vM.md` before the loop starts (see Escalation), and this loop is a loop after teacher guidance. It keeps the same page.
 
 Set `Runde: <n> von 3` in `## Stand` at the start of every round. The board agents get `section_id`, `page_title` (the `Seitentitel`), and `page_id` in every assignment. Then, for round n:
 
@@ -148,6 +148,17 @@ Set `Runde: <n> von 3` in `## Stand` at the start of every round. The board agen
 6. `APPROVED`: leave the loop and finish.
 7. `REVISE` in round 1 or 2: M becomes M plus 1, n becomes n plus 1, and the next round starts on the same page.
 8. `REVISE` in round 3: escalate.
+
+## Resuming a loop
+
+When the entry point resumes a lesson with `Schritt: Planung` or `Schritt: Tafelbild`, never reset `Runde` and never start a fresh cap. Take the state from `## Stand` and `## Verlauf`. Below, V is `Planversion` (planning loop) or `Tafelbildversion` (board loop), and the review is `review_vV.md` or `tafelbild-review_vV.md`:
+
+- The last `## Verlauf` line of this loop records saved feedback or guidance (`rueckmeldung_v<V+1>.md` or `tafelbild-rueckmeldung_v<V+1>.md`): start the loop after teacher input at round 1, as after saving it.
+- V is `keine`: run the first agent of the loop in round `Runde` with version 1.
+- The review of version V is not recorded in `## Verlauf`: run the reviewer of round `Runde` on version V.
+- The review of version V is recorded with its verdict: apply the verdict as steps 5 to 7 of the planning loop or steps 6 to 8 of the board loop say, with the round named in that `## Verlauf` line.
+
+`Schritt: Prüfpunkt` resumes at step 2 of the checkpoint.
 
 ## Escalation
 

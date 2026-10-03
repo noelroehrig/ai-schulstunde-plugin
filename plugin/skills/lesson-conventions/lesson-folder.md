@@ -31,7 +31,8 @@ Rules:
 - Board versions count separately, starting at 1: `tafelbild-review_vN.md` judges `tafelbild_vN.json`.
 - `tafelbild-rueckmeldung_vN.md` carries the board version it leads to: guidance on `tafelbild_v3.json` is saved as `tafelbild-rueckmeldung_v4.md`, then `tafelbild_v4.json` is written.
 - The orchestrator saves the teacher's words verbatim, under the heading `# Rückmeldung zu planung_v<N-1>.md` or `# Rückmeldung zu tafelbild_v<N-1>.json`.
-- Never overwrite an existing versioned file. The next version gets the next number.
+- Never overwrite a versioned file that `## Stand` and `## Verlauf` of `stunde.md` record as done. The next version gets the next number.
+- A versioned file with a higher number than `## Stand` records, or a review that `## Verlauf` does not record with its verdict, comes from an interrupted or failed agent run. It is never an input, and the agent's next run, with the same `output` path, overwrites it. This keeps `review_vN.md` judging `planung_vN.md`.
 - Pass every path explicitly in the assignment. Agents never pick "the latest" file.
 
 ## `stunde.md`
