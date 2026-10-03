@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { AGENT_TOOLS, AGENTS, type AgentName } from "./permissions.ts";
 import { LANGUAGE_SENTENCE, REVIEWER_SENTENCE } from "./rules/agents.ts";
+import { PRIVACY_SENTENCE } from "./rules/templates.ts";
 import {
   ASSIGNMENT_KEYS,
   GLOSSARY_TERMS,
@@ -109,6 +110,39 @@ export function exampleBoardFile(): string {
   );
 }
 
+/** Templates that satisfy the templates rule: required headings, lines, and the privacy sentence. */
+export function templateFiles(): Record<string, string> {
+  const file = (lines: string[]) => [...lines, "", PRIVACY_SENTENCE, ""].join("\n");
+  return {
+    "plugin/templates/CLAUDE.md": file(["# Arbeitsordner"]),
+    "plugin/templates/schulkontext.md": file([
+      "# Schulkontext",
+      "## Schule",
+      "## Zeitraster",
+      "Stundenlänge: [Minuten eintragen] Minuten",
+      "## Phasenmodell",
+      "## Fächer und Klassen",
+      "## Ausstattung im Unterricht",
+      "## Was jede Planung beachten soll",
+    ]),
+    "plugin/templates/kriterien.md": file([
+      "# Meine Kriterien",
+      "## Planung",
+      "### Muss (sonst wird überarbeitet)",
+      "- Die Phasen ergeben zusammen genau die Stundenlänge.",
+      "### Soll",
+      "## Tafelbild",
+    ]),
+    "plugin/templates/onenote.md": file([
+      "# OneNote",
+      "## Ablage",
+      "Abschnitt: [Name]",
+      "Seitentitel: [Schema]",
+      "## Ansicht",
+    ]),
+  };
+}
+
 /** Renders frontmatter lines, leaving out keys whose value is undefined. */
 function frontmatter(fields: Record<string, string | undefined>): string {
   const lines = Object.entries(fields)
@@ -158,9 +192,7 @@ export function completeRepoFiles(): Record<string, string> {
   }
   files["plugin/skills/lesson-conventions/examples/plan.md"] = examplePlanFile();
   files["plugin/skills/lesson-conventions/examples/board.json"] = exampleBoardFile();
-  for (const name of ["CLAUDE.md", "schulkontext.md", "kriterien.md", "onenote.md"]) {
-    files[`plugin/templates/${name}`] = "# [Titel]\n";
-  }
+  Object.assign(files, templateFiles());
   files["README.md"] = "# Anleitung\n";
   files["CHANGELOG.md"] = "# Änderungen\n";
   return files;

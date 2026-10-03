@@ -14,6 +14,7 @@ import { paths } from "./rules/paths.ts";
 import { pluginDir } from "./rules/plugin-dir.ts";
 import { server } from "./rules/server.ts";
 import { skills } from "./rules/skills.ts";
+import { templates } from "./rules/templates.ts";
 
 /** Every rule the CLI runs, in output order. */
 export const RULES: Rule[] = [
@@ -29,6 +30,7 @@ export const RULES: Rule[] = [
   skills,
   conventions,
   examples,
+  templates,
   server,
   completeness,
 ];
