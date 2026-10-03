@@ -2,7 +2,14 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { orchestrationFile, skillFile } from "../fixtures.ts";
 import { createMemoryRepo } from "../repo.ts";
-import { AGENT_TYPES, CHECKPOINT_QUESTION, ENTRY_POINT_REFERENCES, ESCALATION_LABELS, orchestration } from "./orchestration.ts";
+import {
+  AGENT_TYPES,
+  CHECKPOINT_QUESTION,
+  ENTRY_POINT_REFERENCES,
+  ESCALATION_LABELS,
+  SETTINGS_ALLOW_RULES,
+  orchestration,
+} from "./orchestration.ts";
 
 const GUIDE = "plugin/skills/lesson-conventions/orchestration.md";
 
@@ -79,7 +86,7 @@ test("orchestration passes on entry points that reference the guide and both set
 });
 
 test("orchestration passes when the entry points do not exist yet", () => {
-  assert.deepEqual(check({ [entryFile("einrichten")]: "Instructions.\n" }), []);
+  assert.deepEqual(check({ "plugin/skills/lesson-conventions/SKILL.md": "Instructions.\n" }), []);
 });
 
 test("orchestration reports each missing entry-point reference", () => {
@@ -92,4 +99,40 @@ test("orchestration reports each missing entry-point reference", () => {
       assert.ok(findings[0].message.includes(reference), findings[0].message);
     }
   }
+});
+
+test("SETTINGS_ALLOW_RULES are the allow rules of SPEC.md section 10", () => {
+  assert.deepEqual(SETTINGS_ALLOW_RULES, [
+    "Edit(/Stunden/**)",
+    "Read(~/.claude/plugins/**)",
+    "mcp__plugin_unterricht_onenote__ping",
+    "mcp__plugin_unterricht_onenote__get_notebooks",
+    "mcp__plugin_unterricht_onenote__list_pages",
+    "mcp__plugin_unterricht_onenote__get_page",
+    "mcp__plugin_unterricht_onenote__create_page",
+    "mcp__plugin_unterricht_onenote__replace_page",
+  ]);
+});
+
+test("orchestration passes on an einrichten that holds every allow rule", () => {
+  assert.deepEqual(check({ [entryFile("einrichten")]: skillFile("einrichten") }), []);
+});
+
+test("orchestration reports each allow rule missing from einrichten", () => {
+  for (const rule of SETTINGS_ALLOW_RULES) {
+    // Replace whole quoted entries so that removing `ping` does not also hit a longer rule.
+    const text = skillFile("einrichten").split(`"${rule}"`).join('"x"');
+    const findings = check({ [entryFile("einrichten")]: text });
+    assert.equal(findings.length, 1, JSON.stringify(findings));
+    assert.equal(findings[0].rule, "orchestration");
+    assert.equal(findings[0].file, entryFile("einrichten"));
+    assert.ok(findings[0].message.includes(rule), findings[0].message);
+  }
+});
+
+test("orchestration does not count an allow rule that appears only inside a longer one", () => {
+  const text = skillFile("einrichten").split('"mcp__plugin_unterricht_onenote__get_page"').join('"mcp__plugin_unterricht_onenote__get_pages"');
+  const findings = check({ [entryFile("einrichten")]: text });
+  assert.equal(findings.length, 1, JSON.stringify(findings));
+  assert.ok(findings[0].message.includes("mcp__plugin_unterricht_onenote__get_page"), findings[0].message);
 });

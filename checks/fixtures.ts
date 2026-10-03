@@ -10,6 +10,7 @@ import {
   ENTRY_POINT_REFERENCES,
   ESCALATION_LABELS,
   ORCHESTRATION_TOKENS,
+  SETTINGS_ALLOW_RULES,
 } from "./rules/orchestration.ts";
 import { PRIVACY_SENTENCE } from "./rules/templates.ts";
 import {
@@ -69,7 +70,9 @@ export function skillFile(name: string, fields: Record<string, string | undefine
       ? conventionsSkillBody()
       : ["stunde-planen", "stunde-ueberarbeiten"].includes(name)
         ? ENTRY_POINT_REFERENCES.join("\n") + "\n"
-        : "Instructions.\n";
+        : name === "einrichten"
+          ? JSON.stringify({ permissions: { allow: SETTINGS_ALLOW_RULES } }, null, 2) + "\n"
+          : "Instructions.\n";
   return frontmatter({ ...defaults, ...fields }) + body;
 }
 

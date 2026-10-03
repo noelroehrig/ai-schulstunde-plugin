@@ -1,3 +1,4 @@
+import { ONENOTE_TOOL_PREFIX } from "../permissions.ts";
 import type { Finding, Repo, Rule } from "../repo.ts";
 
 const RULE = "orchestration";
@@ -31,9 +32,22 @@ export const ENTRY_POINT_REFERENCES = [
   "${user_config.plan_checkpoint}",
 ];
 
+/** The setup entry point, which offers the allow rules. */
+const SETUP_FILE = "plugin/skills/einrichten/SKILL.md";
+
+/** The allow rules `einrichten` offers for `.claude/settings.json` (`SPEC.md` section 10), in order. */
+export const SETTINGS_ALLOW_RULES = [
+  "Edit(/Stunden/**)",
+  "Read(~/.claude/plugins/**)",
+  ...["ping", "get_notebooks", "list_pages", "get_page", "create_page", "replace_page"].map(
+    (tool) => ONENOTE_TOOL_PREFIX + tool,
+  ),
+];
+
 /**
  * Checks that `orchestration.md`, once it exists, states every constant the procedure relies on, and that
- * each existing entry point following it references the guide and the settings it needs.
+ * each existing entry point following it references the guide and the settings it needs, and that
+ * `einrichten`, once it exists, offers every allow rule.
  */
 export const orchestration: Rule = {
   name: RULE,
@@ -47,9 +61,20 @@ export const orchestration: Rule = {
       if (!files.includes(file)) continue;
       for (const message of entryPointProblems(repo.readText(file))) findings.push({ file, rule: RULE, message });
     }
+    if (files.includes(SETUP_FILE)) {
+      for (const message of setupProblems(repo.readText(SETUP_FILE))) findings.push({ file: SETUP_FILE, rule: RULE, message });
+    }
     return findings;
   },
 };
+
+/** Lists every allow rule missing from `einrichten`. */
+function setupProblems(text: string): string[] {
+  // Rules are matched as JSON strings, so `get_page` inside `"..._get_pages"` does not count.
+  return SETTINGS_ALLOW_RULES.filter((rule) => !text.includes(`"${rule}"`)).map(
+    (rule) => `allow rule "${rule}" missing`,
+  );
+}
 
 /** Lists every reference missing from an entry point that follows the guide. */
 function entryPointProblems(text: string): string[] {
