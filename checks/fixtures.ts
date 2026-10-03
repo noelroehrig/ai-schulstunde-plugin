@@ -7,8 +7,10 @@ import { LANGUAGE_SENTENCE, REVIEWER_SENTENCE } from "./rules/agents.ts";
 import {
   AGENT_TYPES,
   CHECKPOINT_QUESTION,
+  CONVENTIONS_REFERENCE,
   ENTRY_POINT_REFERENCES,
   ESCALATION_LABELS,
+  MAIN_SESSION_TOOLS_SENTENCE,
   ORCHESTRATION_TOKENS,
   SERVER_NOT_RUNNING_MESSAGE,
   SETTINGS_ALLOW_RULES,
@@ -107,6 +109,10 @@ export function orchestrationFile(): string {
     ...ESCALATION_LABELS,
     ...AGENT_TYPES,
     ORCHESTRATION_TOKENS.join(" "),
+    `Read \`${CONVENTIONS_REFERENCE}\`.`,
+    `${MAIN_SESSION_TOOLS_SENTENCE} ` +
+      ["ping", "get_notebooks", "list_pages"].map((tool) => `\`mcp__plugin_unterricht_onenote__${tool}\``).join(", ") +
+      ".",
     "",
   ].join("\n");
 }

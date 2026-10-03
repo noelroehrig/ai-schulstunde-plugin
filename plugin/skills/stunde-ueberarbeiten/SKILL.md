@@ -20,7 +20,7 @@ When you need the teacher's answer, ask in German and end your turn; the next me
 
 ## 1. Preflight, no writes
 
-Write nothing in this step. The preflight of the working folder is the one of `stunde-planen`, kept in one place: read `${CLAUDE_PLUGIN_ROOT}/skills/stunde-planen/SKILL.md` and run checks 1, 2, and 3 of its step 1 exactly as written there, with their German messages; when one fails, stop as it says. Its check 4 (the request) does not apply here. Its checks 5 and 6 are replaced by items 4 and 5 of step 2, which run once the lesson is chosen.
+Write nothing in this step. The preflight of the working folder is the one of `stunde-planen`, kept in one place: read `${CLAUDE_PLUGIN_ROOT}/skills/stunde-planen/SKILL.md` and run checks 1 and 2 of its step 1 exactly as written there, with their German messages; when one fails, stop as it says. As there, `## Ablage` of `onenote.md` is not checked here. Its check 3 (the request) does not apply here. Its checks 4 and 5 are replaced by items 4 and 5 of step 2, which run once the lesson is chosen.
 
 ## 2. Choose the lesson
 

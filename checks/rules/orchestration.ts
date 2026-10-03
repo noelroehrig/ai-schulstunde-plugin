@@ -36,6 +36,12 @@ export const SERVER_NOT_RUNNING_MESSAGE =
   SERVER_EXE +
   " blockiert.";
 
+/** The path through which the guide names the conventions skill, which defines the assignment shape and the conventions. */
+export const CONVENTIONS_REFERENCE = "<plugin root>/skills/lesson-conventions/SKILL.md";
+
+/** The start of the guide's sentence that lists every OneNote tool the main session calls. */
+export const MAIN_SESSION_TOOLS_SENTENCE = "The OneNote tools of the main session are";
+
 /** The path through which an entry point refers to the guide. */
 const GUIDE_REFERENCE = "${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md";
 
@@ -65,7 +71,8 @@ export const SETTINGS_ALLOW_RULES = [
  * Checks that `orchestration.md`, once it exists, states every constant the procedure relies on, and that
  * each existing entry point following it references the guide and the settings it needs, and that
  * `einrichten`, once it exists, offers every allow rule and references the guide, that no entry point repeats
- * the server-not-running message, and that `lesson-folder.md`, once it exists, shows the state lines.
+ * the server-not-running message, and that `lesson-folder.md`, once it exists, shows the state lines. The guide
+ * must not refer to `SPEC.md`, and its main-session sentence must name every OneNote tool it or an entry point calls.
  */
 export const orchestration: Rule = {
   name: RULE,
@@ -73,7 +80,11 @@ export const orchestration: Rule = {
     const files = repo.listFiles();
     const findings: Finding[] = [];
     if (files.includes(GUIDE_FILE)) {
-      for (const message of guideProblems(repo.readText(GUIDE_FILE))) findings.push({ file: GUIDE_FILE, rule: RULE, message });
+      const guide = repo.readText(GUIDE_FILE);
+      const entryPoints = ENTRY_POINT_FILES.filter((file) => files.includes(file)).map((file) => repo.readText(file));
+      for (const message of [...guideProblems(guide), ...mainSessionToolProblems(guide, entryPoints)]) {
+        findings.push({ file: GUIDE_FILE, rule: RULE, message });
+      }
     }
     for (const file of ENTRY_POINT_FILES) {
       if (!files.includes(file)) continue;
@@ -121,11 +132,29 @@ function entryPointProblems(text: string): string[] {
   );
 }
 
+/**
+ * Lists every OneNote tool, by full name, that the guide or an entry point names but the guide's main-session sentence
+ * leaves out, or the missing sentence itself.
+ */
+function mainSessionToolProblems(guide: string, entryPoints: string[]): string[] {
+  const sentence = guide.split(/\r?\n/).find((line) => line.includes(MAIN_SESSION_TOOLS_SENTENCE));
+  if (sentence === undefined) return [`sentence "${MAIN_SESSION_TOOLS_SENTENCE} ..." missing`];
+  const pattern = new RegExp(`${ONENOTE_TOOL_PREFIX}[a-z_]+`, "g");
+  const called = new Set([guide, ...entryPoints].flatMap((text) => text.match(pattern) ?? []));
+  // A tool counts as named only as a whole code span, so `get_page` inside `get_pages` does not count.
+  return [...called]
+    .filter((tool) => !sentence.includes(`\`${tool}\``))
+    .sort()
+    .map((tool) => `"${tool}" missing from the sentence "${MAIN_SESSION_TOOLS_SENTENCE} ..."`);
+}
+
 /** Lists every constant missing from the orchestration guide. */
 function guideProblems(text: string): string[] {
   const problems: string[] = [];
   if (!text.includes(CHECKPOINT_QUESTION)) problems.push("checkpoint question missing or changed");
   if (!text.includes(SERVER_NOT_RUNNING_MESSAGE)) problems.push("server-not-running message missing or changed");
+  if (!text.includes(CONVENTIONS_REFERENCE)) problems.push(`reference "${CONVENTIONS_REFERENCE}" missing`);
+  if (text.includes("SPEC.md")) problems.push("refers to SPEC.md, which does not ship with the plugin");
   for (const label of ESCALATION_LABELS) {
     if (!text.includes(label)) problems.push(`escalation label "${label}" missing`);
   }
