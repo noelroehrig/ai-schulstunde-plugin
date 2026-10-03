@@ -4,6 +4,15 @@ import { fileURLToPath } from "node:url";
 import { AGENT_TOOLS, AGENTS, type AgentName } from "./permissions.ts";
 import { BOARD_GUIDE } from "./rules/agent-bodies.ts";
 import { LANGUAGE_SENTENCE, REVIEWER_SENTENCE } from "./rules/agents.ts";
+import {
+  AGENT_TYPES,
+  CHECKPOINT_QUESTION,
+  ENTRY_POINT_REFERENCES,
+  ESCALATION_LABELS,
+  ORCHESTRATION_TOKENS,
+  SETTINGS_ALLOW_RULES,
+  STATE_LINES,
+} from "./rules/orchestration.ts";
 import { PRIVACY_SENTENCE } from "./rules/templates.ts";
 import {
   ASSIGNMENT_KEYS,
@@ -57,7 +66,14 @@ export function skillFile(name: string, fields: Record<string, string | undefine
     name === "lesson-conventions"
       ? { name, description: "Shared conventions.", "user-invocable": "false" }
       : { name, description: "Startet etwas.", "disable-model-invocation": "true" };
-  const body = name === "lesson-conventions" ? conventionsSkillBody() : "Instructions.\n";
+  const body =
+    name === "lesson-conventions"
+      ? conventionsSkillBody()
+      : ["stunde-planen", "stunde-ueberarbeiten"].includes(name)
+        ? ENTRY_POINT_REFERENCES.join("\n") + "\n"
+        : name === "einrichten"
+          ? JSON.stringify({ permissions: { allow: SETTINGS_ALLOW_RULES } }, null, 2) + "\n"
+          : "Instructions.\n";
   return frontmatter({ ...defaults, ...fields }) + body;
 }
 
@@ -78,6 +94,24 @@ export function conventionsSkillBody(): string {
     TOKENS.join(" "),
     "",
   ].join("\n");
+}
+
+/** An orchestration guide holding every constant the orchestration rule requires. */
+export function orchestrationFile(): string {
+  return [
+    "# Orchestration",
+    "",
+    CHECKPOINT_QUESTION,
+    ...ESCALATION_LABELS,
+    ...AGENT_TYPES,
+    ORCHESTRATION_TOKENS.join(" "),
+    "",
+  ].join("\n");
+}
+
+/** A lesson-folder guide holding every state line the orchestration rule requires, one per line. */
+export function lessonFolderFile(): string {
+  return ["# Lesson folder", "", "```markdown", ...STATE_LINES.map((line) => `${line} keine`), "```", ""].join("\n");
 }
 
 /** An example plan that satisfies the examples rule: every plan heading, durations adding up to 45. */
@@ -203,16 +237,36 @@ export function completeRepoFiles(): Record<string, string> {
   }
   for (const name of [
     "board.md",
-    "lesson-folder.md",
-    "orchestration.md",
     "examples/NOTES.md",
   ]) {
     files[`plugin/skills/lesson-conventions/${name}`] = "Text.\n";
   }
+  files["plugin/skills/lesson-conventions/lesson-folder.md"] = lessonFolderFile();
+  files["plugin/skills/lesson-conventions/orchestration.md"] = orchestrationFile();
   files["plugin/skills/lesson-conventions/examples/plan.md"] = examplePlanFile();
   files["plugin/skills/lesson-conventions/examples/board.json"] = exampleBoardFile();
   Object.assign(files, templateFiles());
-  files["README.md"] = "# Anleitung\n";
-  files["CHANGELOG.md"] = "# Änderungen\n";
+  files["README.md"] = readmeFile();
+  files["CHANGELOG.md"] = changelogFile();
   return files;
+}
+
+/** A README that names the three commands and the marketplace repository. */
+export function readmeFile(): string {
+  return [
+    "# Unterricht",
+    "",
+    "Marktplatz in claude.ai hinzufügen: `noelroehrig/schulstunde-plugin`.",
+    "",
+    "- `/unterricht:einrichten` richtet den Arbeitsordner ein.",
+    "- `/unterricht:stunde-planen` plant eine neue Stunde.",
+    "- `/unterricht:stunde-ueberarbeiten` setzt eine Stunde fort oder überarbeitet sie.",
+    "",
+  ].join("\n");
+}
+
+/** A CHANGELOG with an entry for the version of the repository's own `plugin.json`. */
+export function changelogFile(): string {
+  const manifest = JSON.parse(manifestFiles()["plugin/.claude-plugin/plugin.json"]) as { version: string };
+  return `# Änderungen\n\n## ${manifest.version} (2026-10-03)\n\n- Erste Version.\n`;
 }

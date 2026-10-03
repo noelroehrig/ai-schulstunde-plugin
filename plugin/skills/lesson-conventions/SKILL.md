@@ -57,9 +57,10 @@ The working folder belongs to the teacher. Its files and their roles:
 | `stunde.md` | The request, overrides, status, and OneNote location of the lesson. |
 | `planung_vN.md` | Plan draft N. |
 | `review_vN.md` | Review of `planung_vN.md`. |
-| `rueckmeldung_vN.md` | Teacher feedback that led to `planung_vN.md`. |
+| `rueckmeldung_vN.md` | Teacher feedback or guidance that led to `planung_vN.md`. |
 | `tafelbild_vN.json` | The exact page payload the board author sent in board round N. |
 | `tafelbild-review_vN.md` | Review of board round N. |
+| `tafelbild-rueckmeldung_vN.md` | Teacher guidance at the board cap that led to `tafelbild_vN.json`. |
 
 Rules for agents:
 
