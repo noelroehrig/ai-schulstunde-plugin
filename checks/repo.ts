@@ -23,6 +23,8 @@ export interface Repo {
 export interface Rule {
   name: string;
   run(repo: Repo, mode: Mode): Finding[];
+  /** Informational lines that are not findings, such as an expected gap during the build. */
+  notices?(repo: Repo, mode: Mode): string[];
 }
 
 /** Directory names the walk never enters, at any depth. */

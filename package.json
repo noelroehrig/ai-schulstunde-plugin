@@ -8,7 +8,8 @@
     "check": "tsx checks/run.ts --mode build",
     "check:release": "tsx checks/run.ts --mode release",
     "validate": "claude plugin validate . --strict",
-    "verify": "npm run typecheck && npm run test && npm run check && npm run validate"
+    "verify": "npm run typecheck && npm run test && npm run check && npm run validate",
+    "verify:release": "npm run typecheck && npm run test && npm run check:release && npm run validate"
   },
   "devDependencies": {
     "@types/node": "22.20.5",

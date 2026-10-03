@@ -2,13 +2,32 @@ import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { createFsRepo, type Finding, type Mode, type Repo, type Rule } from "./repo.ts";
 import { noDashes } from "./rules/dashes.ts";
+import { agents } from "./rules/agents.ts";
+import { completeness } from "./rules/completeness.ts";
 import { jsonValid } from "./rules/json.ts";
 import { manifest, userConfigRefs } from "./rules/manifest.ts";
 import { marketplace } from "./rules/marketplace.ts";
 import { mcp } from "./rules/mcp.ts";
+import { paths } from "./rules/paths.ts";
+import { pluginDir } from "./rules/plugin-dir.ts";
+import { server } from "./rules/server.ts";
+import { skills } from "./rules/skills.ts";
 
 /** Every rule the CLI runs, in output order. */
-export const RULES: Rule[] = [noDashes, jsonValid, marketplace, manifest, mcp, userConfigRefs];
+export const RULES: Rule[] = [
+  noDashes,
+  jsonValid,
+  marketplace,
+  manifest,
+  mcp,
+  userConfigRefs,
+  pluginDir,
+  paths,
+  agents,
+  skills,
+  server,
+  completeness,
+];
 
 const USAGE = "usage: run.ts --mode build|release";
 
@@ -44,7 +63,11 @@ export function main(
     err(USAGE);
     return 2;
   }
-  const findings = runRules(createFsRepo(root), mode, RULES);
+  const repo = createFsRepo(root);
+  for (const rule of RULES) {
+    for (const notice of rule.notices?.(repo, mode) ?? []) out(`notice: ${notice}`);
+  }
+  const findings = runRules(repo, mode, RULES);
   for (const finding of findings) out(formatFinding(finding));
   out(`${findings.length} findings (${mode} mode)`);
   return findings.length > 0 ? 1 : 0;

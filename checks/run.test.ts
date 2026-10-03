@@ -1,19 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { completeRepoFiles, manifestFiles } from "./fixtures.ts";
 import { createMemoryRepo, type Rule } from "./repo.ts";
 import { RULES, formatFinding, main, parseMode, runRules } from "./run.ts";
 
 /** The repository's own manifests, so that fixtures satisfy the manifest rules. */
-const PLUGIN_FILES: Record<string, string> = Object.fromEntries(
-  [".claude-plugin/marketplace.json", "plugin/.claude-plugin/plugin.json", "plugin/.mcp.json"].map(
-    (path) => [path, readFileSync(fileURLToPath(new URL(`../${path}`, import.meta.url)), "utf8")],
-  ),
-);
+const PLUGIN_FILES = manifestFiles();
 
 /** Runs `main` against a fresh temporary directory holding `files`. */
 function runMain(args: string[], files: Record<string, string>): { code: number; lines: string[] } {
@@ -68,7 +65,7 @@ test("main exits 0 with a zero count on a clean repository", () => {
 
 test("main exits 1 and prints each finding and the count", () => {
   const { code, lines } = runMain(["--mode", "release"], {
-    ...PLUGIN_FILES,
+    ...completeRepoFiles(),
     "a.json": "{",
     "b.md": "x \u2014 y",
   });
@@ -76,6 +73,18 @@ test("main exits 1 and prints each finding and the count", () => {
   assert.ok(lines.some((line) => line.startsWith("a.json: json-valid: ")));
   assert.ok(lines.some((line) => line.startsWith("b.md: no-dashes: line 1")));
   assert.match(lines.at(-1) ?? "", /^2 findings/);
+});
+
+test("main prints notices before the count without counting them", () => {
+  const { code, lines } = runMain(["--mode", "build"], PLUGIN_FILES);
+  assert.equal(code, 0);
+  assert.ok(lines.includes("notice: server not vendored yet"), JSON.stringify(lines));
+  assert.match(lines.at(-1) ?? "", /^0 findings/);
+});
+
+test("main exits 0 in release mode on a complete repository", () => {
+  const { code, lines } = runMain(["--mode", "release"], completeRepoFiles());
+  assert.equal(code, 0, JSON.stringify(lines));
 });
 
 test("main exits 2 on a missing or unknown mode", () => {
@@ -96,6 +105,19 @@ test("the CLI exits with the code main returns", () => {
 test("the CLI registers every rule", () => {
   assert.deepEqual(
     RULES.map((rule) => rule.name),
-    ["no-dashes", "json-valid", "marketplace", "manifest", "mcp", "user-config-refs"],
+    [
+      "no-dashes",
+      "json-valid",
+      "marketplace",
+      "manifest",
+      "mcp",
+      "user-config-refs",
+      "plugin-dir",
+      "paths",
+      "agents",
+      "skills",
+      "server",
+      "completeness",
+    ],
   );
 });
