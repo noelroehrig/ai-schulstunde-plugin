@@ -42,15 +42,15 @@ Read `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/lesson-folder.md` and foll
 1. Name the lesson folder as `lesson-folder.md` says, from the `Seitentitel` scheme of `onenote.md`: the lesson date if the request names one, else today; `Klasse` and `Thema` from the request. Create `Stunden/` when it does not exist, then the lesson folder in it, taking the first free name.
 2. Write `stunde.md` in the lesson folder, in exactly the format of `lesson-folder.md`:
    - `## Auftrag`: `Thema`, `Klasse`, `Hinweise`, `Stundenlänge`, and `Quelle der Stundenlänge` from step 1.
-   - `## Stand`: `Schritt: Planung`, `Runde: 1 von 3`, `Planversion: keine`, `Freigegebener Plan: keiner`, `Tafelbildversion: keine`.
-   - `## OneNote`: `Abschnitt: offen`, `Seitentitel: offen`, `Seiten-ID: keine`.
+   - `## Stand`: `Schritt: Planung`, `Runde: 0 von 3`, `Planversion: keine`, `Freigegebener Plan: keiner`, `Tafelbildversion: keine`, `Prüfbericht: keiner`, `Rückmeldung: keine`.
+   - `## OneNote`: `Abschnitt: offen`, `Seitentitel: offen`, `Seiten-ID: keine`, `Alte Seite: keine`.
    - `## Übernommene Mängel`: `- keine`.
    - `## Verlauf`: one line with today's date, for example `- 2026-10-07: Stunde angelegt.`
 3. Tell the teacher in one German line where the lesson is, for example `Ich lege die Stunde in Stunden/<Name des Stundenordners> an.`
 
 ## 3. Orchestration
 
-Read `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md` and follow it from the planning loop, round 1, as a new lesson, with these values:
+Read `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md` and follow it, deciding the first step as its Next step says (the author of round 1 of the planning loop), with these values:
 
 - the plugin root: `Plugin root` above;
 - the working folder: the absolute path of the working folder;

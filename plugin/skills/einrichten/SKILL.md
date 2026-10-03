@@ -96,7 +96,12 @@ On a OneNote error, or `onenote_responsive: false`, in this step or in step 5: t
 
 ## 5. Visible area (Ansicht)
 
-Ask `Zeigst du das Tafelbild auf einer festen sichtbaren Fläche, zum Beispiel auf einem gespiegelten Tablet mit fester Zoomstufe? Dann messen wir einmal aus, wie viel davon zu sehen ist. Antworte mit „ja“ oder „nein“.` and end your turn. When `## Ansicht` of `onenote.md` already holds numbers, name them first and ask whether to measure again. On a no, leave `## Ansicht` as it is and go to step 6. When step 4 was skipped, skip the calibration too and list it as missing.
+When step 4 was skipped, skip the calibration too, list it as missing, and go to step 6. Otherwise ask exactly one question and end your turn:
+
+- When `## Ansicht` of `onenote.md` already holds numbers for `Sichtbare Breite` and `Sichtbare Höhe`, ask `In onenote.md steht schon eine Ansicht: Sichtbare Breite <Zahl> pt, Sichtbare Höhe <Zahl> pt. Soll ich die sichtbare Fläche noch einmal ausmessen? Antworte mit „ja“ oder „nein“.` On a no, record the Ansicht as set up.
+- Otherwise ask `Zeigst du das Tafelbild auf einer festen sichtbaren Fläche, zum Beispiel auf einem gespiegelten Tablet mit fester Zoomstufe? Dann messen wir einmal aus, wie viel davon zu sehen ist. Antworte mit „ja“ oder „nein“.`
+
+On a no, leave `## Ansicht` as it is and go to step 6. On a yes, continue with item 1.
 
 1. Ask `In welchem Abschnitt soll ich die Seite „Kalibrierung Ansicht“ anlegen?`, naming the notebook's sections, and end your turn. The section must exist; note its ID.
 2. Call `list_pages` on that section. When a page `Kalibrierung Ansicht` already exists, say `Im Abschnitt „<Abschnitt>“ gibt es schon eine Seite „Kalibrierung Ansicht“, vielleicht von einem früheren Versuch. Bitte lösche sie in OneNote und antworte dann mit „weiter“.` and end your turn; then check again. Never write to a page that existed before.
@@ -144,14 +149,16 @@ Offer allow rules for `.claude/settings.json` in the working folder, so that the
 3. Do not change the file in two cases; show the rules, and go to step 7:
    - It is not valid JSON. Say `Die Datei .claude/settings.json kann ich nicht sicher ergänzen, weil sie kein gültiges JSON enthält. Ich ändere sie nicht. Wenn du die Regeln selbst eintragen möchtest, gehören diese Einträge in die Liste „allow“ unter „permissions“:`
    - It is valid JSON, but the file itself is not an object, `permissions` is not an object, or `permissions.allow` is not a list. Say `Die Datei .claude/settings.json hat einen unerwarteten Aufbau: „permissions“ oder „allow“ hat nicht die erwartete Form. Ich ändere sie nicht. Wenn du die Regeln selbst eintragen möchtest, gehören diese Einträge in die Liste „allow“ unter „permissions“:`
-4. Show the proposal and say which rules are new, then ask `Damit du nicht bei jedem Schritt eine Erlaubnis bestätigen musst, kann ich diese Regeln in .claude/settings.json in deinem Arbeitsordner eintragen. Sie erlauben das Schreiben in Stunden/, das Lesen der Plugin-Dateien und die OneNote-Werkzeuge des Plugins. Soll ich sie eintragen? Antworte mit „ja“ oder „nein“.` and end your turn. Write only after a yes; create `.claude/` when it is missing. On a no, write nothing and list the permissions as not set up.
+
+   In both cases, list the permissions as missing in the summary.
+4. Show the proposal and say which rules are new, then ask `Damit du nicht bei jedem Schritt eine Erlaubnis bestätigen musst, kann ich diese Regeln in .claude/settings.json in deinem Arbeitsordner eintragen. Sie erlauben das Schreiben in Stunden/, das Lesen der Plugin-Dateien und die OneNote-Werkzeuge des Plugins. Soll ich sie eintragen? Antworte mit „ja“ oder „nein“.` and end your turn. Write only after a yes; create `.claude/` when it is missing. On a no, write nothing and list the permissions as missing.
 
 ## 7. Summary
 
 End with a German summary:
 
 - **Eingerichtet:** the files and folders, the values in `schulkontext.md` and `kriterien.md`, the Ablage, the Ansicht, and the permissions that are in place.
-- **Fehlt noch:** every field of step 3 that still needs a value by the rules of its table (the Phasenmodell counts as set once confirmed), with file and line, a placeholder left in the `## Ablage` of `onenote.md`, every skipped OneNote step with the reason, an Ansicht that was not measured when the teacher projects with a fixed visible area, permissions the teacher declined, and a section to create in OneNote. When nothing is missing, say `Alles ist eingerichtet.`
+- **Fehlt noch:** every field of step 3 that still needs a value by the rules of its table (the Phasenmodell counts as set once confirmed), with file and line, a placeholder left in the `## Ablage` of `onenote.md`, every skipped OneNote step with the reason, an Ansicht that was not measured when the teacher projects with a fixed visible area, the allow rules of step 6 when they were not written (declined by the teacher, `.claude/settings.json` not valid JSON, or of an unexpected shape), each with the reason, and a section to create in OneNote. When nothing is missing, say `Alles ist eingerichtet.`
 - **Befehle:**
 
   ```

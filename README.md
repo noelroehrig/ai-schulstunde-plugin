@@ -40,7 +40,7 @@ Du brauchst kein Terminal. Alles geht mit Klicks und mit Nachrichten an Claude.
 
 ## So entsteht eine Stunde
 
-1. **Planung:** Claude entwirft den Plan, und ein zweiter Durchgang prüft ihn gegen deine `kriterien.md` und `schulkontext.md`. Wird ein Muss-Kriterium verfehlt, wird der Plan überarbeitet und erneut geprüft, höchstens dreimal.
+1. **Planung:** Claude entwirft den Plan, und ein zweiter Durchgang prüft ihn gegen deine `kriterien.md` und `schulkontext.md`. Entwurf und Prüfung sind eine Runde. Wird ein Muss-Kriterium verfehlt, folgt eine weitere Runde, in der der Plan überarbeitet und erneut geprüft wird, insgesamt höchstens drei Runden.
 2. **Prüfpunkt:** Claude zeigt dir eine kurze Zusammenfassung des Plans und fragt, ob er so passt. Antworte mit „weiter“, oder schreib, was geändert werden soll. Deine Rückmeldung geht vor deinen Kriterien, und der Plan wird damit neu überarbeitet. Den Prüfpunkt kannst du in den Einstellungen abschalten.
 3. **Tafelbild:** Claude legt die Seite in OneNote an und liest sie danach zur Prüfung wieder aus. Auch hier gibt es höchstens drei Runden.
 
