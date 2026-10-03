@@ -57,7 +57,10 @@ export function main(
   let baseVersion: string;
   let headVersion: string;
   try {
-    changedFiles = parseNameList(git(["diff", "--name-only", `${base}...HEAD`]));
+    // Unquoted UTF-8 paths and both sides of a rename, so every changed path is seen as written.
+    changedFiles = parseNameList(
+      git(["-c", "core.quotepath=false", "diff", "--name-only", "--no-renames", `${base}...HEAD`]),
+    );
     baseVersion = manifestVersion(git(["show", `${base}:${MANIFEST}`]), `${base}:${MANIFEST}`);
     headVersion = manifestVersion(readFileSync(join(root, MANIFEST), "utf8"), MANIFEST);
   } catch (error) {
