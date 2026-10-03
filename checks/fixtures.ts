@@ -60,6 +60,30 @@ export function conventionsSkillBody(): string {
   ].join("\n");
 }
 
+/** An example plan that satisfies the examples rule: every plan heading, durations adding up to 45. */
+export function examplePlanFile(): string {
+  return [
+    "# Thema",
+    "",
+    "Klasse: 6a · Fach: Mathematik · Datum: offen · Stundenlänge: 45 Minuten",
+    "",
+    ...PLAN_HEADINGS.flatMap((heading) =>
+      heading === "## Verlaufsplan"
+        ? [
+            heading,
+            VERLAUFSPLAN_HEADER,
+            "|---|---|---|---|---|",
+            "| 7,5 | Einstieg | Frage | Plenum | Tafelbild |",
+            "| 25 | Erarbeitung | Aufgaben | Partnerarbeit | Arbeitsblatt |",
+            "| 12,5 | Sicherung | Vergleich | Plenum | Tafelbild |",
+            "| **45** | | | | |",
+            "",
+          ]
+        : [heading, "- keine", ""],
+    ),
+  ].join("\n");
+}
+
 /** Renders frontmatter lines, leaving out keys whose value is undefined. */
 function frontmatter(fields: Record<string, string | undefined>): string {
   const lines = Object.entries(fields)
@@ -103,11 +127,11 @@ export function completeRepoFiles(): Record<string, string> {
     "board.md",
     "lesson-folder.md",
     "orchestration.md",
-    "examples/plan.md",
     "examples/NOTES.md",
   ]) {
     files[`plugin/skills/lesson-conventions/${name}`] = "Text.\n";
   }
+  files["plugin/skills/lesson-conventions/examples/plan.md"] = examplePlanFile();
   files["plugin/skills/lesson-conventions/examples/board.json"] = "{}";
   for (const name of ["CLAUDE.md", "schulkontext.md", "kriterien.md", "onenote.md"]) {
     files[`plugin/templates/${name}`] = "# [Titel]\n";

@@ -5,6 +5,7 @@ import { noDashes } from "./rules/dashes.ts";
 import { agents } from "./rules/agents.ts";
 import { completeness } from "./rules/completeness.ts";
 import { conventions } from "./rules/conventions.ts";
+import { examples } from "./rules/examples.ts";
 import { jsonValid } from "./rules/json.ts";
 import { manifest, userConfigRefs } from "./rules/manifest.ts";
 import { marketplace } from "./rules/marketplace.ts";
@@ -27,6 +28,7 @@ export const RULES: Rule[] = [
   agents,
   skills,
   conventions,
+  examples,
   server,
   completeness,
 ];
