@@ -2,6 +2,7 @@ import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { createFsRepo, type Finding, type Mode, type Repo, type Rule } from "./repo.ts";
 import { noDashes } from "./rules/dashes.ts";
+import { agentBodies } from "./rules/agent-bodies.ts";
 import { agents } from "./rules/agents.ts";
 import { completeness } from "./rules/completeness.ts";
 import { conventions } from "./rules/conventions.ts";
@@ -27,6 +28,7 @@ export const RULES: Rule[] = [
   pluginDir,
   paths,
   agents,
+  agentBodies,
   skills,
   conventions,
   examples,

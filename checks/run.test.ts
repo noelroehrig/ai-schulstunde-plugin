@@ -115,6 +115,7 @@ test("the CLI registers every rule", () => {
       "plugin-dir",
       "paths",
       "agents",
+      "agent-bodies",
       "skills",
       "conventions",
       "examples",

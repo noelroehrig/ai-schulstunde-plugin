@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { AGENT_TOOLS, AGENTS, type AgentName } from "./permissions.ts";
+import { BOARD_GUIDE } from "./rules/agent-bodies.ts";
 import { LANGUAGE_SENTENCE, REVIEWER_SENTENCE } from "./rules/agents.ts";
 import { PRIVACY_SENTENCE } from "./rules/templates.ts";
 import {
@@ -27,9 +28,27 @@ export function agentFile(name: AgentName, fields: Record<string, string | undef
     model: "inherit",
     omitClaudeMd: "true",
   };
+  return frontmatter({ ...defaults, ...fields }) + (body ?? agentBody(name));
+}
+
+/** An agent body that satisfies the agents and agent-bodies rules. */
+export function agentBody(name: AgentName): string {
   const reviewer = name === "plan-reviewer" || name === "board-reviewer";
-  const text = body ?? `${LANGUAGE_SENTENCE}\n${reviewer ? REVIEWER_SENTENCE + "\n" : ""}`;
-  return frontmatter({ ...defaults, ...fields }) + text;
+  const board = name === "board-author" || name === "board-reviewer";
+  return [
+    LANGUAGE_SENTENCE,
+    ...(reviewer ? [REVIEWER_SENTENCE] : []),
+    "## Inputs",
+    "## Steps",
+    "1. Read `schulkontext.md`.",
+    "2. Read `kriterien.md`.",
+    ...(board ? [`3. Read \`${BOARD_GUIDE}\`.`] : []),
+    "## Output",
+    "## Stop",
+    "## Result line",
+    "`DONE <path>` or `FAILED <Grund>`.",
+    "",
+  ].join("\n");
 }
 
 /** A `SKILL.md` that satisfies the skills rule, with `fields` overriding frontmatter lines. */
