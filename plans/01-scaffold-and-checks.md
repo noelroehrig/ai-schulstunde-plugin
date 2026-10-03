@@ -118,7 +118,10 @@ Acceptance criteria:
    finding.
 3. Rule `paths`: no JSON string value under `plugin/` contains a backslash or starts with a drive
    letter or `/`. Every `${CLAUDE_PLUGIN_ROOT}/<path>` reference in a file under `plugin/` points to
-   an existing file, except `server/onenote-mcp.exe`.
+   an existing file, except `server/onenote-mcp.exe`. `${` appears only in `plugin/.mcp.json`,
+   `plugin/skills/*/SKILL.md`, and `plugin/agents/*.md`; anywhere else under `plugin/` it is a
+   finding, because Claude Code substitutes these references only in those files, and a file read by
+   path would show them raw (`SPEC.md` section 5.5).
 4. Rule `agents`, for each `plugin/agents/*.md` that exists:
    - the file name is `<name>.md`, and `name` is one of the four agents of `SPEC.md` section 3.1;
    - `description` is not empty; `model` is `inherit`; `omitClaudeMd` is `true`; `skills` is
@@ -138,10 +141,10 @@ Acceptance criteria:
    `<64 lowercase hex>  onenote-mcp.exe`), and the hash equals the SHA-256 of the exe computed with
    `node:crypto`. In build mode a missing `plugin/server/` prints the notice
    `server not vendored yet` and is not a finding. In release mode it is a finding.
-7. Rule `completeness`, release mode only: the four agents, the four skills,
-   `plugin/skills/lesson-conventions/board.md`, at least one file in
-   `plugin/skills/lesson-conventions/examples/`, `plugin/templates/` with `CLAUDE.md`,
-   `schulkontext.md`, `kriterien.md`, and `onenote.md`, and `README.md` and `CHANGELOG.md` at the
+7. Rule `completeness`, release mode only: the four agents; the four skills' `SKILL.md`;
+   `board.md`, `lesson-folder.md`, `orchestration.md`, `examples/plan.md`, `examples/board.json`,
+   and `examples/NOTES.md` in `plugin/skills/lesson-conventions/`; `CLAUDE.md`, `schulkontext.md`,
+   `kriterien.md`, and `onenote.md` in `plugin/templates/`; `README.md` and `CHANGELOG.md` at the
    root. Each missing item is its own finding.
 8. Script `verify:release` runs `typecheck`, `test`, `check:release`, `validate`.
 9. On the repository as it is after this phase, `npm run verify` passes, and `npm run verify:release`

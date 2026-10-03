@@ -90,6 +90,8 @@ The rule: **who reads it decides the language.**
 | Server env var fed from `notebook` | `ONENOTE_ALLOWED_NOTEBOOKS` |
 | Server env var that hides the raw-XML tools | `ONENOTE_DISABLE_RAW_XML` (value `1`) |
 | Round cap per loop | `3` |
+| Agent result line | `DONE <path>` (board author: `DONE <path> page_id=<id>`) or `FAILED <German reason>` |
+| Assignment keys (orchestrator to agent) | `working_folder`, `lesson_folder`, `round`, `inputs`, `output`, `section_id`, `page_title`, `page_id` |
 
 ## 4. Architecture overview (Decided)
 
@@ -139,9 +141,14 @@ schulstunde-plugin/                  # repo root = marketplace
 │   │   ├── stunde-planen/SKILL.md
 │   │   ├── stunde-ueberarbeiten/SKILL.md
 │   │   └── lesson-conventions/
-│   │       ├── SKILL.md             # language rule, glossary, plan and review format
-│   │       ├── board.md             # generic Tafelbild conventions
-│   │       └── examples/            # German example plan and board, annotated
+│   │       ├── SKILL.md             # language, glossary, plan and review formats, assignments
+│   │       ├── board.md             # Tafelbild conventions and the page payload format
+│   │       ├── lesson-folder.md     # stunde.md format, naming, versions
+│   │       ├── orchestration.md     # loops, checkpoint, escalation, failure handling
+│   │       └── examples/
+│   │           ├── plan.md          # German example plan
+│   │           ├── board.json       # example page payload
+│   │           └── NOTES.md         # why the examples are good (English)
 │   ├── agents/
 │   │   ├── lesson-planner.md
 │   │   ├── plan-reviewer.md
@@ -149,6 +156,7 @@ schulstunde-plugin/                  # repo root = marketplace
 │   │   └── board-reviewer.md
 │   └── templates/                   # German files that einrichten copies into a working folder
 ├── checks/                          # repo checks and their node:test tests (Appendix C)
+├── scripts/                         # CI helpers: server vendoring, tool contract (11.2)
 ├── plans/                           # build plans for the engine (Appendix C)
 ├── package.json                     # dev tooling only: typecheck, test, verify, verify:release
 ├── .agentpasture/                   # build engine, local only, gitignored (Appendix C)
@@ -228,11 +236,13 @@ Plugin agents ignore the `hooks`, `mcpServers`, and `permissionMode` frontmatter
 
 One skill, `lesson-conventions`, with `user-invocable: false`. It must not set `disable-model-invocation: true`, which would block preloading into subagents (F16).
 
-- `SKILL.md`: language rule, glossary, plan format (section 7), review format (section 6.2), the rule against personal data (section 9.2).
-- `board.md`: generic Tafelbild conventions (section 8.2).
-- `examples/`: one German example plan and one example board payload, each with notes on why it is good. Written for the plugin, not copied from a real teacher's notebook, and marked as examples.
+- `SKILL.md`: language rule, glossary, working-folder files, plan format (section 7), review format (section 6.2), the assignment format and result line (3.1), the rule against personal data (section 9.2).
+- `board.md`: Tafelbild conventions (section 8.2), the `replace_page` payload format, and the `tafelbild_vN.json` format.
+- `lesson-folder.md`: the `stunde.md` format, folder naming, and version numbering (section 9). Read by the orchestrators.
+- `orchestration.md`: the loops, the checkpoint, escalation, and failure handling (sections 6 and 11.3), shared by `stunde-planen` and `stunde-ueberarbeiten`.
+- `examples/`: one German example plan, one example page payload, and English notes on why they are good. Written for the plugin, not copied from a real teacher's notebook, and marked as examples.
 
-Each agent preloads the skill through `skills:` (full `SKILL.md` injected, F16). The board agents read `board.md` and the examples by path, written as `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/board.md` in the agent body (F11).
+Each agent preloads the skill through `skills:` (full `SKILL.md` injected, F16). Supporting files are read with the Read tool by path. `${CLAUDE_PLUGIN_ROOT}` and `${user_config.*}` are substituted only in `SKILL.md` files and agent files (F9, F11), never in a file read by path, so supporting files contain no `${...}`. The agent or entry-point skill names the full path, for example `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/board.md`, and passes values such as `plan_checkpoint` on.
 
 ## 6. Workflow (Decided)
 
@@ -390,7 +400,7 @@ Generic conventions in `board.md`; the teacher's specifics come from `onenote.md
 The board reviewer reads the page back with `get_page`. It returns the title, outlines with position and width in points, paragraphs and lists with text, heading level, and inline formatting. It does not return outline height, formatting that OneNote moved to paragraph level, tables, or ink (B1).
 
 - **On the read-back:** structure (title, phase blocks in plan order, every item of "Tafelbild (Inhalt)" present, nothing invented), German and glossary terms, brevity (words and lines per block), horizontal geometry (`x + width` of every outline inside the visible width), and that the text matches `tafelbild_vN.json`.
-- **On `tafelbild_vN.json`:** font sizes, colors, heading styles, because formatting may not survive a read-back.
+- **On `tafelbild_vN.json`:** font sizes, colors, heading styles, because formatting may not survive a read-back. OneNote also rewrites colors (`#C00000` came back as `#9C0000`, `#FFFF00` as `yellow`), so a formatting difference between payload and read-back is never a finding.
 - **Not checkable:** vertical extent and overlap (estimated from line counts), rendering on the presenting device, contrast on the projector. The teacher's one-time look covers this (A8).
 
 ## 9. Working-folder contract (Decided)
@@ -518,7 +528,26 @@ Further rules:
 
 - Tool lists cannot restrict paths. Writes outside the lesson folder are prevented by instruction.
 - Agent tool lists do not bind the main session. `.mcp.json` sets `ONENOTE_DISABLE_RAW_XML=1`, so the raw-XML tools do not exist in the teacher's normal chats either (requires `onenote-mcp` R4, Appendix B).
-- Permission prompts: `allowed-tools` grants end with the teacher's next message (F20), and plugin agents cannot set `permissionMode` (F15). `einrichten` therefore offers to write `.claude/settings.json` in the working folder with allow rules for exactly the tools in the table above, and writes it only after a yes. Whether these rules cover subagent calls in the Code tab is verified by hand (S2, section 14).
+- Permission prompts: `allowed-tools` grants end with the teacher's next message (F20), and plugin agents cannot set `permissionMode` (F15). `einrichten` therefore offers to add these allow rules to `.claude/settings.json` in the working folder, and writes only after a yes (merging, never replacing an existing file). `Edit` rules cover every file-writing tool; `/` anchors at the working folder; MCP tools are allowed by full name:
+
+  ```json
+  {
+    "permissions": {
+      "allow": [
+        "Edit(/Stunden/**)",
+        "Read(~/.claude/plugins/**)",
+        "mcp__plugin_unterricht_onenote__ping",
+        "mcp__plugin_unterricht_onenote__get_notebooks",
+        "mcp__plugin_unterricht_onenote__list_pages",
+        "mcp__plugin_unterricht_onenote__get_page",
+        "mcp__plugin_unterricht_onenote__create_page",
+        "mcp__plugin_unterricht_onenote__replace_page"
+      ]
+    }
+  }
+  ```
+
+  Whether these rules cover subagent calls in the Code tab is verified by hand (S2, section 14).
 
 ## 11. MCP dependency and updates (Decided)
 
@@ -549,8 +578,9 @@ Further rules:
 - **During the build the exe is absent.** No placeholder binary is committed. `.mcp.json` references the path anyway.
 - `npm run verify` (engine and every PR) passes without `plugin/server/` and prints that the server is not vendored yet. If `plugin/server/` exists, its three files must all be present and consistent.
 - `npm run verify:release` (CI before a release) fails unless `plugin/server/` holds the exe, `VERSION`, and a `.sha256` that matches the exe, and unless every component of section 5.1 exists.
-- **Pin update workflow** (manual trigger with a release tag): download the asset and its `.sha256`, verify the hash, update `plugin/server/`, bump the plugin version, add a changelog line, open a PR.
-- **Tool contract check** in the same workflow, on a Windows runner: start the exe, list its tools over MCP with `ONENOTE_DISABLE_RAW_XML=1`, and compare against the six tools the plugin uses. The server answers `tools/list` without OneNote (B9). This cannot run in the Linux build container.
+- **Pin update workflow** (`.github/workflows/update-server.yml`, manual trigger with a release tag, Windows runner): download the asset and its `.sha256` with `gh release download`, then `scripts/vendor-server.ts` verifies the hash, updates `plugin/server/`, bumps the plugin's patch version, and adds a changelog line; then the tool contract check, `npm run verify:release`, and a PR.
+- **Tool contract check** (`scripts/tool-contract.ts`): start the exe with `ONENOTE_DISABLE_RAW_XML=1`, list its tools over MCP stdio, and require the six tools the plugin uses and none of the four raw-XML tools. The server answers `tools/list` without OneNote (B9). The script is tested in the container against a fake MCP server; the real exe runs only in the workflow.
+- **CI** (`.github/workflows/ci.yml`): `npm run verify` on every push and pull request, `npm run verify:release` on pushes to `main`, and on pull requests the version-bump check: a change under `plugin/` needs a higher `version` and a `CHANGELOG.md` change.
 - Every pin bump adds the full exe to git history. No Git LFS. The plugin must stay under 200 MB (F25).
 - Agents never touch `plugin/server/` (protected path, Appendix C). Only the maintainer or the pin workflow changes it.
 
@@ -720,19 +750,19 @@ Read on 2026-10-03 at `C:\Projects\Personal\onenote-mcp`, branch `ci/standalone-
 - **B4 OneNote state and errors.** Every call creates the COM object, which most likely starts OneNote if installed (not proven); if OneNote is not registered for COM, calls fail with a `backend_error` saying so. `ping` returns `{"server": "ok", "onenote_responsive": true|false}` and never fails. Errors arrive as `Error executing tool <tool>: <code>: <message>`; argument validation errors carry no code. On `timeout` the worker thread is abandoned, so a timed-out write may still complete. No retries in the server.
 - **B5 Images.** Handles are `mcpref:` plus 12 hex characters, valid only while the server process runs. No tool takes a local file path.
 - **B6 Environment.** `ONENOTE_ALLOWED_NOTEBOOKS`: comma-separated display names, trimmed, exact and case-sensitive; unset or blank means no restriction (**read**, `com.py:403-414`); enforced on reads and writes of sections and pages, not on `ping`, `get_image_data`, `validate_handles` (**read**, `com.py:433-462`). Timeouts: `ONENOTE_READ_TIMEOUT` 20 s, `ONENOTE_WRITE_TIMEOUT` 25 s, `ONENOTE_PING_TIMEOUT` 8 s. FastMCP also reads `FASTMCP_*` variables and a `.env` file in the working directory.
-- **B7 Tools.** 13, all always registered today: `ping`, `validate_handles`, `get_image_data`, `get_notebooks`, `list_pages`, `get_page`, `create_page`, `replace_page`, `append_page`, and the raw-XML tools `list_hierarchy_xml`, `get_page_xml`, `replace_page_xml`, `append_page_xml`.
+- **B7 Tools.** 13 (9 with `ONENOTE_DISABLE_RAW_XML=1`, R4): `ping`, `validate_handles`, `get_image_data`, `get_notebooks`, `list_pages`, `get_page`, `create_page`, `replace_page`, `append_page`, and the raw-XML tools `list_hierarchy_xml`, `get_page_xml`, `replace_page_xml`, `append_page_xml`.
 - **B8 Release.** `.github/workflows/release.yml` on a `v*` tag: unit tests, tag-equals-version check, PyInstaller onefile (Python 3.14), smoke test without OneNote, release with `onenote-mcp.exe` and `onenote-mcp.exe.sha256` (sha256sum format). Not signed. Size unknown. Version 1.0.1; the workflow is not on `main` yet.
 - **B9 Without OneNote.** The exe answers `tools/list` without OneNote; COM is touched only on the first tool call.
 - **B10 Content from other devices.** Ink synced to the desktop copy is deleted by `replace_page`, with no conflict check.
-- **Escaping bug.** Styled text goes into an HTML span without escaping (**read**, `builders.py:87-101`). `<`, `&`, or `]]>` in styled text breaks the write or corrupts the text. Color and font family go into the CSS unchecked.
+- **Escaping bug** (fixed by R1, not yet released). Styled text went into an HTML span without escaping (**read**, `builders.py:87-101`), so `<`, `&`, or `]]>` broke the write or corrupted the text, and color and font family went into the CSS unchecked.
 
 Server changes (O27):
 
 | ID | Change | Status |
 |---|---|---|
-| R1 | Escape text in styled spans; validate color and font family | Maintainer, before the first release |
-| R2 | Merge `ci/standalone-exe`, publish `v1.0.1` with exe and checksum | Maintainer |
-| R4 | `ONENOTE_DISABLE_RAW_XML=1` hides the raw-XML tools | Maintainer, before the first release |
+| R1 | Escape text in styled spans; validate color and font family | Done on branch `fix/escaping-raw-xml-switch` (2026-10-03): all text in `<one:T>` is escaped, colors must be `#RGB` or `#RRGGBB`, font families match `^[A-Za-z0-9 ,.\-]+$`; `get_page` normalizes OneNote's color names to hex and drops values that do not fit |
+| R2 | Merge `ci/standalone-exe` and `fix/escaping-raw-xml-switch`, publish `v1.0.1` with exe and checksum | Open, maintainer |
+| R4 | `ONENOTE_DISABLE_RAW_XML=1` hides the raw-XML tools | Done on the same branch: read once at startup, 9 tools when set, an invalid value stops the server |
 | R3, R7, R8 | Section groups, page levels, tables | Dismissed |
 | R5, R6, R9 | Last-modified and conflict check, outline height and paragraph formatting, negative positions | After v1 |
 
@@ -751,7 +781,11 @@ The plugin is built with AgentPasture (`.agentpasture/`, engine 0.9.0): Claude C
 Plans, one file each under `plans/`, each split into phases with acceptance criteria:
 
 1. `01-scaffold-and-checks.md`: `package.json`, `checks/` with tests, `verify` and `verify:release`, marketplace and plugin manifests, `.mcp.json`.
-2. `02-conventions-and-templates.md`: the `lesson-conventions` skill and the German templates.
+2. `02-conventions-and-templates.md`: `lesson-conventions` (`SKILL.md`, `board.md`, `lesson-folder.md`, examples) and the German templates.
 3. `03-agents.md`: the four agents.
-4. `04-entry-points.md`: `einrichten`, `stunde-planen`, `stunde-ueberarbeiten`, README, CHANGELOG.
-5. `05-ci.md`: CI on every PR, the pin update workflow, the tool contract check.
+4. `04-entry-points.md`: `orchestration.md`, `einrichten`, `stunde-planen`, `stunde-ueberarbeiten`, README, CHANGELOG.
+5. `05-ci.md`: CI, the version-bump check, the server vendoring workflow with the tool contract check.
+
+**Running end to end:** `.agentpasture/run-all.ps1` runs the plans in order. Each plan starts from the previous plan's result branch (`build/<plan>`), so the chain needs no merges in between. It stops at the first plan that does not finish; `-From <n>` resumes there, and the engine continues that plan from its last passed phase. For plan 05 it removes `.github/**` from the protected paths and restores the config afterwards. `main` receives the result only after review, once `npm run verify:release` passes with the vendored server, because teachers install from `main`.
+
+CI facts pinned for plan 05 (looked up on 2026-10-03): `actions/checkout` v7.0.1 is commit `3d3c42e5aac5ba805825da76410c181273ba90b1`, `actions/setup-node` v7.0.0 is commit `820762786026740c76f36085b0efc47a31fe5020`, `@anthropic-ai/claude-code` latest is 2.1.288 (it has a `postinstall` script, so it is installed globally in CI, never as a dependency).
