@@ -19,7 +19,7 @@ The assignment of `lesson-conventions`, with the board lines `section_id`, `page
 - `kriterien.md`: the teacher's criteria. The board must meet every Muss-Kriterium of `## Tafelbild` and should meet the Soll-Kriterien.
 - `onenote.md`: the optional `## Ansicht` (Sichtbare Breite, Sichtbare Höhe, Mindestschriftgröße, Farben).
 - The approved plan (`planung_vN.md`): its `## Tafelbild (Inhalt)` and the phase order of its `## Verlaufsplan`.
-- In a later board round, also: the previous payload (`tafelbild_vM.json`), its review (`tafelbild-review_vM.md`), and, after the teacher's guidance at the cap, the guidance file (`tafelbild-rueckmeldung_vM.md`).
+- In a later board round, also: the previous payload (`tafelbild_vM.json`, M is N minus 1), its review (`tafelbild-review_vM.md`), and, after the teacher's guidance at the cap, the guidance that leads to the payload you write (`tafelbild-rueckmeldung_vN.md`, numbered like `output`).
 
 `output` is the path of the payload file to write (`tafelbild_vN.json`). The OneNote tools are `mcp__plugin_unterricht_onenote__<tool>`; below they are named by `<tool>` only.
 
@@ -46,10 +46,18 @@ The assignment of `lesson-conventions`, with the board lines `section_id`, `page
    - `page_id` empty (round 1): call `list_pages(section_id)` and note the IDs of the pages already titled exactly `page_title`. Then call `create_page(section_id, page_title)` and take the new page ID from its answer. Then write the payload with that ID to `output`, then call `replace_page` with exactly that payload.
    - `page_id` given: write the payload with that ID to `output`, then call `replace_page` with exactly that payload on that page.
 10. Handle a tool error as below. The error code is inside the text `Error executing tool <tool>: <code>: <message>`; an error without a code counts as `bad_request`.
-    - `timeout` on `create_page`: the page may exist after all, so never retry blindly. Call `ping`, then `list_pages(section_id)`. A page titled exactly `page_title` whose ID you did not note before `create_page` is yours: use its ID. Otherwise call `create_page` once more. Never use a page whose ID you noted before `create_page`: `replace_page` would delete the teacher's content on it. The first `create_page` and this one retry are the only `create_page` calls in a round, also after a `bad_request` correction. If the retry fails too, with `timeout` or any other error, or `ping` or `list_pages` fails here, stop with `FAILED` and a German reason that says a page with the title may have been created in the section and should be checked, for example `FAILED Die Seite „<page_title>“ wurde vielleicht trotzdem im Abschnitt angelegt. Bitte dort nachsehen: <Fehlertext>`.
-    - `timeout` or `backend_error` on `replace_page`: send the same payload once more. If that fails too, stop with `FAILED` and a German reason that says the page may be empty, for example `FAILED Die Seite „<page_title>“ ist möglicherweise leer: <Fehlertext>`.
-    - `bad_request`: correct your call once and send it again; when the correction changes the payload, write it to `output` again first. If it fails again, stop with `FAILED` and the error text.
-    - Any other error: stop with `FAILED` and the error text.
+    - `create_page`: call it at most twice in a round, the first call and one second call. A page that appears in `list_pages` titled exactly `page_title` whose ID you did not note before the first call is yours: use its ID. Never use a page whose ID you noted before: `replace_page` would delete the teacher's content on it.
+      - First call `timeout`: the page may exist after all, so never retry blindly. Call `ping`, then `list_pages(section_id)`. Use your page if it is there; otherwise make the second call with the same arguments.
+      - First call `bad_request`: correct the arguments and make the second call. This correction is the second call.
+      - First call with any other error: stop with `FAILED` and the error text.
+      - Second call `timeout`: call `ping`, then `list_pages(section_id)` once more, and use your page if it is there.
+      - Otherwise, when the second call fails with any error, or when `ping` or `list_pages` fails after a `create_page` error, stop. Return `FAILED` with a German reason that says a page with the title may have been created in the section and should be checked, for example `FAILED Die Seite „<page_title>“ wurde vielleicht trotzdem im Abschnitt angelegt. Bitte dort nachsehen: <Fehlertext>`. Never make a third call.
+    - `replace_page`: call it at most twice in a round.
+      - `timeout` or `backend_error`: send the same payload once more.
+      - `bad_request`: correct the call once; when the correction changes the payload, write it to `output` again first, then send it.
+      - If the second call fails too, with any error, stop with `FAILED` and a German reason that says the page may be empty, for example `FAILED Die Seite „<page_title>“ ist möglicherweise leer: <Fehlertext>`.
+      - Any other error on the first call: stop with that reason as well.
+    - An error on any other call: stop with `FAILED` and the error text.
 
 ## Output
 
