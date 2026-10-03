@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { changelogFile, manifestFiles, readmeFile } from "../fixtures.ts";
 import { createMemoryRepo } from "../repo.ts";
 import { COMMANDS, MARKETPLACE_REPO, docs } from "./docs.ts";
+import { SERVER_EXE } from "./orchestration.ts";
 
 const README = "README.md";
 const CHANGELOG = "CHANGELOG.md";
@@ -58,6 +59,11 @@ test("docs reports each command missing from the README", () => {
 test("docs reports a README without the marketplace repository", () => {
   const files = { ...docFiles(), [README]: readmeFile().split(MARKETPLACE_REPO).join("x") };
   assertOneFinding(files, README, /noelroehrig\/schulstunde-plugin/);
+});
+
+test("docs reports a README without a troubleshooting entry naming the server exe", () => {
+  const files = { ...docFiles(), [README]: readmeFile().split(SERVER_EXE).join("x") };
+  assertOneFinding(files, README, /onenote-mcp\.exe/);
 });
 
 test("docs reports a CHANGELOG without an entry for the manifest version", () => {

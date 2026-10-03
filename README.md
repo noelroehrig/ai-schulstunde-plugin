@@ -80,6 +80,7 @@ Dieses Repository ist öffentlich und enthält keine Inhalte von Lehrkräften. D
 ## Wenn etwas nicht klappt
 
 - **OneNote reagiert nicht oder zeigt einen Dialog:** Öffne OneNote und schließe offene Dialoge, zum Beispiel eine Anmeldung oder eine Meldung zur Synchronisierung. Claude versucht es dann noch einmal. Klappt es trotzdem nicht, bleibt der Plan erhalten, und du machst später mit `/unterricht:stunde-ueberarbeiten` weiter.
+- **Claude meldet, dass die OneNote-Verbindung des Plugins nicht läuft:** Starte die Claude-App neu. Wenn das nicht hilft, prüfe, ob Windows Defender oder SmartScreen die Datei `onenote-mcp.exe` blockiert, und gib sie dort frei. Bis dahin plant Claude die Stunde trotzdem, und das Tafelbild machst du danach mit `/unterricht:stunde-ueberarbeiten`.
 - **Das Notizbuch wird nicht gefunden:** Der Name in der Einstellung „OneNote-Notizbuch“ muss genau so geschrieben sein wie in OneNote, mit Groß- und Kleinschreibung und ohne Komma. Ändere ihn mit `/config`.
 - **Der Abschnitt fehlt:** Das Plugin legt keine Abschnitte an. Lege den Abschnitt in OneNote an oder nenne Claude einen anderen. Abschnitte in Abschnittsgruppen werden nicht unterstützt.
 - **Claude fragt bei jedem Schritt um Erlaubnis:** `/unterricht:einrichten` bietet dir an, die nötigen Freigaben in `.claude/settings.json` in deinem Arbeitsordner einzutragen. Stimme zu, dann fragt Claude seltener.

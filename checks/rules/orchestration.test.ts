@@ -7,6 +7,8 @@ import {
   CHECKPOINT_QUESTION,
   ENTRY_POINT_REFERENCES,
   ESCALATION_LABELS,
+  SERVER_EXE,
+  SERVER_NOT_RUNNING_MESSAGE,
   SETTINGS_ALLOW_RULES,
   STATE_LINES,
   orchestration,
@@ -68,9 +70,23 @@ test("orchestration reports each missing token", () => {
   }
 });
 
+test("orchestration reports a missing or changed server-not-running message", () => {
+  assertOneFinding(orchestrationFile().split(SERVER_NOT_RUNNING_MESSAGE).join("x"), /server-not-running message/);
+  const changed = SERVER_NOT_RUNNING_MESSAGE.replace("SmartScreen", "Smartscreen");
+  assertOneFinding(orchestrationFile().split(SERVER_NOT_RUNNING_MESSAGE).join(changed), /server-not-running message/);
+});
+
+test("SERVER_NOT_RUNNING_MESSAGE names the exe and the advice of SPEC.md section 11.3", () => {
+  assert.equal(
+    SERVER_NOT_RUNNING_MESSAGE,
+    "Die OneNote-Verbindung des Plugins läuft nicht. Starte die Claude-App neu. Wenn das nicht hilft, prüfe, ob Windows Defender oder SmartScreen die Datei onenote-mcp.exe blockiert.",
+  );
+  assert.ok(SERVER_NOT_RUNNING_MESSAGE.includes(SERVER_EXE));
+});
+
 test("orchestration reports each missing item separately", () => {
   const findings = check({ [GUIDE]: "# Orchestration\n" });
-  assert.equal(findings.length, 1 + 3 + 4 + 5);
+  assert.equal(findings.length, 1 + 3 + 4 + 5 + 1);
   assert.ok(findings.every((finding) => finding.rule === "orchestration" && finding.file === GUIDE));
 });
 
@@ -102,6 +118,16 @@ test("orchestration reports each missing entry-point reference", () => {
   }
 });
 
+test("orchestration reports an entry point that repeats the server-not-running message instead of referring to it", () => {
+  for (const name of [...ENTRY_POINTS, "einrichten"]) {
+    const findings = check({ [entryFile(name)]: skillFile(name) + `Say \`${SERVER_NOT_RUNNING_MESSAGE}\`\n` });
+    assert.equal(findings.length, 1, JSON.stringify(findings));
+    assert.equal(findings[0].rule, "orchestration");
+    assert.equal(findings[0].file, entryFile(name));
+    assert.ok(findings[0].message.includes(SERVER_EXE), findings[0].message);
+  }
+});
+
 test("SETTINGS_ALLOW_RULES are the allow rules of SPEC.md section 10", () => {
   assert.deepEqual(SETTINGS_ALLOW_RULES, [
     "Edit(/Stunden/**)",
@@ -129,6 +155,14 @@ test("orchestration reports each allow rule missing from einrichten", () => {
     assert.equal(findings[0].file, entryFile("einrichten"));
     assert.ok(findings[0].message.includes(rule), findings[0].message);
   }
+});
+
+test("orchestration reports an einrichten that does not reference the guide", () => {
+  const reference = "${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md";
+  const findings = check({ [entryFile("einrichten")]: skillFile("einrichten").split(reference).join("x") });
+  assert.equal(findings.length, 1, JSON.stringify(findings));
+  assert.equal(findings[0].file, entryFile("einrichten"));
+  assert.ok(findings[0].message.includes(reference), findings[0].message);
 });
 
 test("orchestration does not count an allow rule that appears only inside a longer one", () => {

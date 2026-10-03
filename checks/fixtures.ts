@@ -10,6 +10,7 @@ import {
   ENTRY_POINT_REFERENCES,
   ESCALATION_LABELS,
   ORCHESTRATION_TOKENS,
+  SERVER_NOT_RUNNING_MESSAGE,
   SETTINGS_ALLOW_RULES,
   STATE_LINES,
 } from "./rules/orchestration.ts";
@@ -72,7 +73,7 @@ export function skillFile(name: string, fields: Record<string, string | undefine
       : ["stunde-planen", "stunde-ueberarbeiten"].includes(name)
         ? ENTRY_POINT_REFERENCES.join("\n") + "\n"
         : name === "einrichten"
-          ? JSON.stringify({ permissions: { allow: SETTINGS_ALLOW_RULES } }, null, 2) + "\n"
+          ? ENTRY_POINT_REFERENCES[0] + "\n" + JSON.stringify({ permissions: { allow: SETTINGS_ALLOW_RULES } }, null, 2) + "\n"
           : "Instructions.\n";
   return frontmatter({ ...defaults, ...fields }) + body;
 }
@@ -102,6 +103,7 @@ export function orchestrationFile(): string {
     "# Orchestration",
     "",
     CHECKPOINT_QUESTION,
+    SERVER_NOT_RUNNING_MESSAGE,
     ...ESCALATION_LABELS,
     ...AGENT_TYPES,
     ORCHESTRATION_TOKENS.join(" "),
@@ -251,7 +253,7 @@ export function completeRepoFiles(): Record<string, string> {
   return files;
 }
 
-/** A README that names the three commands and the marketplace repository. */
+/** A README that names the three commands, the marketplace repository, and the server exe. */
 export function readmeFile(): string {
   return [
     "# Unterricht",
@@ -261,6 +263,8 @@ export function readmeFile(): string {
     "- `/unterricht:einrichten` richtet den Arbeitsordner ein.",
     "- `/unterricht:stunde-planen` plant eine neue Stunde.",
     "- `/unterricht:stunde-ueberarbeiten` setzt eine Stunde fort oder überarbeitet sie.",
+    "",
+    "Wenn Windows die Datei `onenote-mcp.exe` blockiert, starte die Claude-App neu.",
     "",
   ].join("\n");
 }
