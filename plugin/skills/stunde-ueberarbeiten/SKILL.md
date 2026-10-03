@@ -20,16 +20,7 @@ When you need the teacher's answer, ask in German and end your turn; the next me
 
 ## 1. Preflight, no writes
 
-Write nothing in this step. Run the preflight of `stunde-planen`, in this order. Collect the failures of checks 2 and 3 before you answer.
-
-1. `schulkontext.md`, `kriterien.md`, and `onenote.md` exist. When one is missing, stop with `Im Ordner <Arbeitsordner> fehlt <Datei>. Bitte richte den Ordner zuerst mit /unterricht:einrichten ein.`
-2. `schulkontext.md` has a line `Stundenlänge: <Zahl> Minuten` under `## Zeitraster`, where the number may have a decimal comma. A missing line, a placeholder in square brackets such as `[Minuten eintragen]`, or anything else that is not a number is a failure: `In schulkontext.md, Zeile <n>, fehlt die Stundenlänge als Zahl: „<Zeile>“. Bitte trag die Minuten ein, zum Beispiel „Stundenlänge: 45 Minuten“.` Without such a line, name the line of `## Zeitraster`.
-3. `onenote.md` has a filled `Abschnitt:` and a filled `Seitentitel:` under `## Ablage`. An empty value or a placeholder in square brackets is a failure: `In onenote.md, Zeile <n>, ist „<Abschnitt | Seitentitel>“ noch nicht ausgefüllt. Bitte trag den Wert ein oder führe /unterricht:einrichten aus.` Without such a line, name the line of `## Ablage`. The `## Ansicht` is optional; its placeholders are no failure.
-
-   When checks 2 or 3 failed, tell the teacher every failure, each with its file and line, and stop. Write nothing.
-4. The lesson: choose it as step 2 says.
-5. The `notebook` setting (`OneNote notebook` above) is not blank and has no comma. Otherwise do not call any OneNote tool, say `Hinweis: Die Einstellung „OneNote-Notizbuch“ ist leer oder enthält ein Komma. Für das Tafelbild trag mit /config genau den Namen eines Notizbuchs ein.`, skip check 6, and continue.
-6. Call `mcp__plugin_unterricht_onenote__ping`. When it reports `onenote_responsive: false`, or the call fails, say `Hinweis: OneNote reagiert gerade nicht. Ich mache trotzdem weiter und prüfe vor dem Tafelbild noch einmal. Bitte öffne bis dahin OneNote und schließe offene Dialoge.` and continue. Never stop here because of OneNote.
+Write nothing in this step. The preflight of the working folder is the one of `stunde-planen`, kept in one place: read `${CLAUDE_PLUGIN_ROOT}/skills/stunde-planen/SKILL.md` and run checks 1, 2, and 3 of its step 1 exactly as written there, with their German messages; when one fails, stop as it says. Its check 4 (the request) does not apply here. Its checks 5 and 6 are replaced by items 4 and 5 of step 2, which run once the lesson is chosen.
 
 ## 2. Choose the lesson
 
@@ -48,18 +39,24 @@ The lessons are the folders in `Stunden/` that hold a `stunde.md`. When there is
 
    End your turn. When the answer also holds changes, keep them as the teacher's changes.
 3. Read `stunde.md` of the chosen lesson and `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/lesson-folder.md`. When `stunde.md` does not have the format of `lesson-folder.md`, or `Schritt` is not one of its values, stop with `Die Datei stunde.md im Ordner <Name des Stundenordners> kann ich nicht lesen: <was fehlt>. Ich ändere nichts.`
-4. Go by `Schritt`: `Planung`, `Prüfpunkt`, or `Tafelbild` resume (step 3); `Fertig` or `Abgebrochen` revise (step 4).
+4. The `notebook` setting (`OneNote notebook` above) is not blank and has no comma. Otherwise do not call any OneNote tool, say `Hinweis: Die Einstellung „OneNote-Notizbuch“ ist leer oder enthält ein Komma. Für das Tafelbild trag mit /config genau den Namen eines Notizbuchs ein.`, skip item 5, and continue with item 6.
+5. Call `mcp__plugin_unterricht_onenote__ping`. When it reports `onenote_responsive: false`, or the call fails, say `Hinweis: OneNote reagiert gerade nicht. Ich mache trotzdem weiter und prüfe vor dem Tafelbild noch einmal. Bitte öffne bis dahin OneNote und schließe offene Dialoge.` and continue. Never stop here because of OneNote.
+6. Only after items 4 and 5, go by `Schritt`: `Planung`, `Prüfpunkt`, or `Tafelbild` resume (step 3); `Fertig` or `Abgebrochen` revise (step 4).
 
 ## 3. Resume
 
 The run was interrupted. Continue at the recorded step, with the versions and the round of `## Stand`. Never start a fresh cap and never reset `Runde` or a version.
 
-When the teacher's changes are not empty and `Schritt` is `Planung` or `Tafelbild`, say first `Diese Stunde ist noch nicht fertig. Ich setze sie dort fort, wo sie unterbrochen wurde. Deine Änderungen kannst du am Prüfpunkt nennen oder danach mit /unterricht:stunde-ueberarbeiten einbringen.`
+When the teacher's changes are not empty, never drop them without a word:
+
+- `Schritt: Prüfpunkt`: the changes are always the checkpoint feedback, also when `Plan checkpoint` above is `false` (see below).
+- `Schritt: Planung` while `Plan checkpoint` above is not `false`: say first `Diese Stunde ist noch nicht fertig. Ich setze die Planung dort fort, wo sie unterbrochen wurde. Deine Änderungen kannst du gleich am Prüfpunkt nennen.`
+- `Schritt: Planung` while `Plan checkpoint` above is `false`, and `Schritt: Tafelbild`: say first `Diese Stunde ist noch nicht fertig. Ich setze sie dort fort, wo sie unterbrochen wurde, und übernehme deine Änderungen jetzt nicht. Wenn die Stunde fertig ist, kannst du sie mit /unterricht:stunde-ueberarbeiten einbringen.`
 
 Tell the teacher in one German line where you continue, for example `Ich setze die Stunde „<Name des Stundenordners>“ bei der Planung fort, Runde 2 von 3.`
 
 - `Schritt: Planung`: the planning loop, as `Resuming a loop` of `orchestration.md` says.
-- `Schritt: Prüfpunkt`: the checkpoint, from step 2, as `orchestration.md` says. When `Plan checkpoint` above is `false`, go on as after `weiter`. When the teacher's changes are not empty, they are the answer to the checkpoint question: do not ask it, and save them as its feedback.
+- `Schritt: Prüfpunkt`: when the teacher's changes are not empty, they are the answer to the checkpoint question, whatever `Plan checkpoint` says: do not ask it, save them verbatim as `rueckmeldung_v<N+1>.md`, N being `Planversion`, exactly as step 4 of the checkpoint in `orchestration.md` says for feedback, and start the new planning loop after teacher input. Otherwise, when `Plan checkpoint` above is `false`, go on as after `weiter`; else continue at step 2 of the checkpoint, as `orchestration.md` says.
 - `Schritt: Tafelbild`: the OneNote gate for a resumed board loop, then the board loop as `Resuming a loop` says. It continues on the page recorded as `Seiten-ID` in `## OneNote` and never creates another one.
 
   When `Seiten-ID` is `keine` but `## OneNote` already records a `Seitentitel` other than `offen`, the board loop had started, and an interrupted `create_page` may have left an empty page. After the gate, before the first agent run, say `Möglicherweise ist bei der Unterbrechung im Abschnitt „<Abschnitt>“ eine leere Seite „<Seitentitel>“ entstanden. Falls du sie in OneNote findest, lösche sie bitte. Ich lege das Tafelbild auf einer neuen Seite an.` Then continue with an empty `page_id`: the board author never reuses a page that existed before its round.
