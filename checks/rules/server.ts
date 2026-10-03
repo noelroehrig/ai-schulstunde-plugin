@@ -13,8 +13,11 @@ const SERVER_FILES = [EXE, VERSION, SHA];
 
 const VERSION_LINE = /^v\d+\.\d+\.\d+(\r?\n)?$/;
 
-/** The format `sha256sum` writes and the server's release publishes. */
-const SHA_LINE = /^([0-9a-f]{64}) {2}onenote-mcp\.exe(\r?\n)?$/;
+/**
+ * The format `sha256sum` writes and the server's release publishes. The `*` is the binary marker
+ * `sha256sum` writes on Windows.
+ */
+const SHA_LINE = /^([0-9a-f]{64}) [ *]onenote-mcp\.exe(\r?\n)?$/;
 
 const NOT_VENDORED = "server not vendored yet";
 
@@ -55,7 +58,7 @@ function serverProblems(repo: Repo, files: string[]): [string, string][] {
   }
   if (files.includes(SHA)) {
     const match = SHA_LINE.exec(repo.readText(SHA));
-    if (match === null) problems.push([SHA, "must be one line: <64 lowercase hex>  onenote-mcp.exe"]);
+    if (match === null) problems.push([SHA, "must be one line: <64 lowercase hex>  onenote-mcp.exe (or *onenote-mcp.exe)"]);
     else if (files.includes(EXE) && match[1] !== sha256(repo.readBytes(EXE))) {
       problems.push([SHA, "checksum does not match onenote-mcp.exe"]);
     }

@@ -16,8 +16,11 @@ const CHANGELOG_HEADING = "# Änderungen";
 const TAG = /^v\d+\.\d+\.\d+$/;
 const VERSION = /^(\d+)\.(\d+)\.(\d+)$/;
 
-/** The format `sha256sum` writes and the server's release publishes, as one line. */
-const CHECKSUM_LINE = /^([0-9A-Fa-f]{64}) {2}onenote-mcp\.exe(\r?\n)?$/;
+/**
+ * The format `sha256sum` writes and the server's release publishes, as one line. The `*` is the
+ * binary marker `sha256sum` writes on Windows, where the release is built.
+ */
+const CHECKSUM_LINE = /^([0-9A-Fa-f]{64}) [ *]onenote-mcp\.exe(\r?\n)?$/;
 
 /** True when `tag` is a release tag like `v1.0.1` and nothing else. */
 export function isValidTag(tag: string): boolean {
@@ -94,7 +97,7 @@ function planVendoring(root: string, from: string, tag: string, today: Date): Ve
   requireExisting(join(from, EXE_NAME), "file");
   requireExisting(join(from, SHA_NAME), "file");
   const expected = parseChecksumLine(readFileSync(join(from, SHA_NAME), "utf8"));
-  if (expected === undefined) throw new Error(`${SHA_NAME}: checksum file must be one line: <64 hex>  ${EXE_NAME}`);
+  if (expected === undefined) throw new Error(`${SHA_NAME}: checksum file must be one line: <64 hex>  ${EXE_NAME} or <64 hex> *${EXE_NAME}`);
   const exe = readFileSync(join(from, EXE_NAME));
   const actual = sha256(exe);
   if (actual !== expected) throw new Error(`${EXE_NAME}: checksum mismatch, expected ${expected}, got ${actual}`);
