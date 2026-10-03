@@ -26,7 +26,8 @@ Common rules for every phase:
 ## Phase 1: `orchestration.md`
 
 Files: `plugin/skills/lesson-conventions/orchestration.md`,
-`plugin/skills/lesson-conventions/lesson-folder.md` (the board guidance file of AC8),
+`plugin/skills/lesson-conventions/lesson-folder.md` and the working-folder list in
+`plugin/skills/lesson-conventions/SKILL.md` (the board guidance file of AC8),
 `checks/rules/orchestration.ts`, and its test.
 
 Acceptance criteria:
@@ -35,7 +36,8 @@ Acceptance criteria:
    folder, the `notebook` setting, and the `plan_checkpoint` value.
 2. **Running an agent:** the assignment (keys as in `lesson-conventions`), then waiting for the
    result line. `FAILED <reason>` stops the procedure with a German message that contains the
-   reason and the resume hint (`/unterricht:stunde-ueberarbeiten`). Any other final message is a
+   reason and the resume hint (`/unterricht:stunde-ueberarbeiten`), except the board reviewer's
+   read timeout (AC9). Any other final message is a
    protocol error: run the agent once more with a reminder of the result line, and stop with a
    German message on the second failure.
 3. **Reading a verdict:** read line 1 of the review only (Read with `limit: 1`); strip a UTF-8 BOM,
@@ -72,8 +74,8 @@ Acceptance criteria:
    `## Übernommene Mängel`. Guidance is saved verbatim like checkpoint feedback: in the planning
    loop as `rueckmeldung_vN.md`, in the board loop as `tafelbild-rueckmeldung_vM.md` under the
    heading `# Rückmeldung zu tafelbild_v<M-1>.json` (M is the board version it leads to). Then
-   the loop starts again with a fresh cap. `lesson-folder.md` lists the board guidance file and its
-   version rule.
+   the loop starts again with a fresh cap. `lesson-folder.md` and the working-folder list in
+   `SKILL.md` name the board guidance file and its version rule.
 9. **Failure handling:** the rows of `SPEC.md` section 11.3 that concern the orchestrator. A
    `FAILED` result of the board reviewer whose reason contains the code `timeout` is the read
    timeout of section 11.3: tell the teacher that OneNote is busy or shows a dialog, `ping`, run the
