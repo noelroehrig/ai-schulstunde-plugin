@@ -4,6 +4,7 @@ import { createFsRepo, type Finding, type Mode, type Repo, type Rule } from "./r
 import { noDashes } from "./rules/dashes.ts";
 import { agents } from "./rules/agents.ts";
 import { completeness } from "./rules/completeness.ts";
+import { conventions } from "./rules/conventions.ts";
 import { jsonValid } from "./rules/json.ts";
 import { manifest, userConfigRefs } from "./rules/manifest.ts";
 import { marketplace } from "./rules/marketplace.ts";
@@ -25,6 +26,7 @@ export const RULES: Rule[] = [
   paths,
   agents,
   skills,
+  conventions,
   server,
   completeness,
 ];

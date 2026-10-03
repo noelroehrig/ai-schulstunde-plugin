@@ -3,6 +3,14 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { AGENT_TOOLS, AGENTS, type AgentName } from "./permissions.ts";
 import { LANGUAGE_SENTENCE, REVIEWER_SENTENCE } from "./rules/agents.ts";
+import {
+  ASSIGNMENT_KEYS,
+  GLOSSARY_TERMS,
+  PLAN_HEADINGS,
+  REVIEW_HEADINGS,
+  TOKENS,
+  VERLAUFSPLAN_HEADER,
+} from "./rules/conventions.ts";
 
 /** Test fixtures: repository contents that satisfy the rules. Imported by tests only. */
 
@@ -29,7 +37,27 @@ export function skillFile(name: string, fields: Record<string, string | undefine
     name === "lesson-conventions"
       ? { name, description: "Shared conventions.", "user-invocable": "false" }
       : { name, description: "Startet etwas.", "disable-model-invocation": "true" };
-  return frontmatter({ ...defaults, ...fields }) + "Instructions.\n";
+  const body = name === "lesson-conventions" ? conventionsSkillBody() : "Instructions.\n";
+  return frontmatter({ ...defaults, ...fields }) + body;
+}
+
+/** A conventions skill body holding every item the conventions rule requires. */
+export function conventionsSkillBody(): string {
+  return [
+    "## Glossary",
+    "| Begriff | Meaning |",
+    "|---|---|",
+    ...GLOSSARY_TERMS.map((term) => `| ${term} | Meaning. |`),
+    "",
+    ...ASSIGNMENT_KEYS.map((key) => `${key}: value`),
+    "",
+    ...PLAN_HEADINGS.flatMap((heading) =>
+      heading === "## Verlaufsplan" ? [heading, VERLAUFSPLAN_HEADER] : [heading],
+    ),
+    ...REVIEW_HEADINGS,
+    TOKENS.join(" "),
+    "",
+  ].join("\n");
 }
 
 /** Renders frontmatter lines, leaving out keys whose value is undefined. */
