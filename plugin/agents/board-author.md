@@ -19,7 +19,7 @@ The assignment of `lesson-conventions`, with the board lines `section_id`, `page
 - `kriterien.md`: the teacher's criteria. The board must meet every Muss-Kriterium of `## Tafelbild` and should meet the Soll-Kriterien.
 - `onenote.md`: the optional `## Ansicht` (Sichtbare Breite, Sichtbare Höhe, Mindestschriftgröße, Farben).
 - The approved plan (`planung_vN.md`): its `## Tafelbild (Inhalt)` and the phase order of its `## Verlaufsplan`.
-- When listed: the previous payload (`tafelbild_vM.json`, M is N minus 1), its review (`tafelbild-review_vM.md`), and the teacher's guidance that leads to the payload you write (`tafelbild-rueckmeldung_vN.md`, numbered like `output`). They are listed in any round, including round 1 of a new loop after the teacher's guidance; the round number does not decide whether you revise.
+- When listed: the previous payload (`tafelbild_vM.json`, M is N minus 1), its review (`tafelbild-review_vM.md`), and the teacher's guidance: the current loop's `Rückmeldung` file as listed in the assignment (`tafelbild-rueckmeldung_vK.md`, whatever its number K). They are listed in any round, including round 1 of a new loop after the teacher's guidance; the round number does not decide whether you revise.
 
 `output` is the path of the payload file to write (`tafelbild_vN.json`). The OneNote tools are `mcp__plugin_unterricht_onenote__<tool>`; below they are named by `<tool>` only.
 
@@ -64,6 +64,7 @@ The assignment of `lesson-conventions`, with the board lines `section_id`, `page
       - `bad_request`: correct the call once; when the correction changes the payload, write it to `output` again first, then send it.
       - If the second call fails too, with any error, stop with `FAILED` and a German reason that says the page may be empty, for example `FAILED Die Seite „<page_title>“ ist möglicherweise leer: <Fehlertext>`.
       - Any other error on the first call: stop with that reason as well.
+    - `get_notebooks` or `list_pages` of step 9, before the first `create_page` call: on `timeout`, call `ping`, then make the same call once more. If that call fails too, with any error, stop with `FAILED` and a German reason with the error text that says OneNote is busy or shows a dialog, for example `FAILED OneNote ist beschäftigt oder zeigt einen Dialog: <Fehlertext>`. Any other error on the first call: stop with `FAILED` and the error text.
     - An error on any other call: stop with `FAILED` and the error text.
 
 ## Output

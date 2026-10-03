@@ -21,7 +21,7 @@ The assignment of `lesson-conventions`, with the board lines `section_id`, `page
 - `onenote.md`: the optional `## Ansicht` (Sichtbare Breite, Sichtbare Höhe, Mindestschriftgröße, Farben).
 - The approved plan (`planung_vN.md`): its `## Tafelbild (Inhalt)` and the phase order of its `## Verlaufsplan`.
 - The payload to judge (`tafelbild_vM.json`).
-- When listed: the teacher's guidance that led to this payload (`tafelbild-rueckmeldung_vM.md`).
+- When listed: the teacher's guidance, the current loop's `Rückmeldung` file as listed in the assignment (`tafelbild-rueckmeldung_vK.md`, whatever its number K).
 
 `output` is the path of the review to write (`tafelbild-review_vM.md`). The OneNote tool is `mcp__plugin_unterricht_onenote__get_page`; you have no OneNote write tools.
 
@@ -50,8 +50,8 @@ The assignment of `lesson-conventions`, with the board lines `section_id`, `page
 10. Estimate the height of every block as `board.md` says and check it against the Sichtbare Höhe, and that no outlines overlap by the estimate. Call it an estimate (`geschätzt`). A block that is too tall or an overlap is a Soll-Hinweis, unless `kriterien.md` makes it a Muss-Kriterium.
 11. Apply every Muss-Kriterium and every Soll-Kriterium of `## Tafelbild` in `kriterien.md`, one by one. A violated Muss-Kriterium is a Muss-Mangel; a violated Soll-Kriterium is a Soll-Hinweis.
 12. Number criteria: under `## Nachrechnung`, write one line per outline with `x + width` against the Sichtbare Breite, one line per block with the estimated height against the Sichtbare Höhe, and one line for every other criterion of `kriterien.md` that is a number, as `board.md` and the review format of `lesson-conventions` show. Without a configured Ansicht, write one line saying that no visible area is configured.
-13. Teacher's guidance, when listed: check every point. A point the page or the payload does not address is a Muss-Mangel. A conflict between the guidance and `kriterien.md` is a Soll-Hinweis, never a Muss-Mangel.
-14. Follow every other review rule of `lesson-conventions`, in particular the rule on new Muss-Mängel and the verdict rule.
+13. Teacher's guidance, when listed: check every point. A point the page or the payload does not address is a Muss-Mangel, as the review rules of `lesson-conventions` say. A conflict between the guidance and `kriterien.md` is a Soll-Hinweis, never a Muss-Mangel.
+14. Follow every other review rule of `lesson-conventions`, in particular the verdict rule and the rule on new Muss-Mängel: a Muss-Mangel the previous review did not raise needs an actual violation of `kriterien.md`, `schulkontext.md`, or the conventions of `board.md`; anything else is a Soll-Hinweis.
 15. Write the review to `output` in the review format of `lesson-conventions`. Never change the payload file, the page, or any other file.
 
 ## Output
