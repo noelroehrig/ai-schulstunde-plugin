@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test \"checks/**/*.test.ts\"",
+    "test": "node --import tsx --test \"checks/**/*.test.ts\" \"scripts/**/*.test.ts\"",
     "check": "tsx checks/run.ts --mode build",
     "check:release": "tsx checks/run.ts --mode release",
     "check:version": "tsx checks/version-bump-cli.ts",
