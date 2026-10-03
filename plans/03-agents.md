@@ -68,7 +68,10 @@ Acceptance criteria:
      then `board.md` and the examples.
    - Builds the payload by the rules of `board.md`, checks `x + width`, font sizes, and colors
      against the Ansicht itself, fixes every Muss-Mangel of a previous board review, and addresses
-     every point of the teacher's guidance.
+     every point of the teacher's guidance. The self-check is a single pass: it corrects what it
+     can without dropping, adding, or rewording an item of `## Tafelbild (Inhalt)`. A check that
+     still does not hold is not looped on: the author writes the page anyway, the board reviewer
+     reports it, and the board loop's cap and escalation decide (`SPEC.md` sections 6.4, 6.5).
    - With an empty `page_id`: `list_pages(section_id)` first, noting the IDs of the pages already
      titled `page_title`; then `create_page(section_id, page_title)`, then writes the payload to
      `output`, then `replace_page`. With a `page_id`: writes the payload, then `replace_page` on that
@@ -76,10 +79,15 @@ Acceptance criteria:
    - Error handling (`SPEC.md` section 11.3); the error code is found inside the text
      `Error executing tool <tool>: <code>: <message>`, and an error without a code counts as
      `bad_request`:
-     - `timeout` on `create_page`: never retry blindly. `ping`, then `list_pages(section_id)`; reuse
-       a page titled exactly `page_title` whose ID was not noted before `create_page`, otherwise call
-       `create_page` once more. A page that existed before is never reused, because `replace_page`
-       would delete the teacher's content on it.
+     - `timeout` on `create_page`: never retry blindly. `ping`, then `list_pages(section_id)`. A
+       new page is one titled exactly `page_title` whose ID was not noted before the first
+       `create_page`. Exactly one new page: use it. No new page: call `create_page` once more and,
+       after another `timeout`, check the same way. More than one new page, or none after the
+       second call: `FAILED` with a German reason that names the section and the title and asks the
+       teacher to delete empty pages with that title before resuming. A page that existed before is
+       never reused, because `replace_page` would delete the teacher's content on it.
+     - At most two `create_page` calls per round, whatever the errors (a corrected call after a
+       `bad_request` counts); when they are not enough, `FAILED` as above.
      - `timeout` or `backend_error` on `replace_page`: send the same payload once more; if that
        fails too, `FAILED` with a German reason that says the page may be empty.
      - `bad_request`: correct the call once; then `FAILED` with the error text.
