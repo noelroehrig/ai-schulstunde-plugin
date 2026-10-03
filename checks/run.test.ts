@@ -1,18 +1,28 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createMemoryRepo, type Rule } from "./repo.ts";
-import { formatFinding, main, parseMode, runRules } from "./run.ts";
+import { RULES, formatFinding, main, parseMode, runRules } from "./run.ts";
+
+/** The repository's own manifests, so that fixtures satisfy the manifest rules. */
+const PLUGIN_FILES: Record<string, string> = Object.fromEntries(
+  [".claude-plugin/marketplace.json", "plugin/.claude-plugin/plugin.json", "plugin/.mcp.json"].map(
+    (path) => [path, readFileSync(fileURLToPath(new URL(`../${path}`, import.meta.url)), "utf8")],
+  ),
+);
 
 /** Runs `main` against a fresh temporary directory holding `files`. */
 function runMain(args: string[], files: Record<string, string>): { code: number; lines: string[] } {
   const root = mkdtempSync(join(tmpdir(), "run-test-"));
   try {
-    for (const [name, content] of Object.entries(files)) writeFileSync(join(root, name), content);
+    for (const [name, content] of Object.entries(files)) {
+      mkdirSync(dirname(join(root, name)), { recursive: true });
+      writeFileSync(join(root, name), content);
+    }
     const lines: string[] = [];
     const code = main(args, root, (line) => lines.push(line));
     return { code, lines };
@@ -51,13 +61,17 @@ test("formatFinding prints file, rule, and message", () => {
 });
 
 test("main exits 0 with a zero count on a clean repository", () => {
-  const { code, lines } = runMain(["--mode", "build"], { "a.json": "{}" });
+  const { code, lines } = runMain(["--mode", "build"], { ...PLUGIN_FILES, "a.json": "{}" });
   assert.equal(code, 0);
   assert.match(lines.at(-1) ?? "", /^0 findings/);
 });
 
 test("main exits 1 and prints each finding and the count", () => {
-  const { code, lines } = runMain(["--mode", "release"], { "a.json": "{", "b.md": "x \u2014 y" });
+  const { code, lines } = runMain(["--mode", "release"], {
+    ...PLUGIN_FILES,
+    "a.json": "{",
+    "b.md": "x \u2014 y",
+  });
   assert.equal(code, 1);
   assert.ok(lines.some((line) => line.startsWith("a.json: json-valid: ")));
   assert.ok(lines.some((line) => line.startsWith("b.md: no-dashes: line 1")));
@@ -77,4 +91,11 @@ test("the CLI exits with the code main returns", () => {
   });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /--mode/);
+});
+
+test("the CLI registers every rule", () => {
+  assert.deepEqual(
+    RULES.map((rule) => rule.name),
+    ["no-dashes", "json-valid", "marketplace", "manifest", "mcp", "user-config-refs"],
+  );
 });

@@ -3,9 +3,12 @@ import { fileURLToPath } from "node:url";
 import { createFsRepo, type Finding, type Mode, type Repo, type Rule } from "./repo.ts";
 import { noDashes } from "./rules/dashes.ts";
 import { jsonValid } from "./rules/json.ts";
+import { manifest, userConfigRefs } from "./rules/manifest.ts";
+import { marketplace } from "./rules/marketplace.ts";
+import { mcp } from "./rules/mcp.ts";
 
 /** Every rule the CLI runs, in output order. */
-export const RULES: Rule[] = [noDashes, jsonValid];
+export const RULES: Rule[] = [noDashes, jsonValid, marketplace, manifest, mcp, userConfigRefs];
 
 const USAGE = "usage: run.ts --mode build|release";
 
