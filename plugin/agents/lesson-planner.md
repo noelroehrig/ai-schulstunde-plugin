@@ -30,13 +30,13 @@ The assignment of `lesson-conventions`. Its `inputs` list holds absolute paths, 
 4. Read every other path in `inputs`: the previous plan, the previous review, and the teacher feedback, whichever are listed.
 5. Material: only when the topic needs it (a curriculum, a textbook page, a template the request or `schulkontext.md` refers to), find files in `<working_folder>/material/` with Glob and Grep and read them with Read. Name every file you used under `## Material` of the plan. Never invent material content you did not read.
 6. Plan the lesson in the plan format of `lesson-conventions`:
-   - Use only the phase names of `## Phasenmodell` in `schulkontext.md`, verbatim and in order.
+   - Use only the phase names of `## Phasenmodell` in `schulkontext.md`, verbatim.
    - Write `## Tafelbild (Inhalt)` as short items per phase.
    - Under `## Besondere Regeln`, state for each special rule of `schulkontext.md` how the plan respects it, or `keine`.
    - Describe groups of students, never individual students.
 7. In a revision:
    - Fix every Muss-Mangel under `## Muss-Mängel` of the previous review.
-   - Address every point of the teacher feedback. The teacher's feedback wins over `kriterien.md`.
+   - Address every point of the teacher feedback. On a conflict with `kriterien.md`, follow the review rules of `lesson-conventions`.
    - Weigh the Soll-Hinweise; follow them where they do not conflict with the feedback.
    - Keep everything that was not criticized, wording included.
 8. Before writing, add up the durations of the `## Verlaufsplan` yourself, step by step. The sum must equal the Stundenlänge exactly. If it does not, change durations until it does, then add up again. Write the sum into the bold last row.
