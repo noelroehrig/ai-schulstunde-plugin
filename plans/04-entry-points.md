@@ -20,6 +20,16 @@ Common rules for every phase:
 - When the procedure needs the teacher's answer, Claude asks in German and ends its turn; the skill
   stays in the conversation, and `stunde.md` holds the state, so the next message continues the
   procedure and a new conversation can resume with `stunde-ueberarbeiten`.
+- Every exchange with the teacher has a defined way out. A proposed write happens only after a
+  yes; on a no, Claude asks what to change and proposes again, or skips the step when the teacher
+  says so. `Abbrechen` at any question stops the procedure; in `stunde-planen` and
+  `stunde-ueberarbeiten` it sets `Schritt: Abgebrochen` and keeps every file.
+- Answers are read by meaning, not by exact spelling: `weiter`, `ja`, `passt`, or `ok` alone
+  continue; an answer that asks for a change is feedback; when an answer is unclear, Claude asks
+  once more.
+- The state lives in `## Stand` of `stunde.md`. A file with a higher version than `## Stand`
+  records comes from an interrupted agent run: it is never an input, and the agent's next run
+  overwrites it.
 - Every mechanical requirement gets its check first. `npm run verify` passes at the end of every
   phase.
 
@@ -126,11 +136,16 @@ Acceptance criteria:
    last `Verlauf` date) and asks which one.
 3. **Resume** when `Schritt` is `Planung`, `Prüfpunkt`, or `Tafelbild`: continue at that step with
    the stored versions and round. An interrupted board loop continues on the page in `stunde.md`.
+   When the board loop had started but `Seiten-ID` is `keine`, an interrupted `create_page` may
+   have left an empty page: tell the teacher the section and title to look for, and continue with
+   an empty `page_id` (the author never reuses a page that existed before its round).
 4. **Revise** when `Schritt` is `Fertig` or `Abgebrochen`: the teacher's changes (from the
    arguments, or asked for) become the next `rueckmeldung_vN.md`; then planning loop with a fresh
    cap, checkpoint, and a board loop on a **new** page. The finished page is never replaced
-   (`SPEC.md` section 6.6). At the end, tell the teacher the title of the old page to delete in
-   OneNote.
+   (`SPEC.md` section 6.6). The new page's title is the old title followed by ` (überarbeitet)`,
+   or ` (überarbeitet 2)`, ` (überarbeitet 3)`, and so on when that title already exists in the
+   section. `## OneNote` in `stunde.md` then records the new page, and `## Verlauf` the old one. At
+   the end, tell the teacher the exact title of the old page to delete in OneNote.
 5. Follows `orchestration.md` like `stunde-planen`.
 
 ## Phase 4: `einrichten`
@@ -160,8 +175,13 @@ Acceptance criteria:
      Mindestschriftgröße and colors the teacher names, after a yes. It reminds the teacher to delete
      the calibration page.
    - Offers the allow rules of `SPEC.md` section 10 for `.claude/settings.json`: shows them, merges
-     them into an existing file without removing anything, and writes only after a yes.
+     them into an existing file without removing anything, and writes only after a yes. An
+     existing file that is not valid JSON is not changed: say so in German and show the rules.
    - Ends with a German summary of what is set up, what is missing, and the commands.
+   - A OneNote error or `onenote_responsive: false` is reported in German; the remaining OneNote
+     steps are skipped and listed as missing in the summary. `create_page` for the calibration page
+     is never retried: after a `timeout`, ask the teacher to look for a page `Kalibrierung Ansicht`
+     in the section and to run `einrichten` again later.
 3. Running it again in a set-up folder changes nothing without a yes and reports the state, so it
    works as a health check.
 4. Rule `orchestration` gains: the `SKILL.md` of `einrichten` contains every allow rule of

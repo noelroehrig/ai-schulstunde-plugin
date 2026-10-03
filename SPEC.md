@@ -338,7 +338,7 @@ The orchestrator reads the last review fully, shows the open Muss-Mängel in Ger
 
 ### 6.6 Re-planning and resume (O10)
 
-`/unterricht:stunde-ueberarbeiten` resumes or revises a lesson (5.3). The server cannot protect a page the teacher has changed: `replace_page` deletes ink and everything else except the title, the structured tools expose no last-modified time, and there is no conflict check (B1, B2, B10). Therefore **a page is never replaced after its board loop has ended**. Revising a finished lesson creates a new page next to the old one, and the teacher is told to delete the old one. Resuming an interrupted board loop continues on the page that loop created.
+`/unterricht:stunde-ueberarbeiten` resumes or revises a lesson (5.3). The server cannot protect a page the teacher has changed: `replace_page` deletes ink and everything else except the title, the structured tools expose no last-modified time, and there is no conflict check (B1, B2, B10). Therefore **a page is never replaced after its board loop has ended**. Revising a finished lesson creates a new page next to the old one, with ` (überarbeitet)` added to its title, and the teacher is told to delete the old one. Resuming an interrupted board loop continues on the page that loop created.
 
 ## 7. Lesson plan (Decided)
 
