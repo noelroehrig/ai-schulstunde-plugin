@@ -522,7 +522,7 @@ omitClaudeMd: true
 ---
 ```
 
-How a plugin skill is named in `skills:` (bare or with the plugin prefix) is not documented; `claude plugin validate` decides it during the build.
+How a plugin skill is named in `skills:` (bare or with the plugin prefix) is not documented, and `claude plugin validate` does not check `skills:` references. A probe plugin on Claude Code 2.1.288 (2026-10-03) showed that both forms preload the skill; the plugin uses the bare name. A missing skill is skipped with only a debug-log warning, so A3 confirms the preload by hand.
 
 Further rules:
 
@@ -678,7 +678,7 @@ Manual verification on Windows (not decisions, cannot run in the build container
 
 - **A1 Install** `[manual]`: installed from the claude.ai marketplace. The three entry points appear in the Code tab with German descriptions. `ping` reports `onenote_responsive: true`.
 - **A2 Setup** `[manual]`: `einrichten` in an empty folder creates exactly the files of section 9. In a filled folder it changes nothing without a yes.
-- **A3 Happy path** `[manual]`: `stunde-planen` creates the lesson folder, at least one `planung_vN.md` and `review_vN.md` pair, an approved final plan, and a board page in the right section with the right title. `stunde.md` records the page.
+- **A3 Happy path** `[manual]`: `stunde-planen` creates the lesson folder, at least one `planung_vN.md` and `review_vN.md` pair, an approved final plan, and a board page in the right section with the right title. `stunde.md` records the page. Plans and reviews follow the `lesson-conventions` formats, which shows that the agents got the skill preloaded.
 - **A4 Verdicts** `[manual]`: line 1 of every review file is exactly `APPROVED` or `REVISE`.
 - **A5 Time sum** `[manual]`: the minutes of the approved plan sum exactly to the configured lesson length, checked by hand.
 - **A6 Caps** `[manual]`: with a deliberately unsatisfiable Muss-Kriterium, each loop stops after 3 rounds, shows the open Muss-Mängel in German, and offers the escalation options.
