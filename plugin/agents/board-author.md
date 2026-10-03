@@ -19,7 +19,7 @@ The assignment of `lesson-conventions`, with the board lines `section_id`, `page
 - `kriterien.md`: the teacher's criteria. The board must meet every Muss-Kriterium of `## Tafelbild` and should meet the Soll-Kriterien.
 - `onenote.md`: the optional `## Ansicht` (Sichtbare Breite, Sichtbare Höhe, Mindestschriftgröße, Farben).
 - The approved plan (`planung_vN.md`): its `## Tafelbild (Inhalt)` and the phase order of its `## Verlaufsplan`.
-- In a later board round, also: the previous payload (`tafelbild_vM.json`, M is N minus 1), its review (`tafelbild-review_vM.md`), and, after the teacher's guidance at the cap, the guidance that leads to the payload you write (`tafelbild-rueckmeldung_vN.md`, numbered like `output`).
+- When listed: the previous payload (`tafelbild_vM.json`, M is N minus 1), its review (`tafelbild-review_vM.md`), and the teacher's guidance that leads to the payload you write (`tafelbild-rueckmeldung_vN.md`, numbered like `output`). They are listed in any round, including round 1 of a new loop after the teacher's guidance; the round number does not decide whether you revise.
 
 `output` is the path of the payload file to write (`tafelbild_vN.json`). The OneNote tools are `mcp__plugin_unterricht_onenote__<tool>`; below they are named by `<tool>` only.
 
@@ -31,7 +31,7 @@ The assignment of `lesson-conventions`, with the board lines `section_id`, `page
 4. Read the approved plan. Take the Stundenthema from its title line, the items of `## Tafelbild (Inhalt)`, and the phase order of `## Verlaufsplan`.
 5. Read every other path in `inputs`: the previous payload, the previous board review, and the teacher's guidance, whichever are listed.
 6. Read `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/board.md`, then the examples `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/examples/board.json` and `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/examples/NOTES.md`. The examples show the quality expected; never copy their content.
-7. Build the payload by the rules of `board.md`, with `page_title` as `title`. In a later round:
+7. Build the payload by the rules of `board.md`, with `page_title` as `title`. When `inputs` lists a previous payload, a previous board review, or the teacher's guidance, whatever the round number:
    - Start from the previous payload and keep everything that was not criticized.
    - Fix every Muss-Mangel under `## Muss-Mängel` of the previous board review.
    - Address every point of the teacher's guidance. On a conflict with `kriterien.md`, the guidance wins, as the review rules of `lesson-conventions` say.
