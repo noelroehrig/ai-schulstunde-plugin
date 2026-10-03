@@ -21,10 +21,15 @@ Common rules for every phase:
   strings in manifests) are written exactly as given below.
 - The repo walk skips `.git/`, `node_modules/`, and `.agentpasture/`.
 - Never create anything under `plugin/server/`.
+- The checks also run on Windows (plan 05 runs `verify:release` on `windows-latest`). The
+  repository interface reports repo-relative paths with forward slashes on every platform, and
+  findings use them. Rules accept LF and CRLF line endings. npm scripts use only syntax that works
+  in both `sh` and `cmd.exe`: double quotes, never single quotes, no inline environment variables,
+  no POSIX-only commands.
 
 ## Phase 1: tooling and the check runner
 
-Files: `package.json`, `package-lock.json`, `tsconfig.json`, `checks/repo.ts`
+Files: `package.json`, `package-lock.json`, `tsconfig.json`, `.gitattributes`, `checks/repo.ts`
 (the repository interface and its file-system implementation), `checks/run.ts` (the CLI),
 `checks/rules/dashes.ts`, `checks/rules/json.ts`, and their tests.
 
@@ -48,7 +53,10 @@ Acceptance criteria:
    `.yaml`, or `.txt` file is a finding naming file and line.
 7. Rule `json-valid`: every `.json` file parses; a file that does not is a finding with the parser's
    message.
-8. `npm run verify` passes on the repository as it is after this phase.
+8. `.gitattributes` at the repo root is exactly the two lines `* text=auto eol=lf` and
+   `*.exe binary`. The conversion of a native path to a repo-relative forward-slash path is a pure
+   function with a test that turns `plugin\agents\x.md` into `plugin/agents/x.md`.
+9. `npm run verify` passes on the repository as it is after this phase.
 
 ## Phase 2: marketplace, plugin manifest, MCP config
 
@@ -118,7 +126,8 @@ Acceptance criteria:
    finding.
 3. Rule `paths`: no JSON string value under `plugin/` contains a backslash or starts with a drive
    letter or `/`. Every `${CLAUDE_PLUGIN_ROOT}/<path>` reference in a file under `plugin/` points to
-   an existing file, except `server/onenote-mcp.exe`. `${` appears only in `plugin/.mcp.json`,
+   an existing file, or to an existing directory when the reference ends in `/`, except
+   `server/onenote-mcp.exe`. `${` appears only in `plugin/.mcp.json`,
    `plugin/skills/*/SKILL.md`, and `plugin/agents/*.md`; anywhere else under `plugin/` it is a
    finding, because Claude Code substitutes these references only in those files, and a file read by
    path would show them raw (`SPEC.md` section 5.5).
