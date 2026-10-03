@@ -76,7 +76,7 @@ The lines of `## Stand`:
 - `Schritt`: the step the lesson is in. `Planung` is the planning loop, `Prüfpunkt` the checkpoint (and the OneNote gate after it), `Tafelbild` the board loop, which exists only after the OneNote gate passed. `Fertig` and `Abgebrochen` end the procedure.
 - `Runde`: the round of the recorded draft in the current loop, `0` when the current loop has no draft yet. The current loop is the planning loop while `Schritt` is `Planung`, the board loop while it is `Tafelbild`.
 - `Planversion`: the number N of the last plan draft whose planner returned `DONE`, or `keine`. In the planning loop, the recorded draft is `planung_v<Planversion>.md`; its review is `review_v<Planversion>.md`.
-- `Freigegebener Plan`: the plan the teacher passed at the checkpoint, or the plan approved or accepted when the checkpoint is skipped or replaced by the escalation; `keiner` before that. The board agents work from it.
+- `Freigegebener Plan`: the plan of the last `APPROVED` verdict or `So übernehmen` in the planning loop, written together with `Schritt: Prüfpunkt`; `keiner` before that, and again from the start of a revision until then. The checkpoint shows it to the teacher, and the board loop works from it.
 - `Tafelbildversion`: the number M of the last board version whose board author returned `DONE`, or `keine`. In the board loop, the recorded draft is `tafelbild_v<Tafelbildversion>.json`; its review is `tafelbild-review_v<Tafelbildversion>.md`.
 - `Prüfbericht`: the last review whose verdict was read, or `keiner`.
 - `Rückmeldung`: the teacher input that started the current loop (`rueckmeldung_vN.md` or `tafelbild-rueckmeldung_vM.md`), an input of every round of that loop; `keine` when the loop started without teacher input.

@@ -12,7 +12,7 @@ function fakeGit(diff: string, baseManifest: string): { git: Git; calls: string[
   const calls: string[][] = [];
   const git: Git = (args) => {
     calls.push(args);
-    if (args[0] === "diff") return diff;
+    if (args.includes("diff")) return diff;
     if (args[0] === "show") return baseManifest;
     throw new Error(`unexpected git call: ${args.join(" ")}`);
   };
@@ -49,11 +49,11 @@ test("parseBase reads --base and rejects a missing value", () => {
   assert.equal(parseBase(["--base"]), undefined);
 });
 
-test("main passes the ref to git as separate arguments", () => {
+test("main passes the ref to git as separate arguments, with plain paths and no rename detection", () => {
   const { git, calls } = fakeGit("README.md\n", BASE_MANIFEST);
   runMain(["--base", "origin/main"], "0.1.0", git);
   assert.deepEqual(calls, [
-    ["diff", "--name-only", "origin/main...HEAD"],
+    ["-c", "core.quotepath=false", "diff", "--name-only", "--no-renames", "origin/main...HEAD"],
     ["show", "origin/main:plugin/.claude-plugin/plugin.json"],
   ]);
 });

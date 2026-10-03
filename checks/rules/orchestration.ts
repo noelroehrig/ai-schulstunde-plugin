@@ -27,12 +27,24 @@ export const AGENT_TYPES = [
 /** Verdict tokens, result-line tokens, and the `ping` field the orchestrator reads. */
 export const ORCHESTRATION_TOKENS = ["APPROVED", "REVISE", "DONE", "FAILED", "onenote_responsive"];
 
+/** The file name of the OneNote server, which Windows may block because it is unsigned. */
+export const SERVER_EXE = "onenote-mcp.exe";
+
+/** The German message for a OneNote server that did not start (`SPEC.md` section 11.3), written once, in the guide. */
+export const SERVER_NOT_RUNNING_MESSAGE =
+  "Die OneNote-Verbindung des Plugins läuft nicht. Starte die Claude-App neu. Wenn das nicht hilft, prüfe, ob Windows Defender oder SmartScreen die Datei " +
+  SERVER_EXE +
+  " blockiert.";
+
+/** The path through which an entry point refers to the guide. */
+const GUIDE_REFERENCE = "${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md";
+
 /** The entry points that follow `orchestration.md`. */
 const ENTRY_POINT_FILES = ["plugin/skills/stunde-planen/SKILL.md", "plugin/skills/stunde-ueberarbeiten/SKILL.md"];
 
 /** What each entry point that follows the guide must reference: the guide's path and the two settings it passes on. */
 export const ENTRY_POINT_REFERENCES = [
-  "${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md",
+  GUIDE_REFERENCE,
   "${user_config.notebook}",
   "${user_config.plan_checkpoint}",
 ];
@@ -52,8 +64,8 @@ export const SETTINGS_ALLOW_RULES = [
 /**
  * Checks that `orchestration.md`, once it exists, states every constant the procedure relies on, and that
  * each existing entry point following it references the guide and the settings it needs, and that
- * `einrichten`, once it exists, offers every allow rule, and that `lesson-folder.md`, once it exists, shows the
- * state lines.
+ * `einrichten`, once it exists, offers every allow rule and references the guide, that no entry point repeats
+ * the server-not-running message, and that `lesson-folder.md`, once it exists, shows the state lines.
  */
 export const orchestration: Rule = {
   name: RULE,
@@ -66,6 +78,11 @@ export const orchestration: Rule = {
     for (const file of ENTRY_POINT_FILES) {
       if (!files.includes(file)) continue;
       for (const message of entryPointProblems(repo.readText(file))) findings.push({ file, rule: RULE, message });
+    }
+    for (const file of [...ENTRY_POINT_FILES, SETUP_FILE]) {
+      if (files.includes(file) && repo.readText(file).includes(SERVER_EXE)) {
+        findings.push({ file, rule: RULE, message: `names "${SERVER_EXE}": refer to the server-not-running message of the guide instead` });
+      }
     }
     if (files.includes(LESSON_FOLDER_FILE)) {
       for (const message of lessonFolderProblems(repo.readText(LESSON_FOLDER_FILE))) {
@@ -87,12 +104,14 @@ function lessonFolderProblems(text: string): string[] {
   );
 }
 
-/** Lists every allow rule missing from `einrichten`. */
+/** Lists every allow rule missing from `einrichten`, and a missing reference to the guide. */
 function setupProblems(text: string): string[] {
   // Rules are matched as JSON strings, so `get_page` inside `"..._get_pages"` does not count.
-  return SETTINGS_ALLOW_RULES.filter((rule) => !text.includes(`"${rule}"`)).map(
+  const problems = SETTINGS_ALLOW_RULES.filter((rule) => !text.includes(`"${rule}"`)).map(
     (rule) => `allow rule "${rule}" missing`,
   );
+  if (!text.includes(GUIDE_REFERENCE)) problems.push(`reference "${GUIDE_REFERENCE}" missing`);
+  return problems;
 }
 
 /** Lists every reference missing from an entry point that follows the guide. */
@@ -106,6 +125,7 @@ function entryPointProblems(text: string): string[] {
 function guideProblems(text: string): string[] {
   const problems: string[] = [];
   if (!text.includes(CHECKPOINT_QUESTION)) problems.push("checkpoint question missing or changed");
+  if (!text.includes(SERVER_NOT_RUNNING_MESSAGE)) problems.push("server-not-running message missing or changed");
   for (const label of ESCALATION_LABELS) {
     if (!text.includes(label)) problems.push(`escalation label "${label}" missing`);
   }

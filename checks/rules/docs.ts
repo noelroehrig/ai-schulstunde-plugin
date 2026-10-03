@@ -1,5 +1,6 @@
 import type { Finding, Repo, Rule } from "../repo.ts";
 import { isObject, readJson } from "./json.ts";
+import { SERVER_EXE } from "./orchestration.ts";
 
 const RULE = "docs";
 
@@ -14,7 +15,7 @@ export const COMMANDS = ["/unterricht:einrichten", "/unterricht:stunde-planen", 
 export const MARKETPLACE_REPO = "noelroehrig/schulstunde-plugin";
 
 /**
- * Checks that `README.md`, once it exists, names the three commands and the marketplace repository,
+ * Checks that `README.md`, once it exists, names the three commands, the marketplace repository, and the server exe,
  * and that `CHANGELOG.md`, once it exists, has a heading for the `version` in `plugin.json`.
  */
 export const docs: Rule = {
@@ -33,10 +34,11 @@ export const docs: Rule = {
   },
 };
 
-/** Lists every command and the marketplace repository when missing from the README. */
+/** Lists every command, the marketplace repository, and the troubleshooting entry for the server when missing from the README. */
 function readmeProblems(text: string): string[] {
   const problems = COMMANDS.filter((command) => !text.includes(command)).map((command) => `command "${command}" missing`);
   if (!text.includes(MARKETPLACE_REPO)) problems.push(`marketplace repository "${MARKETPLACE_REPO}" missing`);
+  if (!text.includes(SERVER_EXE)) problems.push(`troubleshooting entry naming "${SERVER_EXE}" missing`);
   return problems;
 }
 

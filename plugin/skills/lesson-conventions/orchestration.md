@@ -1,6 +1,6 @@
 # Orchestration
 
-The shared procedure of the entry points `stunde-planen` and `stunde-ueberarbeiten`: the planning loop, the checkpoint, the OneNote gate, the board loop, escalation, failure handling, and the finish. Read it together with `SKILL.md` and `lesson-folder.md` of `lesson-conventions`. You run it in the main conversation; the agents run one level below you.
+The shared procedure of the entry points `stunde-planen` and `stunde-ueberarbeiten`: the planning loop, the checkpoint, a OneNote server that is not running, the OneNote gate, the board loop, escalation, failure handling, and the finish. Read it together with `SKILL.md` and `lesson-folder.md` of `lesson-conventions`. You run it in the main conversation; the agents run one level below you.
 
 ## Inputs
 
@@ -140,12 +140,22 @@ It runs with `Schritt: Prüfpunkt`. When `plan_checkpoint` is `false`, skip it a
    - `Abbrechen`: abort as above.
    - Unclear: ask once more.
 
+## OneNote server not running
+
+The plugin's OneNote tools are `mcp__plugin_unterricht_onenote__*`. When they are not available in this session, the plugin's OneNote server did not start, for example because Windows blocked the unsigned `onenote-mcp.exe`. Wherever a procedure would call `ping` first (the preflight of `stunde-planen` and `stunde-ueberarbeiten`, step 2 of the OneNote gate, the OneNote steps of `einrichten`), check this first: `mcp__plugin_unterricht_onenote__ping` is not among your tools, also not after a tool search when tools are loaded on demand. Then call no OneNote tool and treat it like `onenote_responsive: false`, with this German message instead of the one about OneNote not responding:
+
+`Die OneNote-Verbindung des Plugins läuft nicht. Starte die Claude-App neu. Wenn das nicht hilft, prüfe, ob Windows Defender oder SmartScreen die Datei onenote-mcp.exe blockiert.`
+
+- Preflight of `stunde-planen` or `stunde-ueberarbeiten`: say `Hinweis: ` and the message, then the entry point's sentence that it continues anyway and checks again before the Tafelbild, and continue. Never stop there because of it.
+- OneNote gate: do not ask the teacher to open OneNote and do not wait for an answer, because the server does not start within this conversation. Stop as Stopping says, with the message as the reason and the resume hint, for example `Ich habe angehalten: <Meldung> Der Plan bleibt im Ordner <Name des Stundenordners>. Wenn die Verbindung wieder läuft, mach das Tafelbild mit /unterricht:stunde-ueberarbeiten.`
+- `einrichten`: say the message, skip the OneNote steps, and list them as missing in the summary.
+
 ## OneNote gate
 
 The gate runs with `Schritt: Prüfpunkt`, before a board loop starts: after `weiter` at the checkpoint, when `plan_checkpoint` is `false`, or after `So übernehmen` in the planning loop. Check, in this order; nothing in `## Stand` or `## OneNote` changes before step 6. A resumed board loop (`Schritt: Tafelbild`) runs steps 1 to 4 only, to resolve `section_id`, and writes nothing. The OneNote tools of the main session are `mcp__plugin_unterricht_onenote__ping` and `mcp__plugin_unterricht_onenote__get_notebooks`.
 
 1. The `notebook` setting is not blank and has no comma. Otherwise stop before any OneNote call, with `Die Einstellung „OneNote-Notizbuch“ ist leer oder enthält ein Komma. Trag dort mit /config genau den Namen eines Notizbuchs ein. Setze dann mit /unterricht:stunde-ueberarbeiten fort.`
-2. Call `ping`. When it reports `onenote_responsive: true`, go on. When it reports `onenote_responsive: false`, ask `OneNote reagiert gerade nicht. Bitte öffne OneNote und schließe alle offenen Dialoge. Antworte dann mit „weiter“.` and end your turn. After the answer, call `ping` once more; when it still reports `onenote_responsive: false`, stop and say that the plan is kept and that the board can be made later with `/unterricht:stunde-ueberarbeiten`.
+2. When the OneNote tools are not available, stop as OneNote server not running says. Otherwise call `ping`. When it reports `onenote_responsive: true`, go on. When it reports `onenote_responsive: false`, ask `OneNote reagiert gerade nicht. Bitte öffne OneNote und schließe alle offenen Dialoge. Antworte dann mit „weiter“.` and end your turn. After the answer, call `ping` once more; when it still reports `onenote_responsive: false`, stop and say that the plan is kept and that the board can be made later with `/unterricht:stunde-ueberarbeiten`.
 3. Call `get_notebooks`. The notebook whose name is exactly the `notebook` setting, case-sensitive, must be in the list. Otherwise stop before writing, with `Das Notizbuch „<notebook>“ wurde in OneNote nicht gefunden. Der Name muss genau stimmen, auch bei Groß- und Kleinschreibung. Du kannst ihn mit /config in der Einstellung „OneNote-Notizbuch“ ändern. Ich lege nie ein Notizbuch an.`
 4. The section. In a resumed board loop, it is the recorded `Abschnitt` of `## OneNote`: when the notebook has no section with exactly that name, stop with `Der Abschnitt „<Abschnitt>“, in dem das Tafelbild dieser Stunde liegt, ist im Notizbuch „<notebook>“ nicht mehr zu finden. Ich wähle keinen anderen Abschnitt. Stell den Abschnitt in OneNote wieder her und setze dann mit /unterricht:stunde-ueberarbeiten fort.` Otherwise read `Abschnitt` under `## Ablage` in `onenote.md`. `Abschnitt: Klasse` means the section named exactly like the `Klasse` in `## Auftrag` of `stunde.md`; any other value is the section name itself. The section must be one of the notebook's sections in the `get_notebooks` answer, with exactly that name; note its ID as `section_id`. When it is missing, ask `Im Notizbuch „<notebook>“ gibt es keinen Abschnitt „<Abschnitt>“. Bitte lege ihn in OneNote an und antworte mit „weiter“, oder nenne einen anderen vorhandenen Abschnitt.` and end your turn. Then call `get_notebooks` again and check again, with the section the teacher named, if any. Never create a section, and never change `onenote.md`.
 5. The page title, unless the entry point gives another rule for it: fill the `Seitentitel` scheme of `## Ablage` in `onenote.md`: `JJJJ-MM-TT` is the lesson date when `stunde.md` names one, else the date the lesson folder name starts with, else today; `Klasse` and `Thema` come from `## Auftrag` of `stunde.md`. Keep every other text of the scheme as it is.
@@ -203,6 +213,7 @@ At the cap of either loop:
 
 The rows of `SPEC.md` section 11.3 that concern you. An error of a OneNote tool arrives as `Error executing tool <tool>: <code>: <message>`: find the code inside the text. An error without a code counts as `bad_request`. Every stop here keeps the plan and the files.
 
+- The plugin's OneNote tools are not available: as OneNote server not running says.
 - `onenote_responsive: false` before the board loop: as in step 2 of the OneNote gate.
 - `timeout` on your own read (`get_notebooks`): say `OneNote ist gerade beschäftigt oder zeigt einen Dialog. Ich versuche es gleich noch einmal.`, call `ping`, and call the tool once more. On a second failure, stop the board loop, keep the plan, and explain how to resume with `/unterricht:stunde-ueberarbeiten`.
 - `FAILED` from `unterricht:board-reviewer` whose reason contains the code `timeout`: the read timeout. Say `OneNote ist gerade beschäftigt oder zeigt einen Dialog. Bitte schließe offene Dialoge in OneNote. Ich versuche es gleich noch einmal.`, call `ping`, and run the reviewer once more with the same assignment, with its status line. When the second run returns `FAILED` again, stop the board loop, keep the plan, and explain how to resume with `/unterricht:stunde-ueberarbeiten`.

@@ -48,6 +48,7 @@ test("evaluateContract reports each missing required tool", () => {
   assert.match(findings.map((f) => f.message).join("\n"), /ping/);
   assert.match(findings.map((f) => f.message).join("\n"), /get_page/);
   assert.ok(findings.every((f) => f.rule === "tool-contract"));
+  assert.ok(findings.every((f) => f.file === "onenote-mcp.exe"));
 });
 
 test("evaluateContract reports each forbidden raw-XML tool", () => {
@@ -55,6 +56,13 @@ test("evaluateContract reports each forbidden raw-XML tool", () => {
   const findings = evaluateContract([...REQUIRED, ...forbidden]);
   assert.equal(findings.length, 4);
   for (const name of forbidden) assert.ok(findings.some((f) => f.message.includes(name)), name);
+  assert.ok(findings.every((f) => f.file === "onenote-mcp.exe"));
+});
+
+test("evaluateContract names the given file in every finding", () => {
+  const findings = evaluateContract(["get_page_xml"], "plugin/server/onenote-mcp.exe");
+  assert.equal(findings.length, 7);
+  assert.ok(findings.every((f) => f.file === "plugin/server/onenote-mcp.exe"));
 });
 
 test("listTools returns the tool names after the full handshake and stops the server", async () => {
@@ -71,15 +79,16 @@ test("listTools follows nextCursor across pages", async () => {
 
 test("a server with a forbidden tool fails the contract", async () => {
   const tools = await listFake({ FAKE_MCP_TOOLS: [...REQUIRED, "replace_page_xml"].join(",") });
-  assert.deepEqual(
-    evaluateContract(tools).map((f) => f.message),
-    ["forbidden tool replace_page_xml is listed"],
-  );
+  assert.deepEqual(evaluateContract(tools), [
+    { file: "onenote-mcp.exe", rule: "tool-contract", message: "forbidden tool replace_page_xml is listed" },
+  ]);
 });
 
 test("a server missing a tool fails the contract", async () => {
   const tools = await listFake({ FAKE_MCP_TOOLS: REQUIRED.slice(1).join(",") });
-  assert.deepEqual(evaluateContract(tools).map((f) => f.message), ["required tool ping is missing"]);
+  assert.deepEqual(evaluateContract(tools), [
+    { file: "onenote-mcp.exe", rule: "tool-contract", message: "required tool ping is missing" },
+  ]);
 });
 
 test("listTools fails on a timeout and stops the server", async () => {
@@ -156,9 +165,11 @@ test("the CLI prints the findings and exits 1 on a broken contract", async () =>
       fakeList([...REQUIRED.slice(1), "get_page_xml"], []),
     );
     assert.equal(code, 1);
-    assert.ok(lines.some((line) => line.endsWith("tool-contract: required tool ping is missing")));
-    assert.ok(lines.some((line) => line.endsWith("tool-contract: forbidden tool get_page_xml is listed")));
-    assert.equal(lines.at(-1), "2 findings (tool contract)");
+    assert.deepEqual(lines.slice(-3), [
+      "onenote-mcp.exe: tool-contract: required tool ping is missing",
+      "onenote-mcp.exe: tool-contract: forbidden tool get_page_xml is listed",
+      "2 findings (tool contract)",
+    ]);
   });
 });
 
