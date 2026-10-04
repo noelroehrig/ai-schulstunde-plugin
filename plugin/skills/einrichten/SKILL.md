@@ -10,6 +10,8 @@ The teacher wants to set up their working folder, or check one that is already s
 
 Plugin root: ${CLAUDE_PLUGIN_ROOT}
 OneNote notebook: ${user_config.notebook}
+Planning model: ${user_config.planning_model}
+Board model: ${user_config.board_model}
 
 The working folder is the current working directory: use its absolute path, with forward slashes. Every file named below without a folder is in the working folder. The templates are in `${CLAUDE_PLUGIN_ROOT}/templates/`.
 
@@ -158,6 +160,7 @@ Offer allow rules for `.claude/settings.json` in the working folder, so that the
 End with a German summary:
 
 - **Eingerichtet:** the files and folders, the values in `schulkontext.md` and `kriterien.md`, the Ablage, the Ansicht, and the permissions that are in place.
+- **Modelle:** one line with both settings, for example `Plan und Planprüfung: Opus, Tafelbild: Sonnet. Ändern kannst du das mit /config.`, using `Planning model` and `Board model` above.
 - **Fehlt noch:** every field of step 3 that still needs a value by the rules of its table (the Phasenmodell counts as set once confirmed), with file and line, a placeholder left in the `## Ablage` of `onenote.md`, every skipped OneNote step with the reason, an Ansicht that was not measured when the teacher projects with a fixed visible area, the allow rules of step 6 when they were not written (declined by the teacher, `.claude/settings.json` not valid JSON, or of an unexpected shape), each with the reason, and a section to create in OneNote. When nothing is missing, say `Alles ist eingerichtet.`
 - **Befehle:**
 

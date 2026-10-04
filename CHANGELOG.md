@@ -8,4 +8,5 @@ Erste Version.
 - `/unterricht:stunde-planen` plant eine neue Stunde: Der Plan wird gegen deine Kriterien in höchstens drei Runden geprüft und überarbeitet, du kannst ihn vor dem Tafelbild prüfen, und das Tafelbild entsteht als Seite in OneNote, ebenfalls mit Prüfung.
 - `/unterricht:stunde-ueberarbeiten` setzt eine unterbrochene Stunde fort oder überarbeitet eine fertige Stunde mit deinen Änderungen auf einer neuen OneNote-Seite.
 - Bleiben nach drei Runden Mängel offen, entscheidest du: übernehmen, Hinweise geben oder abbrechen.
+- Für Plan und Planprüfung und für das Tafelbild wählst du je ein Claude-Modell, voreingestellt Opus und Sonnet.
 - Deine eigenen Dateien und fertigen OneNote-Seiten werden nie überschrieben.

@@ -4,7 +4,7 @@ const RULE = "conventions";
 
 const SKILL_FILE = "plugin/skills/lesson-conventions/SKILL.md";
 
-/** The glossary of `SPEC.md` section 3, in order. */
+/** The German glossary terms that are never translated, in order. */
 export const GLOSSARY_TERMS = [
   "Tafelbild",
   "Einstieg",
@@ -23,7 +23,7 @@ export const GLOSSARY_TERMS = [
   "Material",
 ];
 
-/** The headings of a lesson plan (`SPEC.md` section 7.1), in order. */
+/** The headings of a lesson plan, in order. */
 export const PLAN_HEADINGS = [
   "## Einordnung",
   "## Lernziele",
@@ -45,7 +45,7 @@ export const REVIEW_HEADINGS = [
   "## Frühere Muss-Mängel",
 ];
 
-/** The assignment keys of `SPEC.md` section 3.1. */
+/** The keys of an assignment from the orchestrator to an agent. */
 export const ASSIGNMENT_KEYS = [
   "working_folder",
   "lesson_folder",

@@ -10,11 +10,22 @@ const LESSON_FOLDER_FILE = "plugin/skills/lesson-conventions/lesson-folder.md";
 /** Labels of the state model that `lesson-folder.md` must show, each at the start of a line of the `stunde.md` format. */
 export const STATE_LINES = ["Prüfbericht:", "Rückmeldung:", "Alte Seite:"];
 
-/** The checkpoint question of `SPEC.md` section 6.3, verbatim. */
+/** The checkpoint question the teacher answers after the planning loop, verbatim. */
 export const CHECKPOINT_QUESTION = "Passt der Plan so? Antworte mit „weiter“, oder schreib, was geändert werden soll.";
 
-/** The three escalation options of `SPEC.md` section 6.5, in order. */
+/** The three options offered when a loop reaches its cap, in order. */
 export const ESCALATION_LABELS = ["So übernehmen", "Ich gebe Hinweise", "Abbrechen"];
+
+/**
+ * The rows of the guide's model table: each choice of the `planning_model` and `board_model` settings
+ * and the Agent tool's `model` parameter it becomes. `wie die Sitzung` passes none.
+ */
+export const MODEL_TABLE_ROWS = [
+  "| `Opus` | `opus` |",
+  "| `Sonnet` | `sonnet` |",
+  "| `Haiku` | `haiku` |",
+  "| `wie die Sitzung` | none",
+];
 
 /** The `subagent_type` values the orchestrator starts agents with. */
 export const AGENT_TYPES = [
@@ -30,13 +41,13 @@ export const ORCHESTRATION_TOKENS = ["APPROVED", "REVISE", "DONE", "FAILED", "on
 /** The file name of the OneNote server, which Windows may block because it is unsigned. */
 export const SERVER_EXE = "onenote-mcp.exe";
 
-/** The German message for a OneNote server that did not start (`SPEC.md` section 11.3), written once, in the guide. */
+/** The German message for a OneNote server that did not start, written once, in the guide. */
 export const SERVER_NOT_RUNNING_MESSAGE =
   "Die OneNote-Verbindung des Plugins läuft nicht. Starte die Claude-App neu. Wenn das nicht hilft, prüfe, ob Windows Defender oder SmartScreen die Datei " +
   SERVER_EXE +
   " blockiert.";
 
-/** The German stop message for a `FAILED` result whose reason contains `bad_request` (`SPEC.md` section 11.3). */
+/** The German stop message for a `FAILED` result whose reason contains `bad_request`: a plugin bug for the maintainer. */
 export const BAD_REQUEST_MESSAGE =
   "Ich habe angehalten, weil das Plugin einen Fehler gemeldet hat: <Grund>. Das ist ein Fehler im Plugin. " +
   "Bitte leite diese Meldung an die Person weiter, die das Plugin betreut. Die bisherigen Dateien bleiben im Ordner " +
@@ -54,17 +65,19 @@ const GUIDE_REFERENCE = "${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchest
 /** The entry points that follow `orchestration.md`. */
 const ENTRY_POINT_FILES = ["plugin/skills/stunde-planen/SKILL.md", "plugin/skills/stunde-ueberarbeiten/SKILL.md"];
 
-/** What each entry point that follows the guide must reference: the guide's path and the two settings it passes on. */
+/** What each entry point that follows the guide must reference: the guide's path and the settings it passes on. */
 export const ENTRY_POINT_REFERENCES = [
   GUIDE_REFERENCE,
   "${user_config.notebook}",
   "${user_config.plan_checkpoint}",
+  "${user_config.planning_model}",
+  "${user_config.board_model}",
 ];
 
 /** The setup entry point, which offers the allow rules. */
 const SETUP_FILE = "plugin/skills/einrichten/SKILL.md";
 
-/** The allow rules `einrichten` offers for `.claude/settings.json` (`SPEC.md` section 10), in order. */
+/** The allow rules `einrichten` offers for `.claude/settings.json`, in order. */
 export const SETTINGS_ALLOW_RULES = [
   "Edit(/Stunden/**)",
   "Read(~/.claude/plugins/**)",
@@ -77,8 +90,8 @@ export const SETTINGS_ALLOW_RULES = [
  * Checks that `orchestration.md`, once it exists, states every constant the procedure relies on, and that
  * each existing entry point following it references the guide and the settings it needs, and that
  * `einrichten`, once it exists, offers every allow rule and references the guide, that no entry point repeats
- * the server-not-running message, and that `lesson-folder.md`, once it exists, shows the state lines. The guide
- * must not refer to `SPEC.md`, and its main-session sentence must name every OneNote tool it or an entry point calls.
+ * the server-not-running message, and that `lesson-folder.md`, once it exists, shows the state lines. The guide's
+ * main-session sentence must name every OneNote tool it or an entry point calls.
  */
 export const orchestration: Rule = {
   name: RULE,
@@ -161,7 +174,9 @@ function guideProblems(text: string): string[] {
   if (!text.includes(SERVER_NOT_RUNNING_MESSAGE)) problems.push("server-not-running message missing or changed");
   if (!text.includes(BAD_REQUEST_MESSAGE)) problems.push("bad_request message missing or changed");
   if (!text.includes(CONVENTIONS_REFERENCE)) problems.push(`reference "${CONVENTIONS_REFERENCE}" missing`);
-  if (text.includes("SPEC.md")) problems.push("refers to SPEC.md, which does not ship with the plugin");
+  for (const row of MODEL_TABLE_ROWS) {
+    if (!text.includes(row)) problems.push(`model table row "${row}" missing`);
+  }
   for (const label of ESCALATION_LABELS) {
     if (!text.includes(label)) problems.push(`escalation label "${label}" missing`);
   }

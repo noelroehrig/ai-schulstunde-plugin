@@ -12,6 +12,8 @@ The teacher wants to work on an existing lesson in `Stunden/`. You either resume
 Plugin root: ${CLAUDE_PLUGIN_ROOT}
 OneNote notebook: ${user_config.notebook}
 Plan checkpoint: ${user_config.plan_checkpoint}
+Planning model: ${user_config.planning_model}
+Board model: ${user_config.board_model}
 Request: $ARGUMENTS
 
 The working folder is the current working directory: use its absolute path, with forward slashes. Every file named below without a folder is in the working folder.
@@ -86,7 +88,9 @@ Read `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md` and foll
 - the working folder: the absolute path of the working folder;
 - the lesson folder: the absolute path of the chosen lesson folder;
 - the `notebook` setting: `OneNote notebook` above;
-- the `plan_checkpoint` value: `Plan checkpoint` above.
+- the `plan_checkpoint` value: `Plan checkpoint` above;
+- the `planning_model` value: `Planning model` above;
+- the `board_model` value: `Board model` above.
 
 From here on, `Abbrechen` and every stop work as `orchestration.md` says, and `stunde.md` holds the state. Two additions apply whenever `Alte Seite` in `## OneNote` is not `keine`, also when the lesson is resumed later. Both read only `## OneNote`, never `## Verlauf`.
 

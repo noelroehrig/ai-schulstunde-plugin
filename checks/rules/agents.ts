@@ -4,11 +4,11 @@ import type { Finding, Repo, Rule } from "../repo.ts";
 
 const RULE = "agents";
 
-/** The sentence every agent body contains verbatim (`SPEC.md` section 3). */
+/** The language sentence every agent body contains verbatim. */
 export const LANGUAGE_SENTENCE =
   "All instructions are in English. Everything you write (plans, reviews, OneNote content, messages to the user) must be in German.";
 
-/** The sentence the two reviewer bodies also contain verbatim (`SPEC.md` section 3). */
+/** The sentence the two reviewer bodies also contain verbatim: the verdict token stays English. */
 export const REVIEWER_SENTENCE = "Exception: line 1 of every review is the verdict token, exactly as defined.";
 
 const REVIEWERS = new Set(["plan-reviewer", "board-reviewer"]);

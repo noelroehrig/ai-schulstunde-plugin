@@ -4,7 +4,7 @@ import { isNonEmptyString, isObject, readJson, type JsonObject } from "./json.ts
 const FILE = "plugin/.claude-plugin/plugin.json";
 const RULE = "manifest";
 
-/** Keys a `userConfig` option may use (`SPEC.md` Appendix A, F8). */
+/** Keys a `userConfig` option may use; Claude Code rejects any other key. */
 const OPTION_KEYS = new Set([
   "type",
   "title",
@@ -31,6 +31,9 @@ const DEFAULT_TYPES: Record<string, string> = {
 };
 
 const OPTION_NAME = /^[A-Za-z0-9_]+$/;
+
+/** Longest label an `options` entry may have. */
+const MAX_LABEL_LENGTH = 64;
 
 const SEMVER = /^\d+\.\d+\.\d+$/;
 
@@ -77,6 +80,35 @@ function optionProblems(name: string, option: unknown): string[] {
     if (!OPTION_KEYS.has(key)) problems.push(`${key} is not an allowed key`);
   }
   if ("type" in option) problems.push(...defaultProblems(option));
+  if ("options" in option) problems.push(...choiceProblems(option));
+  return problems;
+}
+
+/**
+ * Checks a fixed list of choices: labels of 1 to 64 characters without surrounding spaces, distinct in any
+ * letter case, on a plain string option, with the default among them. Claude Code refuses to load a plugin
+ * that breaks this.
+ */
+function choiceProblems(option: JsonObject): string[] {
+  const choices = option.options;
+  if (!Array.isArray(choices) || choices.length === 0) return ["options must be a non-empty list"];
+  const problems: string[] = [];
+  if (option.type !== "string" || option.multiple === true || option.sensitive === true) {
+    problems.push("options needs a string option that is neither multiple nor sensitive");
+  }
+  const isLabel = (choice: unknown) =>
+    typeof choice === "string" &&
+    choice.length >= 1 &&
+    choice.length <= MAX_LABEL_LENGTH &&
+    choice.trim() === choice;
+  if (!choices.every(isLabel)) {
+    problems.push(
+      `every entry of options must be a label of 1 to ${MAX_LABEL_LENGTH} characters without surrounding spaces`,
+    );
+  }
+  const folded = choices.map((choice) => (typeof choice === "string" ? choice.toLowerCase() : choice));
+  if (new Set(folded).size !== folded.length) problems.push("options must not repeat an entry in any letter case");
+  if ("default" in option && !choices.includes(option.default)) problems.push("default must be one of options");
   return problems;
 }
 

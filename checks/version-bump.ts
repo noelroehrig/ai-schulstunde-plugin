@@ -45,7 +45,7 @@ export function isValidRef(ref: string): boolean {
 
 /**
  * Checks that a change under `plugin/` raises the plugin version and changes the changelog
- * (`SPEC.md` section 11.2). Changes outside `plugin/` need neither.
+ * for teachers. Changes outside `plugin/` need neither.
  */
 export function checkVersionBump(input: VersionBumpInput): Finding[] {
   if (!input.changedFiles.some((file) => file.startsWith(PLUGIN_DIR))) return [];

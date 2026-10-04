@@ -6,7 +6,7 @@ const RULE = "mcp";
 
 const COMMAND = "${CLAUDE_PLUGIN_ROOT}/server/onenote-mcp.exe";
 
-/** The exact environment the server gets (`SPEC.md` section 11.1). */
+/** The exact environment the server gets: the allowed notebook and no raw-XML tools. */
 const ENV: Record<string, string> = {
   ONENOTE_ALLOWED_NOTEBOOKS: "${user_config.notebook}",
   ONENOTE_DISABLE_RAW_XML: "1",

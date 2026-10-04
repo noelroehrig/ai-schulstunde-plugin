@@ -2,7 +2,7 @@ import type { Finding, Repo, Rule } from "../repo.ts";
 
 const RULE = "plugin-dir";
 
-/** The only directories at the top of `plugin/` (`SPEC.md` section 5.1). */
+/** The only directories at the top of `plugin/`. */
 const ALLOWED_DIRS = new Set([".claude-plugin", "server", "skills", "agents", "templates"]);
 
 /** The only file at the top of `plugin/`. */

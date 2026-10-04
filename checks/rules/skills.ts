@@ -3,13 +3,13 @@ import type { Finding, Repo, Rule } from "../repo.ts";
 
 const RULE = "skills";
 
-/** The conventions skill, preloaded into every agent (`SPEC.md` section 5.5). */
+/** The conventions skill, preloaded into every agent. */
 export const CONVENTIONS_SKILL = "lesson-conventions";
 
-/** The skills only the teacher starts (`SPEC.md` section 5.3). */
+/** The skills only the teacher starts. */
 export const ENTRY_POINT_SKILLS = ["einrichten", "stunde-planen", "stunde-ueberarbeiten"];
 
-/** The four skills of `SPEC.md` section 3.1. */
+/** The plugin's four skills. */
 export const SKILLS = [...ENTRY_POINT_SKILLS, CONVENTIONS_SKILL];
 
 const SKILL_FILE = /^plugin\/skills\/([^/]+)\/SKILL\.md$/;
@@ -39,7 +39,7 @@ function skillProblems(name: string, text: string): string[] {
   const problems: string[] = [];
   if (name === CONVENTIONS_SKILL) {
     if (fields.get("user-invocable") !== "false") problems.push("user-invocable must be false");
-    // The key itself is forbidden, not only `true`: `true` blocks the preload into subagents (F16).
+    // The key itself is forbidden, not only `true`: `true` blocks the preload into subagents.
     if (fields.has("disable-model-invocation")) problems.push("must not set disable-model-invocation");
     return problems;
   }

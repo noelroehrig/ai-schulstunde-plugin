@@ -28,7 +28,7 @@ test("completeness reports each missing component on its own", () => {
   );
 });
 
-test("completeness lists every component of SPEC.md section 5.1", () => {
+test("completeness lists every component of the marketplace and the plugin", () => {
   const findings = completeness.run(createMemoryRepo({}), "release");
   assert.equal(findings.length, 20);
   assert.deepEqual(

@@ -10,6 +10,7 @@ import {
   ENTRY_POINT_REFERENCES,
   ESCALATION_LABELS,
   MAIN_SESSION_TOOLS_SENTENCE,
+  MODEL_TABLE_ROWS,
   SERVER_EXE,
   SERVER_NOT_RUNNING_MESSAGE,
   SETTINGS_ALLOW_RULES,
@@ -79,7 +80,7 @@ test("orchestration reports a missing or changed server-not-running message", ()
   assertOneFinding(orchestrationFile().split(SERVER_NOT_RUNNING_MESSAGE).join(changed), /server-not-running message/);
 });
 
-test("SERVER_NOT_RUNNING_MESSAGE names the exe and the advice of SPEC.md section 11.3", () => {
+test("SERVER_NOT_RUNNING_MESSAGE names the exe and the advice to restart and to check Windows", () => {
   assert.equal(
     SERVER_NOT_RUNNING_MESSAGE,
     "Die OneNote-Verbindung des Plugins läuft nicht. Starte die Claude-App neu. Wenn das nicht hilft, prüfe, ob Windows Defender oder SmartScreen die Datei onenote-mcp.exe blockiert.",
@@ -89,7 +90,7 @@ test("SERVER_NOT_RUNNING_MESSAGE names the exe and the advice of SPEC.md section
 
 test("orchestration reports each missing item separately", () => {
   const findings = check({ [GUIDE]: "# Orchestration\n" });
-  assert.equal(findings.length, 1 + 3 + 4 + 5 + 1 + 1 + 1 + 1);
+  assert.equal(findings.length, 1 + 3 + 4 + 5 + 4 + 1 + 1 + 1 + 1);
   assert.ok(findings.every((finding) => finding.rule === "orchestration" && finding.file === GUIDE));
 });
 
@@ -100,7 +101,7 @@ function entryFile(name: string): string {
   return `plugin/skills/${name}/SKILL.md`;
 }
 
-test("orchestration passes on entry points that reference the guide and both settings", () => {
+test("orchestration passes on entry points that reference the guide and every setting they pass on", () => {
   const files = Object.fromEntries(ENTRY_POINTS.map((name) => [entryFile(name), skillFile(name)]));
   assert.deepEqual(check(files), []);
 });
@@ -131,7 +132,7 @@ test("orchestration reports an entry point that repeats the server-not-running m
   }
 });
 
-test("SETTINGS_ALLOW_RULES are the allow rules of SPEC.md section 10", () => {
+test("SETTINGS_ALLOW_RULES are the lesson-folder edit, the plugin read, and the six OneNote tools", () => {
   assert.deepEqual(SETTINGS_ALLOW_RULES, [
     "Edit(/Stunden/**)",
     "Read(~/.claude/plugins/**)",
@@ -204,8 +205,24 @@ test("orchestration does not count a state label that is not at the start of a l
   assert.ok(findings[0].message.includes("Alte Seite:"), findings[0].message);
 });
 
-test("orchestration reports a guide that refers to SPEC.md, which does not ship with the plugin", () => {
-  assertOneFinding(orchestrationFile() + "The rows of `SPEC.md` section 11.3.\n", /SPEC\.md/);
+test("MODEL_TABLE_ROWS map every model choice to the Agent tool's model parameter", () => {
+  assert.deepEqual(MODEL_TABLE_ROWS, [
+    "| `Opus` | `opus` |",
+    "| `Sonnet` | `sonnet` |",
+    "| `Haiku` | `haiku` |",
+    "| `wie die Sitzung` | none",
+  ]);
+});
+
+test("orchestration reports each missing row of the model table", () => {
+  for (const row of MODEL_TABLE_ROWS) {
+    assertOneFinding(orchestrationFile().split(row).join("| x |"), new RegExp(`model table row.*${row.split("`")[1]}`));
+  }
+});
+
+test("orchestration reports a model table row that maps to another model", () => {
+  const changed = orchestrationFile().split("| `Sonnet` | `sonnet` |").join("| `Sonnet` | `opus` |");
+  assertOneFinding(changed, /model table row.*Sonnet/);
 });
 
 test("orchestration reports a guide that does not name the conventions skill by its path", () => {
@@ -239,7 +256,7 @@ test("orchestration reports a OneNote tool the guide itself calls that the main-
   assert.ok(findings[0].message.includes(getPage), findings[0].message);
 });
 
-test("BAD_REQUEST_MESSAGE shows the error and asks to forward it to the maintainer, as SPEC.md section 11.3 says", () => {
+test("BAD_REQUEST_MESSAGE shows the error and asks to forward it to the maintainer", () => {
   assert.equal(
     BAD_REQUEST_MESSAGE,
     "Ich habe angehalten, weil das Plugin einen Fehler gemeldet hat: <Grund>. Das ist ein Fehler im Plugin. Bitte leite diese Meldung an die Person weiter, die das Plugin betreut. Die bisherigen Dateien bleiben im Ordner <Name des Stundenordners>. Wenn der Fehler behoben ist, setze mit /unterricht:stunde-ueberarbeiten fort.",

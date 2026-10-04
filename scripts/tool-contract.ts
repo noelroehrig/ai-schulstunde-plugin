@@ -10,7 +10,7 @@ const RULE = "tool-contract";
 
 const USAGE = "usage: tool-contract.ts --exe <path>";
 
-/** The tools the plugin uses (`SPEC.md` section 11.1). */
+/** The OneNote tools the plugin uses. */
 const REQUIRED_TOOLS = ["ping", "get_notebooks", "list_pages", "get_page", "create_page", "replace_page"];
 
 /** The raw-XML tools that `ONENOTE_DISABLE_RAW_XML=1` must remove. */
@@ -194,7 +194,7 @@ function isFile(path: string): boolean {
 
 /**
  * Lists the tools of the exe at `--exe` with the raw-XML tools disabled and checks them against
- * the contract (`SPEC.md` section 11.2). Returns the exit code: 0 clean, 1 findings, 2 usage or
+ * the contract. Returns the exit code: 0 clean, 1 findings, 2 usage or
  * server error.
  */
 export async function main(

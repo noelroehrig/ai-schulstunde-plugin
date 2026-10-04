@@ -12,6 +12,7 @@ import {
   ENTRY_POINT_REFERENCES,
   ESCALATION_LABELS,
   MAIN_SESSION_TOOLS_SENTENCE,
+  MODEL_TABLE_ROWS,
   ORCHESTRATION_TOKENS,
   SERVER_NOT_RUNNING_MESSAGE,
   SETTINGS_ALLOW_RULES,
@@ -112,6 +113,7 @@ export function orchestrationFile(): string {
     ...AGENT_TYPES,
     ORCHESTRATION_TOKENS.join(" "),
     `Read \`${CONVENTIONS_REFERENCE}\`.`,
+    ...MODEL_TABLE_ROWS,
     `${MAIN_SESSION_TOOLS_SENTENCE} ` +
       ["ping", "get_notebooks", "list_pages"].map((tool) => `\`mcp__plugin_unterricht_onenote__${tool}\``).join(", ") +
       ".",
@@ -238,7 +240,7 @@ export function manifestFiles(): Record<string, string> {
   );
 }
 
-/** A repository with every component of `SPEC.md` section 5.1 that passes every rule in release mode. */
+/** A repository with every component of the marketplace and the plugin that passes every rule in release mode. */
 export function completeRepoFiles(): Record<string, string> {
   const files: Record<string, string> = { ...manifestFiles(), ...serverFiles() };
   for (const agent of AGENTS) files[`plugin/agents/${agent}.md`] = agentFile(agent);

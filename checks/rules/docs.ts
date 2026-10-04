@@ -11,7 +11,7 @@ const MANIFEST = "plugin/.claude-plugin/plugin.json";
 /** The three entry points as the teacher types them. */
 export const COMMANDS = ["/unterricht:einrichten", "/unterricht:stunde-planen", "/unterricht:stunde-ueberarbeiten"];
 
-/** The repository the teacher adds as a marketplace in claude.ai (`SPEC.md` section 12.1). */
+/** The repository the teacher adds as a marketplace in claude.ai. */
 export const MARKETPLACE_REPO = "noelroehrig/schulstunde-plugin";
 
 /**
