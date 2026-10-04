@@ -1,5 +1,9 @@
 # Änderungen
 
+## 0.1.1 (2026-10-04)
+
+- Server aktualisiert auf v1.0.1.
+
 ## 0.1.0 (2026-10-03)
 
 Erste Version.

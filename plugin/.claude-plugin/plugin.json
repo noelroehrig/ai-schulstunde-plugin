@@ -1,8 +1,10 @@
 {
   "name": "unterricht",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Plant Unterrichtsstunden mit Prüfschleifen und legt das Tafelbild in OneNote an.",
-  "author": { "name": "Noel Röhrig" },
+  "author": {
+    "name": "Noel Röhrig"
+  },
   "userConfig": {
     "notebook": {
       "type": "string",
@@ -20,14 +22,24 @@
       "type": "string",
       "title": "Modell für Plan und Planprüfung",
       "description": "Welches Claude-Modell den Plan schreibt und prüft. „wie die Sitzung“ nimmt das Modell, das du gerade im Chat verwendest.",
-      "options": ["Opus", "Sonnet", "Haiku", "wie die Sitzung"],
+      "options": [
+        "Opus",
+        "Sonnet",
+        "Haiku",
+        "wie die Sitzung"
+      ],
       "default": "Opus"
     },
     "board_model": {
       "type": "string",
       "title": "Modell für das Tafelbild",
       "description": "Welches Claude-Modell das Tafelbild in OneNote anlegt und prüft. Sonnet ist günstiger und reicht dafür meist aus.",
-      "options": ["Opus", "Sonnet", "Haiku", "wie die Sitzung"],
+      "options": [
+        "Opus",
+        "Sonnet",
+        "Haiku",
+        "wie die Sitzung"
+      ],
       "default": "Sonnet"
     }
   }
