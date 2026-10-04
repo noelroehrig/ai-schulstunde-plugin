@@ -20,10 +20,10 @@ export function validateBoardPayload(value: unknown): string[] {
   return errors;
 }
 
-/** Hex colors as the server accepts them after R1: `#RGB` or `#RRGGBB`. */
+/** Hex colors as the server accepts them: `#RGB` or `#RRGGBB`. */
 const COLOR = /^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
 
-/** Font families the server accepts after R1. */
+/** Font families the server accepts. */
 const FONT_FAMILY = /^[A-Za-z0-9 ,.\-]+$/;
 
 const FONT_FAMILY_MAX = 64;
@@ -53,7 +53,7 @@ function checkOutline(outline: unknown, path: string, errors: string[]): void {
   outline.items.forEach((item, index) => checkItem(item, `${path}.items[${index}]`, errors));
 }
 
-/** Checks `{ x, y, z? }`: non-negative coordinates (a negative one breaks `get_page`, B1), integer z. */
+/** Checks `{ x, y, z? }`: non-negative coordinates (a negative one makes `get_page` fail on that page), integer z. */
 function checkPosition(position: unknown, path: string, errors: string[]): void {
   if (!isObject(position)) {
     errors.push(`${path}: must be an object with x and y`);
