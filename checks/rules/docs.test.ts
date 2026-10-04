@@ -67,7 +67,7 @@ test("docs reports a README without a troubleshooting entry naming the server ex
 });
 
 test("docs reports a CHANGELOG without an entry for the manifest version", () => {
-  assertOneFinding(withVersion(docFiles(), "0.2.0"), CHANGELOG, /0\.2\.0/);
+  assertOneFinding(withVersion(docFiles(), "99.0.0"), CHANGELOG, /99\.0\.0/);
 });
 
 test("docs does not count a version that only starts the same way", () => {

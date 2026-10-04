@@ -17,13 +17,7 @@ Du brauchst kein Terminal. Alles geht mit Klicks und mit Nachrichten an Claude.
 1. Öffne claude.ai im Browser und gehe zu *Customize → Plugins → Add marketplace*.
 2. Gib als Marktplatz `noelroehrig/ai-schulstunde-plugin` ein und installiere dort das Plugin `unterricht`.
 3. Starte eine neue Sitzung im Tab „Code“ der Desktop-App. Das Plugin erscheint dort beim nächsten Start einer Sitzung.
-4. Wenn das Plugin aktiviert wird, fragt Claude nach vier Einstellungen:
-   - **OneNote-Notizbuch:** der Name deines Notizbuchs, genau so geschrieben wie in OneNote, mit Groß- und Kleinschreibung. Nur in diesem Notizbuch darf das Plugin lesen und Seiten anlegen.
-   - **Plan vor dem Tafelbild prüfen:** ob Claude dir den fertigen Plan zeigt, bevor das Tafelbild entsteht. Voreingestellt ist „ja“.
-   - **Modell für Plan und Planprüfung:** welches Claude-Modell den Plan schreibt und prüft. Voreingestellt ist Opus.
-   - **Modell für das Tafelbild:** welches Claude-Modell das Tafelbild in OneNote anlegt und prüft. Voreingestellt ist Sonnet, weil es günstiger ist und dafür meist ausreicht.
-
-   Zur Wahl stehen Opus, Sonnet, Haiku und „wie die Sitzung“, also das Modell, das du gerade im Chat verwendest. Opus verbraucht mehr von deinem Kontingent als Sonnet, Haiku am wenigsten. Später änderst du alles mit `/config`.
+4. Trag in der Einstellung **OneNote-Notizbuch** des Plugins mit `/config` den Namen deines Notizbuchs ein, genau so geschrieben wie in OneNote, mit Groß- und Kleinschreibung. Nur in diesem Notizbuch darf das Plugin lesen und Seiten anlegen.
 5. Lege einen Arbeitsordner an, zum Beispiel `Dokumente\Unterricht`, und öffne ihn im Tab „Code“.
 
 ## Erste Schritte
@@ -34,6 +28,16 @@ Du brauchst kein Terminal. Alles geht mit Klicks und mit Nachrichten an Claude.
 
    `/unterricht:stunde-planen Brüche als Anteile, 6b, Einstieg mit Pizza-Beispiel`
 
+## Einstellungen
+
+`/unterricht:einrichten` legt in deinem Arbeitsordner die Datei `einstellungen.md` an und fragt dich, ob die Werte so passen:
+
+- **Plan vor dem Tafelbild prüfen:** ob Claude dir den fertigen Plan zeigt, bevor das Tafelbild entsteht. Voreingestellt ist „ja“.
+- **Modell für Plan und Planprüfung:** welches Claude-Modell den Plan schreibt und prüft. Voreingestellt ist Opus.
+- **Modell für das Tafelbild:** welches Claude-Modell das Tafelbild in OneNote anlegt und prüft. Voreingestellt ist Sonnet, weil es günstiger ist und dafür meist ausreicht.
+
+Zur Wahl stehen Opus, Sonnet, Haiku und „wie die Sitzung“, also das Modell, das du gerade im Chat verwendest. Opus verbraucht mehr von deinem Kontingent als Sonnet, Haiku am wenigsten. Später änderst du die Werte direkt in `einstellungen.md`, oder du bittest Claude darum.
+
 ## Die drei Befehle
 
 - `/unterricht:einrichten` richtet deinen Arbeitsordner und die Verbindung zu OneNote ein und prüft beim nächsten Aufruf, ob noch alles stimmt.
@@ -43,7 +47,7 @@ Du brauchst kein Terminal. Alles geht mit Klicks und mit Nachrichten an Claude.
 ## So entsteht eine Stunde
 
 1. **Planung:** Claude entwirft den Plan, und ein zweiter Durchgang prüft ihn gegen deine `kriterien.md` und `schulkontext.md`. Entwurf und Prüfung sind eine Runde. Wird ein Muss-Kriterium verfehlt, folgt eine weitere Runde, in der der Plan überarbeitet und erneut geprüft wird, insgesamt höchstens drei Runden.
-2. **Prüfpunkt:** Claude zeigt dir eine kurze Zusammenfassung des Plans und fragt, ob er so passt. Antworte mit „weiter“, oder schreib, was geändert werden soll. Deine Rückmeldung geht vor deinen Kriterien, und der Plan wird damit neu überarbeitet. Den Prüfpunkt kannst du in den Einstellungen abschalten.
+2. **Prüfpunkt:** Claude zeigt dir eine kurze Zusammenfassung des Plans und fragt, ob er so passt. Antworte mit „weiter“, oder schreib, was geändert werden soll. Deine Rückmeldung geht vor deinen Kriterien, und der Plan wird damit neu überarbeitet. Den Prüfpunkt kannst du in `einstellungen.md` abschalten.
 3. **Tafelbild:** Claude legt die Seite in OneNote an und liest sie danach zur Prüfung wieder aus. Auch hier gibt es höchstens drei Runden.
 
 Wenn nach drei Runden noch Muss-Mängel offen sind, zeigt Claude sie dir und du entscheidest: „So übernehmen“, „Ich gebe Hinweise“ oder „Abbrechen“.
@@ -60,6 +64,7 @@ Unterricht/
 ├── schulkontext.md    Schule, Stundenlänge, Phasenmodell, Regeln
 ├── kriterien.md       deine Kriterien, aufgeteilt in Muss und Soll
 ├── onenote.md         Abschnitt, Seitentitel und sichtbare Fläche in OneNote
+├── einstellungen.md   Prüfpunkt und Modelle
 ├── material/          Lehrpläne, Vorlagen
 └── Stunden/
     └── 2026-10-07 6b Bruchrechnung/
@@ -71,7 +76,7 @@ Unterricht/
 
 Du musst `onenote.md` nicht vorher ausfüllen, Claude plant die Stunde trotzdem. Steht dort noch kein Seitentitel, heißen der Stundenordner und die Seite in OneNote nach dem Schema `JJJJ-MM-TT Klasse Thema`. Steht dort noch kein Abschnitt, fragt dich Claude vor dem Tafelbild, in welchen Abschnitt die Seite soll.
 
-Die Dateien gehören dir. Das Plugin überschreibt `schulkontext.md`, `kriterien.md`, `onenote.md`, `CLAUDE.md` und deinen `material/`-Ordner nie. Änderungen daran schlägt `/unterricht:einrichten` nur vor und schreibt sie erst nach deinem Ja.
+Die Dateien gehören dir. Das Plugin überschreibt `schulkontext.md`, `kriterien.md`, `onenote.md`, `einstellungen.md`, `CLAUDE.md` und deinen `material/`-Ordner nie. Änderungen daran schlägt `/unterricht:einrichten` nur vor und schreibt sie erst nach deinem Ja.
 
 Wenn OneDrive deinen Arbeitsordner synchronisiert, lade Dateien, die nur online liegen, vorher herunter, sonst kann Claude sie nicht lesen.
 

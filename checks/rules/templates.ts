@@ -7,6 +7,13 @@ const TEMPLATE_DIR = "plugin/templates/";
 /** The privacy sentence every template carries. */
 export const PRIVACY_SENTENCE = "Hier stehen keine Namen oder anderen persönlichen Daten von Schülerinnen und Schülern.";
 
+/** The settings of `einstellungen.md`: each line's label with the template's value. */
+export const SETTINGS: Record<string, string> = {
+  "Plan vor dem Tafelbild prüfen:": "ja",
+  "Modell für Plan und Planprüfung:": "Opus",
+  "Modell für das Tafelbild:": "Sonnet",
+};
+
 /** What each template must contain besides the privacy sentence. */
 interface TemplateSpec {
   /** Heading lines; a heading may continue with an explanation, as in `### Muss (sonst wird überarbeitet)`. */
@@ -45,6 +52,12 @@ export const TEMPLATES: Record<string, TemplateSpec> = {
     headings: ["## Ablage", "## Ansicht"],
     lines: [],
     linePrefixes: ["Abschnitt: [", "Seitentitel: ["],
+    phrases: [],
+  },
+  "einstellungen.md": {
+    headings: ["## Prüfpunkt", "## Modelle"],
+    lines: Object.entries(SETTINGS).map(([label, value]) => `${label} ${value}`),
+    linePrefixes: [],
     phrases: [],
   },
 };

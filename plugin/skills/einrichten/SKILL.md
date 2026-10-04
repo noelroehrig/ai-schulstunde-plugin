@@ -10,8 +10,6 @@ The teacher wants to set up their working folder, or check one that is already s
 
 Plugin root: ${CLAUDE_PLUGIN_ROOT}
 OneNote notebook: ${user_config.notebook}
-Planning model: ${user_config.planning_model}
-Board model: ${user_config.board_model}
 
 The working folder is the current working directory: use its absolute path, with forward slashes. Every file named below without a folder is in the working folder. The templates are in `${CLAUDE_PLUGIN_ROOT}/templates/`.
 
@@ -21,7 +19,7 @@ Rules for the whole procedure:
 - Never overwrite a file. A template is copied only when its file is missing. An existing file is changed only after you showed the change and the teacher said yes. On a no, ask what to change and propose again, or skip the step when the teacher says so.
 - `Abbrechen`, or an answer that means it, at any question stops the procedure: change nothing more, and say `Abgebrochen. Was bis hierher eingerichtet ist, bleibt erhalten. Du kannst /unterricht:einrichten jederzeit noch einmal ausführen.`
 - In a folder that is already set up, this procedure is a health check: it reports the state and changes nothing without a yes.
-- Keep a list of what is set up and what is missing for the summary in step 7.
+- Keep a list of what is set up and what is missing for the summary in step 8.
 - Never write student names or other personal data into a file or a page.
 
 ## 1. Confirm the working folder
@@ -30,7 +28,7 @@ Ask `Ich richte diesen Ordner als deinen Arbeitsordner ein: <absoluter Pfad>. Is
 
 ## 2. Files and folders
 
-1. For each of `CLAUDE.md`, `schulkontext.md`, `kriterien.md`, and `onenote.md`: when the file is missing in the working folder, read the template of the same name in `${CLAUDE_PLUGIN_ROOT}/templates/` and write it unchanged into the working folder. When the file exists, do not read the template and do not touch the file.
+1. For each of `CLAUDE.md`, `schulkontext.md`, `kriterien.md`, `onenote.md`, and `einstellungen.md`: when the file is missing in the working folder, read the template of the same name in `${CLAUDE_PLUGIN_ROOT}/templates/` and write it unchanged into the working folder. When the file exists, do not read the template and do not touch the file.
 2. Create the folders `material/` and `Stunden/` when they are missing.
 3. Tell the teacher what you created and what already existed, for example:
 
@@ -105,7 +103,7 @@ When step 4 was skipped, skip the calibration too, list it as missing, and go to
 
 On a no, leave `## Ansicht` as it is and go to step 6. On a yes, continue with item 1.
 
-1. Ask `In welchem Abschnitt soll ich die Seite „Kalibrierung Ansicht“ anlegen?`, naming the notebook's sections, and end your turn. The section must exist; note its ID.
+1. Ask `In welchem Abschnitt soll ich die Seite „Kalibrierung Ansicht“ anlegen?`, naming the notebook's sections, and end your turn. Then call `get_notebooks` again, because the teacher may just have created the section in OneNote, and check the notebook as in item 3 of step 4 and the section against that fresh answer only: it must be one of the notebook's sections, with exactly that name; note its ID. When it is missing, ask `Im Notizbuch „<notebook>“ gibt es keinen Abschnitt „<Abschnitt>“. Bitte lege ihn in OneNote an und antworte mit „weiter“, oder nenne einen anderen vorhandenen Abschnitt.` and end your turn, then check again the same way.
 2. Call `list_pages` on that section. When a page `Kalibrierung Ansicht` already exists, say `Im Abschnitt „<Abschnitt>“ gibt es schon eine Seite „Kalibrierung Ansicht“, vielleicht von einem früheren Versuch. Bitte lösche sie in OneNote und antworte dann mit „weiter“.` and end your turn; then check again. Never write to a page that existed before.
 3. Call `mcp__plugin_unterricht_onenote__create_page` once, with that section and the title `Kalibrierung Ansicht`. Never retry it. After a `timeout`, say `OneNote hat nicht rechtzeitig geantwortet. Vielleicht wurde die Seite trotzdem angelegt. Bitte sieh im Abschnitt „<Abschnitt>“ nach einer Seite „Kalibrierung Ansicht“, lösche sie, und führe /unterricht:einrichten später noch einmal aus.`, skip the rest of this step, and list the Ansicht as missing.
 4. Call `mcp__plugin_unterricht_onenote__replace_page` on the new page's ID, with the title `Kalibrierung Ansicht` and the payload format of `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/board.md`: one outline per label, each holding one paragraph with the label as text and `font_size` 14.
@@ -155,13 +153,35 @@ Offer allow rules for `.claude/settings.json` in the working folder, so that the
    In both cases, list the permissions as missing in the summary.
 4. Show the proposal and say which rules are new, then ask `Damit du nicht bei jedem Schritt eine Erlaubnis bestätigen musst, kann ich diese Regeln in .claude/settings.json in deinem Arbeitsordner eintragen. Sie erlauben das Schreiben in Stunden/, das Lesen der Plugin-Dateien und die OneNote-Werkzeuge des Plugins. Soll ich sie eintragen? Antworte mit „ja“ oder „nein“.` and end your turn. Write only after a yes; create `.claude/` when it is missing. On a no, write nothing and list the permissions as missing.
 
-## 7. Summary
+## 7. Settings
+
+Read Settings in `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md`, then `einstellungen.md`, and check its three settings as Settings says.
+
+1. When a setting is broken, tell the teacher which, for example `In einstellungen.md fehlt die Einstellung „Modell für das Tafelbild“.` or `In einstellungen.md hat die Einstellung „Modell für das Tafelbild“ den unbekannten Wert „<Wert>“.`, and build the change as in item 3, with the value of `${CLAUDE_PLUGIN_ROOT}/templates/einstellungen.md` for each broken setting.
+2. Otherwise show the settings and ask, and end your turn:
+
+   ```
+   In einstellungen.md steht:
+   - Plan vor dem Tafelbild prüfen: <Wert>
+   - Modell für Plan und Planprüfung: <Wert>
+   - Modell für das Tafelbild: <Wert>
+
+   „Plan vor dem Tafelbild prüfen“ heißt, dass ich dir den fertigen Plan zeige, bevor das Tafelbild entsteht. Als Modell stehen Opus, Sonnet, Haiku und „wie die Sitzung“ zur Wahl, also das Modell, das du gerade im Chat verwendest. Opus verbraucht mehr von deinem Kontingent als Sonnet, Haiku am wenigsten.
+   Sollen die Einstellungen so bleiben? Antworte mit „weiter“, oder schreib, was sich ändern soll.
+   ```
+
+   - `weiter`: change nothing and go to step 8.
+   - Feedback: build the change as in item 3.
+3. Build the change: for each setting the teacher changes and each broken one, its line in the format of the template, for example `Modell für das Tafelbild: Opus`. It replaces the old line; a missing line goes under its heading of the template, and a missing heading is added with it. Use only allowed values: when the teacher asks for another, name the allowed values and ask again.
+4. Show the new lines and the lines they replace, and ask `Soll ich das so in einstellungen.md eintragen? Antworte mit „ja“, oder schreib, was anders sein soll.` and end your turn. Write only after a yes, then go to step 8. On feedback, change the proposal and ask again. On a no without feedback, ask what to change; when the teacher wants to skip, write nothing and list each broken setting as missing.
+
+## 8. Summary
 
 End with a German summary:
 
 - **Eingerichtet:** the files and folders, the values in `schulkontext.md` and `kriterien.md`, the Ablage, the Ansicht, and the permissions that are in place.
-- **Modelle:** one line with both settings, for example `Plan und Planprüfung: Opus, Tafelbild: Sonnet. Ändern kannst du das mit /config.`, using `Planning model` and `Board model` above.
-- **Fehlt noch:** every field of step 3 that still needs a value by the rules of its table (the Phasenmodell counts as set once confirmed), with file and line, a placeholder left in the `## Ablage` of `onenote.md`, every skipped OneNote step with the reason, an Ansicht that was not measured when the teacher projects with a fixed visible area, the allow rules of step 6 when they were not written (declined by the teacher, `.claude/settings.json` not valid JSON, or of an unexpected shape), each with the reason, and a section to create in OneNote. When nothing is missing, say `Alles ist eingerichtet.`
+- **Einstellungen:** one line with the settings of `einstellungen.md` as they are now, for example `Plan vor dem Tafelbild prüfen: ja, Plan und Planprüfung: Opus, Tafelbild: Sonnet. Ändern kannst du das in einstellungen.md.` A broken setting is listed under Fehlt noch instead.
+- **Fehlt noch:** every field of step 3 that still needs a value by the rules of its table (the Phasenmodell counts as set once confirmed), with file and line, a placeholder left in the `## Ablage` of `onenote.md`, every skipped OneNote step with the reason, an Ansicht that was not measured when the teacher projects with a fixed visible area, the allow rules of step 6 when they were not written (declined by the teacher, `.claude/settings.json` not valid JSON, or of an unexpected shape), each with the reason, each setting of step 7 that is still broken, and a section to create in OneNote. When nothing is missing, say `Alles ist eingerichtet.`
 - **Befehle:**
 
   ```

@@ -94,6 +94,19 @@ test("templates reports a filled-in Abschnitt and Seitentitel", () => {
   );
 });
 
+test("templates reports a settings line whose value differs from the default", () => {
+  const files = withFile(
+    "einstellungen.md",
+    template("einstellungen.md").replace("Modell für das Tafelbild: Sonnet", "Modell für das Tafelbild: Opus"),
+  );
+  assertOneFinding(files, "einstellungen.md", /line "Modell für das Tafelbild: Sonnet" missing/);
+});
+
+test("templates reports a missing einstellungen heading", () => {
+  const files = withFile("einstellungen.md", template("einstellungen.md").replace("## Prüfpunkt\n", ""));
+  assertOneFinding(files, "einstellungen.md", /heading "## Prüfpunkt" missing/);
+});
+
 test("templates reports a missing time-sum criterion", () => {
   const files = withFile(
     "kriterien.md",

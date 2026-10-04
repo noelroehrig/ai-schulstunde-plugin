@@ -1,5 +1,6 @@
 import { ONENOTE_TOOL_PREFIX } from "../permissions.ts";
 import type { Finding, Repo, Rule } from "../repo.ts";
+import { SETTINGS } from "./templates.ts";
 
 const RULE = "orchestration";
 
@@ -69,10 +70,13 @@ const ENTRY_POINT_FILES = ["plugin/skills/stunde-planen/SKILL.md", "plugin/skill
 export const ENTRY_POINT_REFERENCES = [
   GUIDE_REFERENCE,
   "${user_config.notebook}",
-  "${user_config.plan_checkpoint}",
-  "${user_config.planning_model}",
-  "${user_config.board_model}",
+  "the `plan_checkpoint` value",
+  "the `planning_model` value",
+  "the `board_model` value",
 ];
+
+/** The label of each `einstellungen.md` line, as the guide's Settings table names it in a code span. */
+export const SETTING_LABELS = Object.keys(SETTINGS).map((label) => `\`${label}\``);
 
 /** The setup entry point, which offers the allow rules. */
 const SETUP_FILE = "plugin/skills/einrichten/SKILL.md";
@@ -176,6 +180,9 @@ function guideProblems(text: string): string[] {
   if (!text.includes(CONVENTIONS_REFERENCE)) problems.push(`reference "${CONVENTIONS_REFERENCE}" missing`);
   for (const row of MODEL_TABLE_ROWS) {
     if (!text.includes(row)) problems.push(`model table row "${row}" missing`);
+  }
+  for (const label of SETTING_LABELS) {
+    if (!text.includes(label)) problems.push(`settings line ${label} missing`);
   }
   for (const label of ESCALATION_LABELS) {
     if (!text.includes(label)) problems.push(`escalation label "${label}" missing`);

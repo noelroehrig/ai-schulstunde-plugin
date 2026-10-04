@@ -11,9 +11,6 @@ The teacher wants to work on an existing lesson in `Stunden/`. You either resume
 
 Plugin root: ${CLAUDE_PLUGIN_ROOT}
 OneNote notebook: ${user_config.notebook}
-Plan checkpoint: ${user_config.plan_checkpoint}
-Planning model: ${user_config.planning_model}
-Board model: ${user_config.board_model}
 Request: $ARGUMENTS
 
 The working folder is the current working directory: use its absolute path, with forward slashes. Every file named below without a folder is in the working folder.
@@ -22,7 +19,7 @@ When you need the teacher's answer, ask in German and end your turn; the next me
 
 ## 1. Preflight, no writes
 
-Write nothing in this step. The preflight of the working folder is the one of `stunde-planen`, kept in one place: read `${CLAUDE_PLUGIN_ROOT}/skills/stunde-planen/SKILL.md` and run checks 1 and 2 of its step 1 exactly as written there, with their German messages; when one fails, stop as it says. As there, `## Ablage` of `onenote.md` is not checked here. Its check 3 (the request) does not apply here. Its checks 4 and 5 are replaced by items 4 and 5 of step 2, which run once the lesson is chosen.
+Write nothing in this step. The preflight of the working folder is the one of `stunde-planen`, kept in one place: read `${CLAUDE_PLUGIN_ROOT}/skills/stunde-planen/SKILL.md` and run checks 1 to 3 of its step 1 exactly as written there, with their German messages; when one fails, stop as it says. Check 3 gives the `plan_checkpoint`, `planning_model`, and `board_model` values. As there, `## Ablage` of `onenote.md` is not checked here. Its check 4 (the request) does not apply here. Its checks 5 and 6 are replaced by items 4 and 5 of step 2, which run once the lesson is chosen.
 
 ## 2. Choose the lesson
 
@@ -51,14 +48,14 @@ The run was interrupted. Continue only as Next step of `orchestration.md` says, 
 
 When the teacher's changes are not empty, never drop them without a word:
 
-- `Schritt: Prüfpunkt`: the changes are always the checkpoint feedback, also when `Plan checkpoint` above is `false` (see below).
-- `Schritt: Planung` while `Plan checkpoint` above is not `false`: say first `Diese Stunde ist noch nicht fertig. Ich setze die Planung dort fort, wo sie unterbrochen wurde. Deine Änderungen kannst du gleich am Prüfpunkt nennen.`
-- `Schritt: Planung` while `Plan checkpoint` above is `false`, and `Schritt: Tafelbild`: say first `Diese Stunde ist noch nicht fertig. Ich setze sie dort fort, wo sie unterbrochen wurde, und übernehme deine Änderungen jetzt nicht. Wenn die Stunde fertig ist, kannst du sie mit /unterricht:stunde-ueberarbeiten einbringen.`
+- `Schritt: Prüfpunkt`: the changes are always the checkpoint feedback, also when the `plan_checkpoint` value is `false` (see below).
+- `Schritt: Planung` while the `plan_checkpoint` value is not `false`: say first `Diese Stunde ist noch nicht fertig. Ich setze die Planung dort fort, wo sie unterbrochen wurde. Deine Änderungen kannst du gleich am Prüfpunkt nennen.`
+- `Schritt: Planung` while the `plan_checkpoint` value is `false`, and `Schritt: Tafelbild`: say first `Diese Stunde ist noch nicht fertig. Ich setze sie dort fort, wo sie unterbrochen wurde, und übernehme deine Änderungen jetzt nicht. Wenn die Stunde fertig ist, kannst du sie mit /unterricht:stunde-ueberarbeiten einbringen.`
 
 Tell the teacher in one German line where you continue, for example `Ich setze die Stunde „<Name des Stundenordners>“ bei der Planung fort, Runde 2 von 3.`
 
-- `Schritt: Prüfpunkt` with changes that are not empty: they are the answer to the checkpoint question, whatever `Plan checkpoint` says. Do not ask it: save them as teacher input, as `rueckmeldung_v<N+1>.md` with N the `Planversion`, exactly as `The state` of `orchestration.md` says, and make the write of the table for teacher feedback at the checkpoint (`Rückmeldung`, `Schritt: Planung`, `Runde: 0 von 3`). Then go on as Next step says.
-- Every other case: go on as Next step says. With `Schritt: Prüfpunkt`, that is the checkpoint question again, or the OneNote gate when `Plan checkpoint` is `false`. With `Schritt: Tafelbild`, the gate resolves `section_id` from the recorded `Abschnitt` first, as `orchestration.md` says for a resumed board loop, and the board loop keeps `Seitentitel` and `Seiten-ID`.
+- `Schritt: Prüfpunkt` with changes that are not empty: they are the answer to the checkpoint question, whatever the `plan_checkpoint` value is. Do not ask it: save them as teacher input, as `rueckmeldung_v<N+1>.md` with N the `Planversion`, exactly as `The state` of `orchestration.md` says, and make the write of the table for teacher feedback at the checkpoint (`Rückmeldung`, `Schritt: Planung`, `Runde: 0 von 3`). Then go on as Next step says.
+- Every other case: go on as Next step says. With `Schritt: Prüfpunkt`, that is the checkpoint question again, or the OneNote gate when the `plan_checkpoint` value is `false`. With `Schritt: Tafelbild`, the gate resolves `section_id` from the recorded `Abschnitt` first, as `orchestration.md` says for a resumed board loop, and the board loop keeps `Seitentitel` and `Seiten-ID`.
 
   With `Schritt: Tafelbild` and `Seiten-ID: keine`, an interrupted board author of round 1 may have left an empty page. After the gate, before the first agent run, say `Möglicherweise ist bei der Unterbrechung im Abschnitt „<Abschnitt>“ eine leere Seite „<Seitentitel>“ entstanden. Falls du sie in OneNote findest, lösche sie bitte. Ich lege das Tafelbild auf einer neuen Seite an.` The board author then runs with an empty `page_id`.
 
@@ -88,9 +85,9 @@ Read `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md` and foll
 - the working folder: the absolute path of the working folder;
 - the lesson folder: the absolute path of the chosen lesson folder;
 - the `notebook` setting: `OneNote notebook` above;
-- the `plan_checkpoint` value: `Plan checkpoint` above;
-- the `planning_model` value: `Planning model` above;
-- the `board_model` value: `Board model` above.
+- the `plan_checkpoint` value: from step 1;
+- the `planning_model` value: from step 1;
+- the `board_model` value: from step 1.
 
 From here on, `Abbrechen` and every stop work as `orchestration.md` says, and `stunde.md` holds the state. Two additions apply whenever `Alte Seite` in `## OneNote` is not `keine`, also when the lesson is resumed later. Both read only `## OneNote`, never `## Verlauf`.
 

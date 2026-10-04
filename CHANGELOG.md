@@ -1,5 +1,10 @@
 # Änderungen
 
+## 0.2.0 (2026-10-04)
+
+- Prüfpunkt und Modelle stehen jetzt in der Datei `einstellungen.md` in deinem Arbeitsordner statt in den Plugin-Einstellungen. Rufe nach dem Update einmal `/unterricht:einrichten` auf: Es legt die Datei mit den bisherigen Voreinstellungen an und fragt, ob sie passen. Werte, die du vorher mit `/config` geändert hattest, trägst du dort neu ein.
+- Beim Ausmessen der sichtbaren Fläche findet `/unterricht:einrichten` jetzt auch einen Abschnitt, den du gerade erst in OneNote angelegt hast.
+
 ## 0.1.1 (2026-10-04)
 
 - Server aktualisiert auf v1.0.1.
