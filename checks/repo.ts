@@ -28,10 +28,7 @@ export interface Rule {
 }
 
 /** Directory names the walk never enters, at any depth. */
-const SKIPPED_DIRS = new Set([".git", "node_modules", ".agentpasture"]);
-
-/** Prefix of the build engine's workspace files at the repo root (ignored by git). */
-const ENGINE_FILE_PREFIX = ".agentpasture-";
+const SKIPPED_DIRS = new Set([".git", "node_modules"]);
 
 /** Converts a native relative path to a repo-relative path with forward slashes. */
 export function toRepoPath(nativePath: string, separator: string = sep): string {
@@ -47,7 +44,7 @@ export function createFsRepo(root: string): Repo {
   };
 }
 
-/** Lists files below `dir` as repo paths, skipping tooling directories and engine files. */
+/** Lists files below `dir` as repo paths, skipping tooling directories. */
 function walk(root: string, dir: string): string[] {
   const files: string[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -55,7 +52,6 @@ function walk(root: string, dir: string): string[] {
     if (entry.isDirectory()) {
       if (!SKIPPED_DIRS.has(entry.name)) files.push(...walk(root, full));
     } else if (entry.isFile()) {
-      if (dir === root && entry.name.startsWith(ENGINE_FILE_PREFIX)) continue;
       files.push(toRepoPath(relative(root, full)));
     }
   }

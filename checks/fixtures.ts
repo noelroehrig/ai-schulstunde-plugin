@@ -268,7 +268,7 @@ export function readmeFile(): string {
   return [
     "# Unterricht",
     "",
-    "Marktplatz in claude.ai hinzufügen: `noelroehrig/schulstunde-plugin`.",
+    "Marktplatz in claude.ai hinzufügen: `noelroehrig/ai-schulstunde-plugin`.",
     "",
     "- `/unterricht:einrichten` richtet den Arbeitsordner ein.",
     "- `/unterricht:stunde-planen` plant eine neue Stunde.",

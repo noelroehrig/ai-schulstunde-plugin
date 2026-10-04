@@ -58,7 +58,7 @@ test("docs reports each command missing from the README", () => {
 
 test("docs reports a README without the marketplace repository", () => {
   const files = { ...docFiles(), [README]: readmeFile().split(MARKETPLACE_REPO).join("x") };
-  assertOneFinding(files, README, /noelroehrig\/schulstunde-plugin/);
+  assertOneFinding(files, README, /noelroehrig\/ai-schulstunde-plugin/);
 });
 
 test("docs reports a README without a troubleshooting entry naming the server exe", () => {
