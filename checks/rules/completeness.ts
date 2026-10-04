@@ -15,7 +15,7 @@ const CONVENTIONS_FILES = [
 ];
 
 /** The templates `einrichten` copies into a working folder. */
-const TEMPLATES = ["CLAUDE.md", "schulkontext.md", "kriterien.md", "onenote.md"];
+const TEMPLATES = ["CLAUDE.md", "schulkontext.md", "kriterien.md", "onenote.md", "einstellungen.md"];
 
 /** Every file a release needs besides the manifests and the server, which their own rules check. */
 export const REQUIRED_FILES = [

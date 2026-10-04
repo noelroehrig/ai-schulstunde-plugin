@@ -15,10 +15,11 @@ import {
   MODEL_TABLE_ROWS,
   ORCHESTRATION_TOKENS,
   SERVER_NOT_RUNNING_MESSAGE,
+  SETTING_LABELS,
   SETTINGS_ALLOW_RULES,
   STATE_LINES,
 } from "./rules/orchestration.ts";
-import { PRIVACY_SENTENCE } from "./rules/templates.ts";
+import { PRIVACY_SENTENCE, SETTINGS } from "./rules/templates.ts";
 import {
   ASSIGNMENT_KEYS,
   GLOSSARY_TERMS,
@@ -114,6 +115,7 @@ export function orchestrationFile(): string {
     ORCHESTRATION_TOKENS.join(" "),
     `Read \`${CONVENTIONS_REFERENCE}\`.`,
     ...MODEL_TABLE_ROWS,
+    ...SETTING_LABELS.map((label) => `| ${label} | Wert |`),
     `${MAIN_SESSION_TOOLS_SENTENCE} ` +
       ["ping", "get_notebooks", "list_pages"].map((tool) => `\`mcp__plugin_unterricht_onenote__${tool}\``).join(", ") +
       ".",
@@ -204,6 +206,12 @@ export function templateFiles(): Record<string, string> {
       "Abschnitt: [Name]",
       "Seitentitel: [Schema]",
       "## Ansicht",
+    ]),
+    "plugin/templates/einstellungen.md": file([
+      "# Einstellungen",
+      "## Prüfpunkt",
+      "## Modelle",
+      ...Object.entries(SETTINGS).map(([label, value]) => `${label} ${value}`),
     ]),
   };
 }
