@@ -30,7 +30,7 @@ test("completeness reports each missing component on its own", () => {
 
 test("completeness lists every component of the marketplace and the plugin", () => {
   const findings = completeness.run(createMemoryRepo({}), "release");
-  assert.equal(findings.length, 20);
+  assert.equal(findings.length, 21);
   assert.deepEqual(
     findings.map((finding) => [finding.rule, finding.file]),
     REQUIRED_FILES.map((file) => ["completeness", file]),

@@ -1,6 +1,6 @@
 # Orchestration
 
-The shared procedure of the entry points `stunde-planen` and `stunde-ueberarbeiten`: the planning loop, the checkpoint, a OneNote server that is not running, the OneNote gate, the board loop, escalation, failure handling, and the finish. Read it together with `<plugin root>/skills/lesson-conventions/SKILL.md`, which defines the assignment shape and the conventions, and `lesson-folder.md` of `lesson-conventions`. You run it in the main conversation; the agents run one level below you.
+The shared procedure of the entry points `stunde-planen` and `stunde-ueberarbeiten`: the settings, the planning loop, the checkpoint, a OneNote server that is not running, the OneNote gate, the board loop, escalation, failure handling, and the finish. Read it together with `<plugin root>/skills/lesson-conventions/SKILL.md`, which defines the assignment shape and the conventions, and `lesson-folder.md` of `lesson-conventions`. You run it in the main conversation; the agents run one level below you.
 
 ## Inputs
 
@@ -14,7 +14,7 @@ The entry point states these values before it tells you to follow this file:
 - the `planning_model` value: the model setting of the planning agents;
 - the `board_model` value: the model setting of the board agents.
 
-Before any agent runs, check both model values as Choosing the model says.
+The entry point read the last three from `einstellungen.md` and checked them in its preflight, as Settings says.
 
 Once `stunde.md` holds the state the entry point wrote, decide the next step as Next step says, from `## Stand` of `stunde.md` only.
 
@@ -89,6 +89,18 @@ Before every agent run, print exactly one German status line in the form `<Planu
 - `Tafelbild, Runde 2 von 3: Das Tafelbild wird überarbeitet.`
 - `Tafelbild, Runde 2 von 3: Das Tafelbild wird geprüft.`
 
+## Settings
+
+The teacher's settings are lines of `einstellungen.md` in the working folder:
+
+| Line | Allowed values | Passed on as |
+|---|---|---|
+| `Plan vor dem Tafelbild prüfen:` | `ja`, `nein` | the `plan_checkpoint` value: `true` for `ja`, `false` for `nein` |
+| `Modell für Plan und Planprüfung:` | `Opus`, `Sonnet`, `Haiku`, `wie die Sitzung` | the `planning_model` value |
+| `Modell für das Tafelbild:` | `Opus`, `Sonnet`, `Haiku`, `wie die Sitzung` | the `board_model` value |
+
+The value is the text after the colon; letter case and surrounding spaces do not matter, and a model value is passed on as the table spells it. A setting is broken when its line is missing or its value is not allowed. Never assume a value for a broken setting. The preflight of each entry point checks all three before anything is written, and on a broken one stops with `Die Einstellung „<Bezeichnung>“ in einstellungen.md fehlt oder hat einen unbekannten Wert. Erlaubt ist <Werte>. Bitte trag einen erlaubten Wert ein, oder führe /unterricht:einrichten aus.` `<Bezeichnung>` is the line without its colon; `<Werte>` is `ja oder nein`, or `Opus, Sonnet, Haiku oder „wie die Sitzung“`.
+
 ## Choosing the model
 
 `unterricht:lesson-planner` and `unterricht:plan-reviewer` run on the `planning_model` value, `unterricht:board-author` and `unterricht:board-reviewer` on the `board_model` value. The value decides the Agent tool's `model` parameter:
@@ -100,7 +112,7 @@ Before every agent run, print exactly one German status line in the form `<Planu
 | `Haiku` | `haiku` |
 | `wie die Sitzung` | none: the agent's `model: inherit` applies |
 
-Any other value is a broken setting. Check both values when you start following this file, before any agent runs, and on a broken one stop with `Ich habe angehalten: Die Einstellung „<Titel>“ hat den unbekannten Wert „<Wert>“. Bitte wähle mit /config Opus, Sonnet, Haiku oder „wie die Sitzung“ und setze danach mit /unterricht:stunde-ueberarbeiten fort.` The title is `Modell für Plan und Planprüfung` for `planning_model` and `Modell für das Tafelbild` for `board_model`. Never choose a model yourself.
+The entry point checked both values in its preflight (see Settings). Never choose a model yourself.
 
 ## Running an agent
 

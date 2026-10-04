@@ -8,6 +8,7 @@ Hier stehen keine Namen oder anderen persönlichen Daten von Schülerinnen und S
 - `schulkontext.md`: Schule, Stundenlänge, Phasenmodell und Regeln, die jede Planung beachten soll.
 - `kriterien.md`: deine Kriterien für Planung und Tafelbild, aufgeteilt in Muss und Soll.
 - `onenote.md`: wo Tafelbilder in OneNote abgelegt werden und wie groß die sichtbare Fläche ist.
+- `einstellungen.md`: ob du den Plan vor dem Tafelbild prüfst und welche Claude-Modelle planen und das Tafelbild anlegen.
 - `material/`: Lehrpläne, Vorlagen und anderes Material für die Planung.
 - `Stunden/`: ein Ordner pro geplanter Stunde mit Planung, Prüfberichten und Tafelbild.
 

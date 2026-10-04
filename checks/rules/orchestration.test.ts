@@ -13,6 +13,7 @@ import {
   MODEL_TABLE_ROWS,
   SERVER_EXE,
   SERVER_NOT_RUNNING_MESSAGE,
+  SETTING_LABELS,
   SETTINGS_ALLOW_RULES,
   STATE_LINES,
   orchestration,
@@ -90,7 +91,7 @@ test("SERVER_NOT_RUNNING_MESSAGE names the exe and the advice to restart and to 
 
 test("orchestration reports each missing item separately", () => {
   const findings = check({ [GUIDE]: "# Orchestration\n" });
-  assert.equal(findings.length, 1 + 3 + 4 + 5 + 4 + 1 + 1 + 1 + 1);
+  assert.equal(findings.length, 1 + 3 + 4 + 5 + 4 + 3 + 1 + 1 + 1 + 1);
   assert.ok(findings.every((finding) => finding.rule === "orchestration" && finding.file === GUIDE));
 });
 
@@ -217,6 +218,20 @@ test("MODEL_TABLE_ROWS map every model choice to the Agent tool's model paramete
 test("orchestration reports each missing row of the model table", () => {
   for (const row of MODEL_TABLE_ROWS) {
     assertOneFinding(orchestrationFile().split(row).join("| x |"), new RegExp(`model table row.*${row.split("`")[1]}`));
+  }
+});
+
+test("SETTING_LABELS are the three lines of einstellungen.md as code spans", () => {
+  assert.deepEqual(SETTING_LABELS, [
+    "`Plan vor dem Tafelbild prüfen:`",
+    "`Modell für Plan und Planprüfung:`",
+    "`Modell für das Tafelbild:`",
+  ]);
+});
+
+test("orchestration reports each settings line missing from the guide", () => {
+  for (const label of SETTING_LABELS) {
+    assertOneFinding(orchestrationFile().split(label).join("`x`"), new RegExp(`settings line ${label}`));
   }
 });
 
