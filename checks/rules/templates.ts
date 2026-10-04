@@ -4,7 +4,7 @@ const RULE = "templates";
 
 const TEMPLATE_DIR = "plugin/templates/";
 
-/** The sentence every template carries (`SPEC.md` section 9.1). */
+/** The privacy sentence every template carries. */
 export const PRIVACY_SENTENCE = "Hier stehen keine Namen oder anderen persönlichen Daten von Schülerinnen und Schülern.";
 
 /** What each template must contain besides the privacy sentence. */

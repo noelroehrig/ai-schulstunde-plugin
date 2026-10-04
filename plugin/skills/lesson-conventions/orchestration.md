@@ -10,7 +10,11 @@ The entry point states these values before it tells you to follow this file:
 - the working folder: the absolute path of the teacher's working folder;
 - the lesson folder: the absolute path of the lesson's folder in `Stunden/`, with its `stunde.md`;
 - the `notebook` setting: the name of the OneNote notebook;
-- the `plan_checkpoint` value: `true` or `false`.
+- the `plan_checkpoint` value: `true` or `false`;
+- the `planning_model` value: the model setting of the planning agents;
+- the `board_model` value: the model setting of the board agents.
+
+Before any agent runs, check both model values as Choosing the model says.
 
 Once `stunde.md` holds the state the entry point wrote, decide the next step as Next step says, from `## Stand` of `stunde.md` only.
 
@@ -85,11 +89,24 @@ Before every agent run, print exactly one German status line in the form `<Planu
 - `Tafelbild, Runde 2 von 3: Das Tafelbild wird überarbeitet.`
 - `Tafelbild, Runde 2 von 3: Das Tafelbild wird geprüft.`
 
+## Choosing the model
+
+`unterricht:lesson-planner` and `unterricht:plan-reviewer` run on the `planning_model` value, `unterricht:board-author` and `unterricht:board-reviewer` on the `board_model` value. The value decides the Agent tool's `model` parameter:
+
+| Setting | `model` parameter |
+|---|---|
+| `Opus` | `opus` |
+| `Sonnet` | `sonnet` |
+| `Haiku` | `haiku` |
+| `wie die Sitzung` | none: the agent's `model: inherit` applies |
+
+Any other value is a broken setting. Check both values when you start following this file, before any agent runs, and on a broken one stop with `Ich habe angehalten: Die Einstellung „<Titel>“ hat den unbekannten Wert „<Wert>“. Bitte wähle mit /config Opus, Sonnet, Haiku oder „wie die Sitzung“.` The title is `Modell für Plan und Planprüfung` for `planning_model` and `Modell für das Tafelbild` for `board_model`. Never choose a model yourself.
+
 ## Running an agent
 
 1. Build the assignment in exactly the shape of `<plugin root>/skills/lesson-conventions/SKILL.md`, with the keys `working_folder`, `lesson_folder`, `round`, `inputs`, `output`, and for the board agents `section_id`, `page_title`, `page_id`. The sections below give the inputs and the output of each run.
 2. Print the status line.
-3. Start the agent with the Agent tool. `subagent_type` is one of `unterricht:lesson-planner`, `unterricht:plan-reviewer`, `unterricht:board-author`, `unterricht:board-reviewer`. The prompt is exactly the assignment, nothing else.
+3. Start the agent with the Agent tool. `subagent_type` is one of `unterricht:lesson-planner`, `unterricht:plan-reviewer`, `unterricht:board-author`, `unterricht:board-reviewer`. The prompt is exactly the assignment, nothing else. Set `model` as Choosing the model says; a run after a protocol error uses the same model.
 4. Wait for the agent's final message and read it as the result line:
    - `DONE <path>`, where `<path>` is the `output` of the assignment: the run succeeded. The board author's line is `DONE <path> page_id=<id>`; take the page ID from it. Make the write of the table for this result.
    - `FAILED <reason>`: stop as above, with a message that contains the reason and the resume hint, for example `Ich habe angehalten: <Grund>. Wenn das Problem behoben ist, setze mit /unterricht:stunde-ueberarbeiten fort.` The two exceptions are a reason that contains `bad_request` and the read timeout of the board reviewer (see Failure handling).

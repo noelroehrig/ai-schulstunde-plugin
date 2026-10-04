@@ -22,7 +22,7 @@ const BOLD_SUM = /^\*\*(.+)\*\*$/;
 
 /**
  * Parses the Stundenlänge from the plan's header line and the rows of its Verlaufsplan table
- * (`SPEC.md` section 7.1). The last table row must hold only the bold sum, reported separately.
+ * (the plan format of `lesson-conventions`). The last table row must hold only the bold sum, reported separately.
  */
 export function parseVerlaufsplan(markdown: string): VerlaufsplanResult {
   const lines = markdown.split(/\r?\n/).map((line) => line.trim());

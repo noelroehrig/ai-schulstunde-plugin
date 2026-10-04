@@ -128,7 +128,7 @@ function writeVendoring(root: string, tag: string, plan: VendorPlan): void {
 }
 
 /**
- * Vendors the server release in `--from` into the repository at `--root` (`SPEC.md` section 11.2).
+ * Vendors the server release in `--from` into the repository at `--root`.
  * Returns the exit code: 0 done, 1 when the release or the repository is not usable, 2 usage error.
  */
 export function main(

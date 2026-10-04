@@ -4,7 +4,7 @@ import { SKILLS } from "./skills.ts";
 
 const RULE = "completeness";
 
-/** The supporting files of the conventions skill (`SPEC.md` section 5.5). */
+/** The supporting files of the conventions skill, read by path. */
 const CONVENTIONS_FILES = [
   "board.md",
   "lesson-folder.md",
@@ -14,7 +14,7 @@ const CONVENTIONS_FILES = [
   "examples/NOTES.md",
 ];
 
-/** The templates `einrichten` copies into a working folder (`SPEC.md` section 9.1). */
+/** The templates `einrichten` copies into a working folder. */
 const TEMPLATES = ["CLAUDE.md", "schulkontext.md", "kriterien.md", "onenote.md"];
 
 /** Every file a release needs besides the manifests and the server, which their own rules check. */
@@ -27,7 +27,7 @@ export const REQUIRED_FILES = [
   "CHANGELOG.md",
 ];
 
-/** In release mode, reports each component of `SPEC.md` section 5.1 that does not exist. */
+/** In release mode, reports each component of the marketplace and the plugin that does not exist. */
 export const completeness: Rule = {
   name: RULE,
   run(repo: Repo, mode: Mode): Finding[] {

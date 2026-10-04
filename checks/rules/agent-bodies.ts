@@ -5,7 +5,7 @@ const RULE = "agent-bodies";
 
 const AGENT_FILE = /^plugin\/agents\/([^/]+)\.md$/;
 
-/** The `##` sections every agent body has, in this order (plan 03). */
+/** The `##` sections every agent body has, in this order. */
 export const BODY_SECTIONS = ["Inputs", "Steps", "Output", "Stop", "Result line"];
 
 /** The board guide the board agents read by path, because supporting files are not preloaded. */

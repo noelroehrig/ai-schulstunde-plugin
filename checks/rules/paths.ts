@@ -5,7 +5,7 @@ const RULE = "paths";
 /** The vendored binary: absent during the build, and never read as text. */
 const SERVER_EXE = "server/onenote-mcp.exe";
 
-/** Files in which Claude Code substitutes `${...}` (F9, F11, `SPEC.md` section 5.5). */
+/** Files in which Claude Code substitutes `${...}`; a file read by path would show it raw. */
 const SUBSTITUTED_FILE = /^plugin\/(\.mcp\.json|skills\/[^/]+\/SKILL\.md|agents\/[^/]+\.md)$/;
 
 const PLUGIN_ROOT_REF = /\$\{CLAUDE_PLUGIN_ROOT\}\/([^\s"'`()<>[\]{},;]*)/g;

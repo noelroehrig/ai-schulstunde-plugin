@@ -42,7 +42,7 @@ test("agents accepts CRLF line endings", () => {
   assert.deepEqual(check({ [REVIEWER]: agentFile("board-reviewer").replaceAll("\n", "\r\n") }), []);
 });
 
-test("the mandated sentences are verbatim from SPEC.md section 3", () => {
+test("the mandated sentences are verbatim", () => {
   assert.equal(
     LANGUAGE_SENTENCE,
     "All instructions are in English. Everything you write (plans, reviews, OneNote content, messages to the user) must be in German.",

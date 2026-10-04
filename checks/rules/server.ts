@@ -8,7 +8,7 @@ const EXE = `${DIR}onenote-mcp.exe`;
 const VERSION = `${DIR}VERSION`;
 const SHA = `${DIR}onenote-mcp.exe.sha256`;
 
-/** The three files of a vendored server (`SPEC.md` section 11.2). */
+/** The three files of a vendored server. */
 const SERVER_FILES = [EXE, VERSION, SHA];
 
 const VERSION_LINE = /^v\d+\.\d+\.\d+(\r?\n)?$/;

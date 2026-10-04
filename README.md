@@ -17,11 +17,13 @@ Du brauchst kein Terminal. Alles geht mit Klicks und mit Nachrichten an Claude.
 1. Öffne claude.ai im Browser und gehe zu *Customize → Plugins → Add marketplace*.
 2. Gib als Marktplatz `noelroehrig/schulstunde-plugin` ein und installiere dort das Plugin `unterricht`.
 3. Starte eine neue Sitzung im Tab „Code“ der Desktop-App. Das Plugin erscheint dort beim nächsten Start einer Sitzung.
-4. Wenn das Plugin aktiviert wird, fragt Claude nach zwei Einstellungen:
+4. Wenn das Plugin aktiviert wird, fragt Claude nach vier Einstellungen:
    - **OneNote-Notizbuch:** der Name deines Notizbuchs, genau so geschrieben wie in OneNote, mit Groß- und Kleinschreibung. Nur in diesem Notizbuch darf das Plugin lesen und Seiten anlegen.
    - **Plan vor dem Tafelbild prüfen:** ob Claude dir den fertigen Plan zeigt, bevor das Tafelbild entsteht. Voreingestellt ist „ja“.
+   - **Modell für Plan und Planprüfung:** welches Claude-Modell den Plan schreibt und prüft. Voreingestellt ist Opus.
+   - **Modell für das Tafelbild:** welches Claude-Modell das Tafelbild in OneNote anlegt und prüft. Voreingestellt ist Sonnet, weil es günstiger ist und dafür meist ausreicht.
 
-   Später änderst du beides mit `/config`.
+   Zur Wahl stehen Opus, Sonnet, Haiku und „wie die Sitzung“, also das Modell, das du gerade im Chat verwendest. Opus verbraucht mehr von deinem Kontingent als Sonnet, Haiku am wenigsten. Später änderst du alles mit `/config`.
 5. Lege einen Arbeitsordner an, zum Beispiel `Dokumente\Unterricht`, und öffne ihn im Tab „Code“.
 
 ## Erste Schritte
@@ -91,7 +93,3 @@ Dieses Repository ist öffentlich und enthält keine Inhalte von Lehrkräften. D
 ## Updates
 
 Neue Versionen kommen automatisch über claude.ai. Starte danach die Claude-Desktop-App neu. Was sich geändert hat, steht in `CHANGELOG.md`. Neue Vorlagen überschreiben nie deine eigenen Dateien. Fehlt nach einem Update eine Datei, sagt dir Claude, dass du `/unterricht:einrichten` aufrufen sollst.
-
----
-
-Für Entwickler: Aufbau und Entscheidungen stehen in [`SPEC.md`](SPEC.md).

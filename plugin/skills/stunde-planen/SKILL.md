@@ -12,6 +12,8 @@ The teacher asked for a new lesson. You plan it with both review loops and put t
 Plugin root: ${CLAUDE_PLUGIN_ROOT}
 OneNote notebook: ${user_config.notebook}
 Plan checkpoint: ${user_config.plan_checkpoint}
+Planning model: ${user_config.planning_model}
+Board model: ${user_config.board_model}
 Request: $ARGUMENTS
 
 The working folder is the current working directory: use its absolute path, with forward slashes. Every file named below without a folder is in the working folder.
@@ -55,6 +57,8 @@ Read `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md` and foll
 - the working folder: the absolute path of the working folder;
 - the lesson folder: the absolute path of the lesson folder you created;
 - the `notebook` setting: `OneNote notebook` above;
-- the `plan_checkpoint` value: `Plan checkpoint` above.
+- the `plan_checkpoint` value: `Plan checkpoint` above;
+- the `planning_model` value: `Planning model` above;
+- the `board_model` value: `Board model` above.
 
 From here on, `Abbrechen` and every stop work as `orchestration.md` says, and `stunde.md` holds the state.
