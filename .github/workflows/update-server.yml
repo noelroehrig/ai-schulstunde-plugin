@@ -1,0 +1,66 @@
+name: Update server
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag of noelroehrig/onenote-mcp, like v1.0.1
+        required: true
+        type: string
+
+jobs:
+  update:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      # Every later step relies on this check, so it is the first step that runs a command.
+      - name: Validate tag
+        shell: bash
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "The tag must look like v1.2.3." >&2
+            exit 1
+          fi
+      - shell: bash
+        run: npm ci
+      - shell: bash
+        run: npm install -g @anthropic-ai/claude-code@2.1.288
+      - name: Download release
+        shell: bash
+        env:
+          TAG: ${{ inputs.tag }}
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download "$TAG" --repo noelroehrig/onenote-mcp --pattern onenote-mcp.exe --pattern onenote-mcp.exe.sha256 --dir "$RUNNER_TEMP/server"
+      - name: Vendor server
+        shell: bash
+        env:
+          TAG: ${{ inputs.tag }}
+        run: npx tsx scripts/vendor-server.ts --tag "$TAG" --from "$RUNNER_TEMP/server"
+      - name: Tool contract
+        shell: bash
+        run: npx tsx scripts/tool-contract.ts --exe plugin/server/onenote-mcp.exe
+      - shell: bash
+        run: npm run verify:release
+      - name: Commit, push, and open a pull request
+        shell: bash
+        env:
+          TAG: ${{ inputs.tag }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="server/$TAG"
+          git switch -c "$branch"
+          git add plugin/server plugin/.claude-plugin/plugin.json CHANGELOG.md
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Server $TAG"
+          gh auth setup-git
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" --title "Server $TAG" --body "Aktualisiert den mitgelieferten OneNote-Server auf $TAG. Prüfsumme, Werkzeugvertrag und npm run verify:release wurden im Workflow geprüft."
