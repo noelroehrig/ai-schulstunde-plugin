@@ -107,6 +107,7 @@ test("manifest reports an options entry that is not a label of 1 to 64 character
 
 test("manifest reports an options entry with surrounding spaces", () => {
   assertOneFinding(manifestJson({ userConfig: { model: stringOption({ options: ["Wert", " Opus"] }) } }), /model.*surrounding spaces/);
+  assertOneFinding(manifestJson({ userConfig: { model: stringOption({ options: ["Wert", "Opus "] }) } }), /model.*surrounding spaces/);
   assertOneFinding(manifestJson({ userConfig: { model: stringOption({ options: ["Wert", "  "] }) } }), /model.*surrounding spaces/);
 });
 
