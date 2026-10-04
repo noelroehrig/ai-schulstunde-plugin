@@ -23,13 +23,11 @@ test("createMemoryRepo lists sorted files and reads text and bytes", () => {
 test("createFsRepo walks the tree with forward slashes and skips tooling directories", () => {
   const root = mkdtempSync(join(tmpdir(), "repo-test-"));
   try {
-    for (const dir of [".git", "node_modules/x", ".agentpasture", "plugin/agents"]) {
+    for (const dir of [".git", "node_modules/x", "plugin/agents"]) {
       mkdirSync(join(root, dir), { recursive: true });
     }
     writeFileSync(join(root, ".git", "HEAD"), "ref");
     writeFileSync(join(root, "node_modules", "x", "index.js"), "");
-    writeFileSync(join(root, ".agentpasture", "state.json"), "{}");
-    writeFileSync(join(root, ".agentpasture-plan.md"), "engine file");
     writeFileSync(join(root, "plugin", "agents", "x.md"), "hello");
     writeFileSync(join(root, "README.md"), "readme");
 

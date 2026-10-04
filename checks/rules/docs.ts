@@ -12,7 +12,7 @@ const MANIFEST = "plugin/.claude-plugin/plugin.json";
 export const COMMANDS = ["/unterricht:einrichten", "/unterricht:stunde-planen", "/unterricht:stunde-ueberarbeiten"];
 
 /** The repository the teacher adds as a marketplace in claude.ai. */
-export const MARKETPLACE_REPO = "noelroehrig/schulstunde-plugin";
+export const MARKETPLACE_REPO = "noelroehrig/ai-schulstunde-plugin";
 
 /**
  * Checks that `README.md`, once it exists, names the three commands, the marketplace repository, and the server exe,

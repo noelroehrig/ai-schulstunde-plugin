@@ -15,7 +15,7 @@ Du brauchst kein Terminal. Alles geht mit Klicks und mit Nachrichten an Claude.
 ## Installation
 
 1. Öffne claude.ai im Browser und gehe zu *Customize → Plugins → Add marketplace*.
-2. Gib als Marktplatz `noelroehrig/schulstunde-plugin` ein und installiere dort das Plugin `unterricht`.
+2. Gib als Marktplatz `noelroehrig/ai-schulstunde-plugin` ein und installiere dort das Plugin `unterricht`.
 3. Starte eine neue Sitzung im Tab „Code“ der Desktop-App. Das Plugin erscheint dort beim nächsten Start einer Sitzung.
 4. Wenn das Plugin aktiviert wird, fragt Claude nach vier Einstellungen:
    - **OneNote-Notizbuch:** der Name deines Notizbuchs, genau so geschrieben wie in OneNote, mit Groß- und Kleinschreibung. Nur in diesem Notizbuch darf das Plugin lesen und Seiten anlegen.
