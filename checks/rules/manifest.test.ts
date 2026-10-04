@@ -105,14 +105,21 @@ test("manifest reports an options entry that is not a label of 1 to 64 character
   assertOneFinding(manifestJson({ userConfig: { model: long } }), /model.*label of 1 to 64/);
 });
 
-test("manifest reports a repeated options entry", () => {
-  const option = stringOption({ options: ["Wert", "Wert"] });
-  assertOneFinding(manifestJson({ userConfig: { model: option } }), /model.*repeat/);
+test("manifest reports an options entry with surrounding spaces", () => {
+  assertOneFinding(manifestJson({ userConfig: { model: stringOption({ options: ["Wert", " Opus"] }) } }), /model.*surrounding spaces/);
+  assertOneFinding(manifestJson({ userConfig: { model: stringOption({ options: ["Wert", "  "] }) } }), /model.*surrounding spaces/);
+});
+
+test("manifest reports a repeated options entry, also in another letter case", () => {
+  assertOneFinding(manifestJson({ userConfig: { model: stringOption({ options: ["Wert", "Wert"] }) } }), /model.*repeat/);
+  assertOneFinding(manifestJson({ userConfig: { model: stringOption({ options: ["Wert", "wert"] }) } }), /model.*repeat/);
 });
 
 test("manifest reports options on an option that is not a plain string", () => {
   const multiple = stringOption({ options: ["Wert"], multiple: true });
   assertOneFinding(manifestJson({ userConfig: { model: multiple } }), /model.*neither multiple nor sensitive/);
+  const sensitive = stringOption({ options: ["Wert"], sensitive: true });
+  assertOneFinding(manifestJson({ userConfig: { model: sensitive } }), /model.*neither multiple nor sensitive/);
   const flag = { type: "boolean", title: "T", description: "D", default: true, options: [true] };
   const findings = check(manifestJson({ userConfig: { flag } }));
   const shown = JSON.stringify(findings);

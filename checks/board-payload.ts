@@ -1,8 +1,8 @@
 import { isNonEmptyString, isObject, type JsonObject } from "./rules/json.ts";
 
 /**
- * Validates a `replace_page` payload `{ page_id, title, outlines }` against the server's model
- * of the OneNote MCP server, restricted to what the plugin uses: outlines with paragraphs and lists.
+ * Validates a `replace_page` payload `{ page_id, title, outlines }` against the OneNote MCP server's
+ * page model, restricted to what the plugin uses: outlines with paragraphs and lists.
  * Images and tables are non-goals, so their item types and the `images` key are errors.
  * Returns every error as `<path>: <message>`; an empty array means the payload is valid.
  */

@@ -85,8 +85,9 @@ function optionProblems(name: string, option: unknown): string[] {
 }
 
 /**
- * Checks a fixed list of choices: distinct labels of 1 to 64 characters on a plain string
- * option, with the default among them. Claude Code refuses to load a plugin that breaks this.
+ * Checks a fixed list of choices: labels of 1 to 64 characters without surrounding spaces, distinct in any
+ * letter case, on a plain string option, with the default among them. Claude Code refuses to load a plugin
+ * that breaks this.
  */
 function choiceProblems(option: JsonObject): string[] {
   const choices = option.options;
@@ -96,11 +97,17 @@ function choiceProblems(option: JsonObject): string[] {
     problems.push("options needs a string option that is neither multiple nor sensitive");
   }
   const isLabel = (choice: unknown) =>
-    typeof choice === "string" && choice.length >= 1 && choice.length <= MAX_LABEL_LENGTH;
+    typeof choice === "string" &&
+    choice.length >= 1 &&
+    choice.length <= MAX_LABEL_LENGTH &&
+    choice.trim() === choice;
   if (!choices.every(isLabel)) {
-    problems.push(`every entry of options must be a label of 1 to ${MAX_LABEL_LENGTH} characters`);
+    problems.push(
+      `every entry of options must be a label of 1 to ${MAX_LABEL_LENGTH} characters without surrounding spaces`,
+    );
   }
-  if (new Set(choices).size !== choices.length) problems.push("options must not repeat an entry");
+  const folded = choices.map((choice) => (typeof choice === "string" ? choice.toLowerCase() : choice));
+  if (new Set(folded).size !== folded.length) problems.push("options must not repeat an entry in any letter case");
   if ("default" in option && !choices.includes(option.default)) problems.push("default must be one of options");
   return problems;
 }

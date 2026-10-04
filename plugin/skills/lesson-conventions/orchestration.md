@@ -100,7 +100,7 @@ Before every agent run, print exactly one German status line in the form `<Planu
 | `Haiku` | `haiku` |
 | `wie die Sitzung` | none: the agent's `model: inherit` applies |
 
-Any other value is a broken setting. Check both values when you start following this file, before any agent runs, and on a broken one stop with `Ich habe angehalten: Die Einstellung „<Titel>“ hat den unbekannten Wert „<Wert>“. Bitte wähle mit /config Opus, Sonnet, Haiku oder „wie die Sitzung“.` The title is `Modell für Plan und Planprüfung` for `planning_model` and `Modell für das Tafelbild` for `board_model`. Never choose a model yourself.
+Any other value is a broken setting. Check both values when you start following this file, before any agent runs, and on a broken one stop with `Ich habe angehalten: Die Einstellung „<Titel>“ hat den unbekannten Wert „<Wert>“. Bitte wähle mit /config Opus, Sonnet, Haiku oder „wie die Sitzung“ und setze danach mit /unterricht:stunde-ueberarbeiten fort.` The title is `Modell für Plan und Planprüfung` for `planning_model` and `Modell für das Tafelbild` for `board_model`. Never choose a model yourself.
 
 ## Running an agent
 
