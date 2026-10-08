@@ -18,30 +18,33 @@ The assignment of `lesson-conventions`. Its `inputs` list holds absolute paths, 
 - `schulkontext.md`: Stundenlänge, Phasenmodell, Besondere Regeln, classes, what every plan must consider.
 - `kriterien.md`: the teacher's criteria. The plan must meet every Muss-Kriterium of `## Planung` and should meet the Soll-Kriterien.
 - `stunde.md` of the lesson folder: the request under `## Auftrag` (Thema, Klasse, Hinweise) and the Stundenlänge of this lesson.
+- When listed, right after `stunde.md`: `material/anhaenge.md` of the lesson folder, the transcription of the images and files the teacher attached to the request, with the tasks verbatim. The files it names lie next to it in `<lesson_folder>/material/`.
 - In a revision, also: the previous plan (`planung_vN.md`), its review (`review_vN.md`), and, after teacher input, the teacher feedback: the current loop's `Rückmeldung` file as listed in the assignment (`rueckmeldung_vK.md`, whatever its number K).
 
-`output` is the path of the plan to write. The `material/` folder of `working_folder` may be read as needed.
+`output` is the path of the plan to write. The `material/` folder of `working_folder` may be read as needed. When `inputs` lists `material/anhaenge.md`, the files it names in `<lesson_folder>/material/` may be read as well.
 
 ## Steps
 
 1. Read `schulkontext.md`.
 2. Read `kriterien.md`.
 3. Read `stunde.md`. Take Thema, Klasse, and Hinweise from `## Auftrag`, and the Stundenlänge from its `Stundenlänge:` line. Read the number with a decimal comma (`7,5` is seven and a half).
-4. Read every other path in `inputs`: the previous plan, the previous review, and the teacher feedback, whichever are listed.
-5. Read the examples `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/examples/plan.md` and `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/examples/NOTES.md`. They show the format and the quality expected; never copy their content into the plan.
-6. Material: only when the topic needs it (a curriculum, a textbook page, a template the request or `schulkontext.md` refers to), find files in `<working_folder>/material/` with Glob and Grep and read them with Read. Name every file you used under `## Material` of the plan. Never invent material content you did not read.
-7. Plan the lesson in the plan format of `lesson-conventions`:
+4. When `inputs` lists `material/anhaenge.md`, read it, then every file it names in `<lesson_folder>/material/`. They belong to the request: use them as the request says, and name every file you used under `## Material` of the plan.
+5. Read every other path in `inputs`: the previous plan, the previous review, and the teacher feedback, whichever are listed.
+6. Read the examples `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/examples/plan.md` and `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/examples/NOTES.md`. They show the format and the quality expected; never copy their content into the plan.
+7. Material: only when the topic needs it (a curriculum, a textbook page, a template the request or `schulkontext.md` refers to), find files in `<working_folder>/material/` with Glob and Grep and read them with Read. Name every file you used under `## Material` of the plan. Never invent material content you did not read.
+8. Plan the lesson in the plan format of `lesson-conventions`:
    - Use only the phase names of `## Phasenmodell` in `schulkontext.md`, verbatim.
    - Write `## Tafelbild (Inhalt)` as short items per phase.
+   - A book task the class works on from the board is one item `Buchaufgabe: <Seite und Nummer>` in `## Tafelbild (Inhalt)`, with page and number exactly as the request in `stunde.md`, the teacher feedback, `material/anhaenge.md`, or a material file you read states them. Never invent book content: a task, page, or number you did not read there is never part of the plan.
    - Under `## Besondere Regeln`, state for each special rule of `schulkontext.md` how the plan respects it, or `keine`.
    - Describe groups of students, never individual students.
-8. In a revision:
+9. In a revision:
    - Fix every Muss-Mangel under `## Muss-Mängel` of the previous review.
    - Address every point of the teacher feedback. On a conflict with `kriterien.md`, follow the review rules of `lesson-conventions`.
    - Weigh the Soll-Hinweise; follow them where they do not conflict with the feedback.
    - Keep everything that was not criticized, wording included.
-9. Before writing, add up the durations of the `## Verlaufsplan` yourself, step by step. The sum must equal the Stundenlänge exactly. If it does not, change durations until it does, then add up again. Write the sum into the bold last row.
-10. Write the plan to `output`. Write no other file.
+10. Before writing, add up the durations of the `## Verlaufsplan` yourself, step by step. The sum must equal the Stundenlänge exactly. If it does not, change durations until it does, then add up again. Write the sum into the bold last row.
+11. Write the plan to `output`. Write no other file.
 
 ## Output
 

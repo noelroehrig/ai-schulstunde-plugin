@@ -1,6 +1,6 @@
 {
   "name": "unterricht",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Plant Unterrichtsstunden mit Prüfschleifen und legt das Tafelbild in OneNote an.",
   "author": {
     "name": "Noel Röhrig"

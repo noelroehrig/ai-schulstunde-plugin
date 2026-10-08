@@ -1,22 +1,23 @@
 import { isNonEmptyString, isObject, type JsonObject } from "./rules/json.ts";
 
 /**
- * Validates a `replace_page` payload `{ page_id, title, outlines }` against the OneNote MCP server's
- * page model, restricted to what the plugin uses: outlines with paragraphs and lists.
- * Images and tables are non-goals, so their item types and the `images` key are errors.
+ * Validates a `replace_page` payload `{ page_id, title, outlines, images? }` against the OneNote MCP server's
+ * page model, restricted to what the plugin uses: outlines with paragraphs, lists, and image placeholders,
+ * and floating images. Tables and inline images are not supported, so their item types are errors.
  * Returns every error as `<path>: <message>`; an empty array means the payload is valid.
  */
 export function validateBoardPayload(value: unknown): string[] {
-  if (!isObject(value)) return ["payload must be an object with page_id, title, and outlines"];
-  const errors: string[] = [];
-  unknownKeys(value, ["page_id", "title", "outlines"], "", errors);
-  if (!isNonEmptyString(value.page_id)) errors.push("page_id: must be a non-empty string");
-  if (!isNonEmptyString(value.title)) errors.push("title: must be a non-empty string");
-  if (!Array.isArray(value.outlines)) {
-    errors.push("outlines: must be an array");
-  } else {
-    value.outlines.forEach((outline, index) => checkOutline(outline, `outlines[${index}]`, errors));
-  }
+  return checkPayload(value, []);
+}
+
+/**
+ * Validates a `tafelbild_vN.json`: the payload plus `image_labels`, which is never sent to the server.
+ * `image_labels` holds one `{ handle, template, label }` per floating image, in the order of `images`,
+ * and is present exactly when `images` is. Returns every error as `<path>: <message>`.
+ */
+export function validateBoardFile(value: unknown): string[] {
+  const errors = checkPayload(value, ["image_labels"]);
+  if (isObject(value)) checkImageLabels(value, errors);
   return errors;
 }
 
@@ -35,6 +36,28 @@ const LIST_STYLES = ["bullet", "numbered"];
 /** Inline formatting fields shared by paragraphs and runs. */
 const FORMATTING_KEYS = ["bold", "italic", "underline", "strikethrough", "color", "highlight", "font_size", "font_family"];
 
+/** The prefix of every image handle the server hands out. */
+const HANDLE_PREFIX = "mcpref:";
+
+/** The template pages a floating image comes from. */
+const IMAGE_TEMPLATES = ["banner", "symbol"];
+
+/** Checks a payload, allowing `extraKeys` at the top level besides the payload's own keys. */
+function checkPayload(value: unknown, extraKeys: string[]): string[] {
+  if (!isObject(value)) return ["payload must be an object with page_id, title, and outlines"];
+  const errors: string[] = [];
+  unknownKeys(value, ["page_id", "title", "outlines", "images", ...extraKeys], "", errors);
+  if (!isNonEmptyString(value.page_id)) errors.push("page_id: must be a non-empty string");
+  if (!isNonEmptyString(value.title)) errors.push("title: must be a non-empty string");
+  if (!Array.isArray(value.outlines)) {
+    errors.push("outlines: must be an array");
+  } else {
+    value.outlines.forEach((outline, index) => checkOutline(outline, `outlines[${index}]`, errors));
+  }
+  if (value.images !== undefined) checkImages(value.images, errors);
+  return errors;
+}
+
 /** Checks one outline: optional position and width, a non-empty items array. */
 function checkOutline(outline: unknown, path: string, errors: string[]): void {
   if (!isObject(outline)) {
@@ -43,7 +66,7 @@ function checkOutline(outline: unknown, path: string, errors: string[]): void {
   }
   unknownKeys(outline, ["position", "width", "items"], path, errors);
   if (outline.position !== undefined) checkPosition(outline.position, `${path}.position`, errors);
-  if (outline.width !== undefined && !(isNumber(outline.width) && outline.width > 0)) {
+  if (outline.width !== undefined && !isPositive(outline.width)) {
     errors.push(`${path}.width: must be a number greater than 0`);
   }
   if (!Array.isArray(outline.items) || outline.items.length === 0) {
@@ -51,6 +74,7 @@ function checkOutline(outline: unknown, path: string, errors: string[]): void {
     return;
   }
   outline.items.forEach((item, index) => checkItem(item, `${path}.items[${index}]`, errors));
+  checkPlaceholdersLast(outline.items, `${path}.items`, errors);
 }
 
 /** Checks `{ x, y, z? }`: non-negative coordinates (a negative one makes `get_page` fail on that page), integer z. */
@@ -67,7 +91,7 @@ function checkPosition(position: unknown, path: string, errors: string[]): void 
   if (position.z !== undefined && !Number.isInteger(position.z)) errors.push(`${path}.z: must be an integer`);
 }
 
-/** Checks one outline item: a paragraph or a list, nothing else. */
+/** Checks one outline item: a paragraph, a list, or an image placeholder, nothing else. */
 function checkItem(item: unknown, path: string, errors: string[]): void {
   if (!isObject(item)) {
     errors.push(`${path}: must be an object`);
@@ -77,9 +101,23 @@ function checkItem(item: unknown, path: string, errors: string[]): void {
     checkParagraph(item, path, errors);
   } else if (item.type === "list") {
     checkList(item, path, errors);
+  } else if (item.type === "image_placeholder") {
+    checkImagePlaceholder(item, path, errors);
   } else {
-    errors.push(`${path}.type: ${JSON.stringify(item.type)} is not allowed, only "paragraph" and "list" (images and tables are a non-goal)`);
+    errors.push(
+      `${path}.type: ${JSON.stringify(item.type)} is not allowed, only "paragraph", "list", and "image_placeholder" ` +
+        "(tables and inline images are not supported)",
+    );
   }
+}
+
+/** Reports every image placeholder that is not the last item of its outline. */
+function checkPlaceholdersLast(items: unknown[], path: string, errors: string[]): void {
+  items.slice(0, -1).forEach((item, index) => {
+    if (isObject(item) && item.type === "image_placeholder") {
+      errors.push(`${path}[${index}]: an image_placeholder must be the last item of its outline`);
+    }
+  });
 }
 
 /** Checks a paragraph: text or segments, an optional style, and the formatting fields. */
@@ -97,6 +135,13 @@ function checkList(item: JsonObject, path: string, errors: string[]): void {
   unknownKeys(item, ["type", "style", "items"], path, errors);
   if (!LIST_STYLES.includes(item.style as string)) errors.push(`${path}.style: must be one of ${LIST_STYLES.join(", ")}`);
   checkListItems(item.items, `${path}.items`, errors);
+}
+
+/** Checks an image placeholder: a non-empty description and the size of the space it keeps free. */
+function checkImagePlaceholder(item: JsonObject, path: string, errors: string[]): void {
+  unknownKeys(item, ["type", "description", "width", "height"], path, errors);
+  if (!isNonEmptyString(item.description)) errors.push(`${path}.description: must be a non-empty string`);
+  checkSize(item, path, errors);
 }
 
 /** Checks an array of list items `{ text | segments, children? }`, recursively. */
@@ -157,7 +202,7 @@ function checkFormatting(item: JsonObject, path: string, errors: string[]): void
       errors.push(`${path}.${key}: must be #RGB or #RRGGBB`);
     }
   }
-  if (item.font_size !== undefined && !(isNumber(item.font_size) && item.font_size > 0)) {
+  if (item.font_size !== undefined && !isPositive(item.font_size)) {
     errors.push(`${path}.font_size: must be a number greater than 0`);
   }
   const family = item.font_family;
@@ -170,16 +215,87 @@ function checkFormatting(item: JsonObject, path: string, errors: string[]): void
   }
 }
 
-/** Reports every key of `object` that is not in `allowed`; `images` gets the non-goal reason. */
+/** Checks the floating images: a non-empty array, because a page without floating images omits the key. */
+function checkImages(images: unknown, errors: string[]): void {
+  if (!Array.isArray(images) || images.length === 0) {
+    errors.push("images: must be a non-empty array, omit it when the page has no floating images");
+    return;
+  }
+  images.forEach((image, index) => checkImage(image, `images[${index}]`, errors));
+}
+
+/** Checks a floating image `{ handle, width, height, position }`, all four required. */
+function checkImage(image: unknown, path: string, errors: string[]): void {
+  if (!isObject(image)) {
+    errors.push(`${path}: must be an object`);
+    return;
+  }
+  unknownKeys(image, ["handle", "width", "height", "position"], path, errors);
+  if (!(typeof image.handle === "string" && image.handle.startsWith(HANDLE_PREFIX))) {
+    errors.push(`${path}.handle: must be a string starting with ${HANDLE_PREFIX}`);
+  }
+  checkSize(image, path, errors);
+  checkPosition(image.position, `${path}.position`, errors);
+}
+
+/** Checks the required `width` and `height` of a floating image or an image placeholder. */
+function checkSize(element: JsonObject, path: string, errors: string[]): void {
+  for (const key of ["width", "height"]) {
+    if (!isPositive(element[key])) errors.push(`${path}.${key}: must be a number greater than 0`);
+  }
+}
+
+/** Checks that `image_labels` is present exactly when `images` is, with one entry per floating image. */
+function checkImageLabels(file: JsonObject, errors: string[]): void {
+  const labels = file.image_labels;
+  if (file.images === undefined) {
+    if (labels !== undefined) errors.push("image_labels: not allowed without images");
+    return;
+  }
+  if (labels === undefined) {
+    errors.push("image_labels: required when images is present");
+    return;
+  }
+  if (!Array.isArray(labels)) {
+    errors.push("image_labels: must be an array");
+    return;
+  }
+  const images = Array.isArray(file.images) ? file.images : [];
+  if (labels.length !== images.length) {
+    errors.push(`image_labels: has ${labels.length} entries, images has ${images.length}`);
+  }
+  labels.forEach((entry, index) => checkImageLabel(entry, images[index], `image_labels[${index}]`, errors));
+}
+
+/** Checks one `{ handle, template, label }` entry against the floating image at the same index. */
+function checkImageLabel(entry: unknown, image: unknown, path: string, errors: string[]): void {
+  if (!isObject(entry)) {
+    errors.push(`${path}: must be an object`);
+    return;
+  }
+  unknownKeys(entry, ["handle", "template", "label"], path, errors);
+  if (isObject(image) && entry.handle !== image.handle) {
+    errors.push(`${path}.handle: must equal the handle of the floating image at the same index`);
+  }
+  if (!IMAGE_TEMPLATES.includes(entry.template as string)) {
+    errors.push(`${path}.template: must be one of ${IMAGE_TEMPLATES.join(", ")}`);
+  }
+  if (!isNonEmptyString(entry.label)) errors.push(`${path}.label: must be a non-empty string`);
+}
+
+/** Reports every key of `object` that is not in `allowed`. */
 function unknownKeys(object: JsonObject, allowed: string[], path: string, errors: string[]): void {
   for (const key of Object.keys(object)) {
-    if (allowed.includes(key)) continue;
-    const keyPath = path === "" ? key : `${path}.${key}`;
-    errors.push(`${keyPath}: ${key === "images" ? "not allowed, images are a non-goal" : "unknown key"}`);
+    if (!allowed.includes(key)) errors.push(`${path === "" ? key : `${path}.${key}`}: unknown key`);
   }
 }
 
 /** True for a finite number. */
 function isNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
+}
+
+/** True for a finite number greater than 0. */
+function isPositive(value: unknown): value is number {
+  return isNumber(value) && value > 0;
 }
