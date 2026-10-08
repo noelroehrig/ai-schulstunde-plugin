@@ -30,7 +30,7 @@ These German terms are never translated. Use them verbatim, also inside English 
 | Sicherung | Phase that consolidates and records the results. |
 | Lernziel | A learning objective of the lesson. |
 | Differenzierung | Adapting tasks or support to different groups of learners. |
-| Stundenthema | The topic of the lesson: the title of the plan and the first line of the Tafelbild. The OneNote page title is the assignment's `page_title`, not the Stundenthema. |
+| Stundenthema | The topic of the lesson: the title of the plan, and the first line of the Tafelbild unless `onenote.md` turns that off. The OneNote page title is the assignment's `page_title`, not the Stundenthema. |
 | Verlaufsplan | The timed table of the lesson's phases. |
 | Sozialform | The grouping of students in a phase. |
 | Einzelarbeit | Students work alone. |
@@ -51,14 +51,15 @@ The working folder belongs to the teacher. Its files and their roles:
 | `CLAUDE.md` | Short German pointer to the files below, for the teacher. |
 | `schulkontext.md` | School, Stundenlänge, Phasenmodell, special rules. |
 | `kriterien.md` | The teacher's criteria, Muss and Soll, used by both reviewers. |
-| `onenote.md` | Ablage (section and page title scheme) and the optional Ansicht. |
+| `onenote.md` | Ablage (section, parent page, and page title scheme), and the optional Ansicht, Vorlagen, and Seitenaufbau. |
 | `material/` | Curricula and templates of the teacher. |
 | `Stunden/<lesson folder>/` | One folder per lesson, holding the files below. |
 | `stunde.md` | The request, overrides, status, and OneNote location of the lesson. |
+| `material/anhaenge.md` | Transcription of the images and files the teacher attached to the request; the copied files lie next to it. |
 | `planung_vN.md` | Plan draft N. |
 | `review_vN.md` | Review of `planung_vN.md`. |
 | `rueckmeldung_vN.md` | Teacher feedback or guidance that led to `planung_vN.md`. |
-| `tafelbild_vN.json` | The exact page payload the board author sent in board round N. |
+| `tafelbild_vN.json` | The exact page payload the board author sent in board round N, with the labels of its images. |
 | `tafelbild-review_vN.md` | Review of board round N. |
 | `tafelbild-rueckmeldung_vN.md` | Teacher guidance at the board cap that led to `tafelbild_vN.json`. |
 
@@ -67,7 +68,7 @@ Rules for agents:
 - Read `schulkontext.md`, then `kriterien.md`, before anything else.
 - Write only the `output` named in your assignment.
 - Never change the teacher's own files: `CLAUDE.md`, `schulkontext.md`, `kriterien.md`, `onenote.md`, and anything in `material/`.
-- Use only the paths your assignment lists. Never pick "the latest" file yourself.
+- Use only the paths your assignment lists. Never pick "the latest" file yourself. When `inputs` lists `material/anhaenge.md` of the lesson folder, the files it names in that `material/` folder may be read as well.
 
 Entry points have no assignment. They follow `lesson-folder.md` and `orchestration.md` instead. They never overwrite the teacher's own files either; only `einrichten` may change one, and only after showing the change and getting a yes.
 
@@ -84,12 +85,16 @@ inputs:
 output: <absolute path>
 ```
 
-Board agents also get these lines; `page_id:` is empty when the page does not exist yet:
+Board agents also get these lines; `page_id:` is empty when the page does not exist yet, and each of the last four is empty when `onenote.md` does not set it:
 
 ```
 section_id: <OneNote section ID>
 page_title: <page title>
 page_id: <OneNote page ID or empty>
+parent_page_id: <ID of the Elternseite or empty>
+banner_page_id: <ID of the Banner-Seite or empty>
+symbol_page_id: <ID of the Symbol-Seite or empty>
+model_page_id: <ID of the Vorbild-Seite or empty>
 ```
 
 The final message of every agent is exactly one line and nothing else:
@@ -127,7 +132,7 @@ Rules:
 - The durations add up exactly to the Stundenlänge. The last row holds only the bold sum in the first column.
 - The Stundenlänge comes from `stunde.md`.
 - Phase names come from the Phasenmodell in `schulkontext.md`.
-- `## Tafelbild (Inhalt)` lists short items per phase: what the Tafelbild must show.
+- `## Tafelbild (Inhalt)` lists short items per phase: what the Tafelbild must show. A book task the class works on from the board is one item `Buchaufgabe: <Seite und Nummer>`, for example `Buchaufgabe: S. 152, Nr. 3`; the Tafelbild keeps a space for its screenshot.
 - `## Besondere Regeln` states how each special rule of `schulkontext.md` is respected, or says `keine`.
 
 ## Review format

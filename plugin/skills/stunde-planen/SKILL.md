@@ -24,12 +24,15 @@ Write nothing in this step. Check, in this order.
 2. `schulkontext.md` has a line `Stundenlänge: <Zahl> Minuten` under `## Zeitraster`, where the number may have a decimal comma. A missing line, a placeholder in square brackets such as `[Minuten eintragen]`, or anything else that is not a number is a failure: `In schulkontext.md, Zeile <n>, fehlt die Stundenlänge als Zahl: „<Zeile>“. Bitte trag die Minuten ein, zum Beispiel „Stundenlänge: 45 Minuten“.` Without such a line, name the line of `## Zeitraster`. Tell the teacher the failure and stop. Write nothing.
 
    Do not check `## Ablage` or `## Ansicht` of `onenote.md` here: the lesson is planned anyway. A `Seitentitel` that is missing, empty, or a placeholder in square brackets means the default scheme (step 2), and `Abschnitt` is checked only at the OneNote gate of `orchestration.md`.
-3. The settings: read Settings in `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md`, then `einstellungen.md`, and check its three settings as Settings says. On a broken one, tell the teacher its message and stop. Otherwise note them as the `plan_checkpoint`, `planning_model`, and `board_model` values.
+3. The settings: read Settings in `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md`, then `einstellungen.md`, and check its four settings as Settings says. On a broken one, tell the teacher its message and stop. Otherwise note them as the `plan_checkpoint`, `board_checkpoint`, `planning_model`, and `board_model` values.
 4. The request: take `Thema`, `Klasse`, and `Hinweise` from the request above.
    - `Thema` is the topic of the lesson, `Klasse` the class, for example `6b`. `Hinweise` is everything else the teacher wrote, verbatim, the lesson date and a lesson length included, or `keine`.
    - When the request names the date of the lesson, keep it as the lesson date.
    - When the request sets another lesson length, for example `nur 45 Minuten`, it overrides the Stundenlänge of `schulkontext.md` for this lesson: `Quelle der Stundenlänge: Auftrag`. Otherwise the Stundenlänge comes from `schulkontext.md`: `Quelle der Stundenlänge: schulkontext.md`.
-   - When `Thema` or `Klasse` is missing, ask for what is missing, for example `Zu welchem Thema und für welche Klasse soll ich die Stunde planen?`, and end your turn. Use the answer and continue with check 5.
+   - When `Thema` or `Klasse` is missing, ask for what is missing, for example `Zu welchem Thema und für welche Klasse soll ich die Stunde planen?`, and end your turn. Use the answer.
+   - The class: the classes of `schulkontext.md` are the values of the column `Klasse` in the table of `## Fächer und Klassen`, from the rows below its header and separator that hold no placeholder in square brackets; a cell that names several classes, separated by commas, counts each. When there is such a class and `Klasse` is not exactly one of them, ask `Die Klasse „<Klasse>“ steht nicht in schulkontext.md. Dort stehen: <Klassen>. Für welche Klasse soll ich planen? Oder antworte mit „trotzdem“, dann plane ich für „<Klasse>“.` and end your turn. A class in the answer becomes `Klasse`; `trotzdem` keeps it.
+
+   Then continue with check 5.
 5. The notebook, as The notebook in `orchestration.md` defines it, is set and not broken. Otherwise do not call any OneNote tool, say `Hinweis: In onenote.md ist noch kein gültiges Notizbuch eingetragen. Ich plane die Stunde trotzdem. Für das Tafelbild führe vorher /unterricht:einrichten aus.`, skip check 6, and continue.
 6. When the plugin's OneNote tools are not available in this session, the OneNote server did not start: read OneNote server not running in `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md`, call no OneNote tool, say `Hinweis: ` and its message, then `Ich plane die Stunde trotzdem und prüfe vor dem Tafelbild noch einmal.`, and continue. Otherwise call `mcp__plugin_unterricht_onenote__ping`. When it reports a `config_error` that is not `null`, say `Hinweis: Die Freigabe für OneNote ist noch nicht eingerichtet. Ich plane die Stunde trotzdem. Für das Tafelbild führe vorher /unterricht:einrichten aus.` and continue. When it reports `onenote_responsive: false`, or the call fails, say `Hinweis: OneNote reagiert gerade nicht. Ich plane die Stunde trotzdem und prüfe vor dem Tafelbild noch einmal. Bitte öffne bis dahin OneNote und schließe offene Dialoge.` and continue. Never stop here because of OneNote.
 
@@ -38,13 +41,17 @@ Write nothing in this step. Check, in this order.
 Read `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/lesson-folder.md` and follow it.
 
 1. Name the lesson folder as `lesson-folder.md` says, from the `Seitentitel` scheme of `onenote.md`, or from the default scheme `JJJJ-MM-TT Klasse Thema` when `Seitentitel` is missing, empty, or a placeholder in square brackets: the lesson date if the request names one, else today; `Klasse` and `Thema` from the request. Create `Stunden/` when it does not exist, then the lesson folder in it, taking the first free name.
-2. Write `stunde.md` in the lesson folder, in exactly the format of `lesson-folder.md`:
-   - `## Auftrag`: `Thema`, `Klasse`, `Hinweise`, `Stundenlänge`, and `Quelle der Stundenlänge` from step 1.
+2. Attachments: when the request, or an answer of the teacher in step 1, carries images or files, write `material/anhaenge.md` in the lesson folder, creating `material/`, so that the agents can read them. Without attachments, write nothing here.
+   - The file starts with the heading `# Anhänge`, then one section `## Anhang <n>` per attachment, numbered from 1: what it shows; the text of every task verbatim, with book, page, and number when they are visible, followed by a line `Seitenverhältnis: <Breite>:<Höhe>` with the shape of the area the task takes on the image, text and figures together, in small whole numbers, for example `3:1`; figures, diagrams, and tables described in words. Never write names or other personal data of students.
+   - An attachment that exists as a file with a path: copy the file unchanged into `material/` of the lesson folder, keeping its name, and name the copy in its section in a line `Datei: <Dateiname>`. When a file of that name is already there, add ` (2)`, ` (3)`, and so on before the extension.
+   - A pasted image without a file is transcribed only. Say so once: `Hinweis: Eingefügte Bilder liegen nicht als Datei vor. Ich habe sie deshalb nur in material/anhaenge.md abgeschrieben und beschrieben.`
+3. Write `stunde.md` in the lesson folder, in exactly the format of `lesson-folder.md`:
+   - `## Auftrag`: `Thema`, `Klasse`, `Hinweise`, `Stundenlänge`, and `Quelle der Stundenlänge` from step 1, and `Anhänge: material/anhaenge.md` when item 2 wrote it, else `Anhänge: keine`.
    - `## Stand`: `Schritt: Planung`, `Runde: 0 von 3`, `Planversion: keine`, `Freigegebener Plan: keiner`, `Tafelbildversion: keine`, `Prüfbericht: keiner`, `Rückmeldung: keine`.
-   - `## OneNote`: `Abschnitt: offen`, `Seitentitel: offen`, `Seiten-ID: keine`, `Alte Seite: keine`.
+   - `## OneNote`: `Abschnitt: offen`, `Elternseite: offen`, `Seitentitel: offen`, `Seiten-ID: keine`, `Alte Seite: keine`.
    - `## Übernommene Mängel`: `- keine`.
    - `## Verlauf`: one line with today's date, for example `- 2026-10-07: Stunde angelegt.`
-3. Tell the teacher in one German line where the lesson is, for example `Ich lege die Stunde in Stunden/<Name des Stundenordners> an.`
+4. Tell the teacher in one German line where the lesson is, for example `Ich lege die Stunde in Stunden/<Name des Stundenordners> an.`
 
 ## 3. Orchestration
 
@@ -54,6 +61,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md` and foll
 - the working folder: the absolute path of the working folder;
 - the lesson folder: the absolute path of the lesson folder you created;
 - the `plan_checkpoint` value: from check 3 of step 1;
+- the `board_checkpoint` value: from check 3 of step 1;
 - the `planning_model` value: from check 3 of step 1;
 - the `board_model` value: from check 3 of step 1.
 

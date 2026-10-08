@@ -18,7 +18,7 @@ Die Schülerinnen und Schüler
 |---|---|---|---|---|
 | 7,5 | Einstieg | Eine Pizza wird an der Tafel in 8 Stücke geteilt, 3 Stücke sind gegessen. Frage: „Wie viel ist noch übrig?“ Die Schülerinnen und Schüler äußern Vermutungen, die Lehrkraft sammelt Schreibweisen. | Plenum | Tafelbild |
 | 25 | Erarbeitung | Arbeitsblatt mit Kreisen, Rechtecken und Streifen: Anteile färben, ablesen und als Bruch notieren. Anschließend vergleichen die Paare ihre Ergebnisse und formulieren, was Zähler und Nenner angeben. | Partnerarbeit | Arbeitsblatt „Anteile“, Buntstifte |
-| 12,5 | Sicherung | Paare stellen je eine Aufgabe vor. Gemeinsam wird der Merksatz zu Zähler und Nenner formuliert und ins Heft übernommen. Die Hausaufgabe wird erklärt. | Plenum | Tafelbild, Heft |
+| 12,5 | Sicherung | Paare stellen je eine Aufgabe vor. Gemeinsam wird der Merksatz zu Zähler und Nenner formuliert und ins Heft übernommen. Die Hausaufgabe wird an der Buchseite im Tafelbild erklärt. | Plenum | Tafelbild, Heft, Buch |
 | **45** | | | | |
 
 ## Differenzierung
@@ -30,6 +30,7 @@ Die Schülerinnen und Schüler
 - Zusatzkarten mit ungleich geteilten Figuren
 - Wortkarten „Zähler“ und „Nenner“
 - Buntstifte
+- Lehrbuch, S. 52
 
 ## Hausaufgabe
 Buch S. 52, Nr. 1 bis 3: Anteile in Figuren ablesen und selbst eine Figur zu 3/4 färben.
@@ -37,7 +38,7 @@ Buch S. 52, Nr. 1 bis 3: Anteile in Figuren ablesen und selbst eine Figur zu 3/4
 ## Tafelbild (Inhalt)
 - Einstieg: Stundenthema „Brüche als Anteile“; Pizza in 8 Stücke geteilt, 5 von 8 Stücken übrig
 - Erarbeitung: Bruch 5/8 mit Pfeilen „Zähler: wie viele dieser Teile gemeint sind“ und „Nenner: in wie viele gleich große Teile das Ganze geteilt ist“
-- Sicherung: Merksatz „Ein Bruch beschreibt einen Anteil an einem Ganzen.“; Beispiele 1/2, 1/4, 3/4
+- Sicherung: Merksatz „Ein Bruch beschreibt einen Anteil an einem Ganzen.“; Beispiele 1/2, 1/4, 3/4; Buchaufgabe: S. 52, Nr. 1 bis 3
 
 ## Besondere Regeln
 - keine

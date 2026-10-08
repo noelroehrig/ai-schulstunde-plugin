@@ -9,10 +9,14 @@ const GUIDE_FILE = "plugin/skills/lesson-conventions/orchestration.md";
 const LESSON_FOLDER_FILE = "plugin/skills/lesson-conventions/lesson-folder.md";
 
 /** Labels of the state model that `lesson-folder.md` must show, each at the start of a line of the `stunde.md` format. */
-export const STATE_LINES = ["Prüfbericht:", "Rückmeldung:", "Alte Seite:"];
+export const STATE_LINES = ["Prüfbericht:", "Rückmeldung:", "Alte Seite:", "Elternseite:", "Anhänge:"];
 
 /** The checkpoint question the teacher answers after the planning loop, verbatim. */
 export const CHECKPOINT_QUESTION = "Passt der Plan so? Antworte mit „weiter“, oder schreib, was geändert werden soll.";
+
+/** The checkpoint question the teacher answers after the board loop, verbatim. */
+export const BOARD_CHECKPOINT_QUESTION =
+  "Passt das Tafelbild so? Antworte mit „weiter“, oder schreib, was geändert werden soll.";
 
 /** The three options offered when a loop reaches its cap, in order. */
 export const ESCALATION_LABELS = ["So übernehmen", "Ich gebe Hinweise", "Abbrechen"];
@@ -71,6 +75,7 @@ const ENTRY_POINT_FILES = ["plugin/skills/stunde-planen/SKILL.md", "plugin/skill
 export const ENTRY_POINT_REFERENCES = [
   GUIDE_REFERENCE,
   "the `plan_checkpoint` value",
+  "the `board_checkpoint` value",
   "the `planning_model` value",
   "the `board_model` value",
 ];
@@ -175,6 +180,7 @@ function mainSessionToolProblems(guide: string, entryPoints: string[]): string[]
 function guideProblems(text: string): string[] {
   const problems: string[] = [];
   if (!text.includes(CHECKPOINT_QUESTION)) problems.push("checkpoint question missing or changed");
+  if (!text.includes(BOARD_CHECKPOINT_QUESTION)) problems.push("board checkpoint question missing or changed");
   if (!text.includes(SERVER_NOT_RUNNING_MESSAGE)) problems.push("server-not-running message missing or changed");
   if (!text.includes(BAD_REQUEST_MESSAGE)) problems.push("bad_request message missing or changed");
   if (!text.includes(CONVENTIONS_REFERENCE)) problems.push(`reference "${CONVENTIONS_REFERENCE}" missing`);

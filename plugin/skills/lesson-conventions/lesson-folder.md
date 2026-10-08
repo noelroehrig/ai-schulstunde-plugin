@@ -8,6 +8,7 @@ Every lesson gets one folder in `Stunden/` of the working folder.
 
 - Name it with the `Seitentitel` scheme from `## Ablage` in `onenote.md`, so that folder and OneNote page match.
 - When `Seitentitel` is missing, empty, or still a placeholder in square brackets, use the default scheme `JJJJ-MM-TT Klasse Thema`: the lesson date if known, else today. The OneNote gate then titles the page with the same default scheme. Example: `2026-10-07 6b Bruchrechnung`.
+- `NN`, the running number of the page, is known only at the OneNote gate. In the folder name, the date `JJJJ-MM-TT` takes its place; when the scheme has `JJJJ-MM-TT` already, leave `NN` out together with the space after it. Example: `NN Thema` gives `2026-10-07 Einheiten von Flächeninhalten`.
 - Remove characters that are invalid in Windows file names (`< > : " / \ | ? *`). Keep umlauts and ß.
 - If a folder with that name already exists, append ` (2)`, ` (3)`, and so on: the first free one. Never reuse or write into an existing lesson folder of another lesson.
 
@@ -16,12 +17,13 @@ Every lesson gets one folder in `Stunden/` of the working folder.
 | File | Written by | Content |
 |---|---|---|
 | `stunde.md` | orchestrator | Request, overrides, status, OneNote location (format below). |
+| `material/` | orchestrator | The teacher's attachments: `anhaenge.md` with their transcription, and the attached files copied unchanged, each named in it. |
 | `planung_vN.md` | `lesson-planner` | Plan draft N. |
 | `review_vN.md` | `plan-reviewer` | Review of `planung_vN.md`. |
 | `rueckmeldung_vN.md` | orchestrator | The teacher's feedback at the checkpoint, guidance at the planning cap, or changes for a revision, that led to `planung_vN.md`. |
 | `tafelbild_vN.json` | `board-author` | The exact `replace_page` payload of board round N. |
 | `tafelbild-review_vN.md` | `board-reviewer` | Review of board round N. |
-| `tafelbild-rueckmeldung_vN.md` | orchestrator | The teacher's guidance at the board cap that led to `tafelbild_vN.json`. |
+| `tafelbild-rueckmeldung_vN.md` | orchestrator | The teacher's feedback at the board checkpoint, or guidance at the board cap, that led to `tafelbild_vN.json`. |
 
 Rules:
 
@@ -46,9 +48,10 @@ Klasse: <Klasse>
 Hinweise: <Hinweise oder „keine“>
 Stundenlänge: <Minuten> Minuten
 Quelle der Stundenlänge: <„schulkontext.md“ oder „Auftrag“>
+Anhänge: <„material/anhaenge.md“ oder „keine“>
 
 ## Stand
-Schritt: <Planung | Prüfpunkt | Tafelbild | Fertig | Abgebrochen>
+Schritt: <Planung | Prüfpunkt | Tafelbild | Tafelbild-Prüfpunkt | Fertig | Abgebrochen>
 Runde: <n> von 3
 Planversion: <N oder „keine“>
 Freigegebener Plan: <Dateiname oder „keiner“>
@@ -58,6 +61,7 @@ Rückmeldung: <Dateiname oder „keine“>
 
 ## OneNote
 Abschnitt: <Name oder „offen“>
+Elternseite: <Titel, „keine“ oder „offen“>
 Seitentitel: <Titel oder „offen“>
 Seiten-ID: <ID oder „keine“>
 Alte Seite: <Titel oder „keine“>
@@ -71,9 +75,11 @@ Alte Seite: <Titel oder „keine“>
 
 `## Stand` and `## OneNote` hold the whole state of the lesson. The procedure reads state only from these two sections, never from `## Verlauf` and never from which files exist or which is newest.
 
+`Anhänge` in `## Auftrag` names the transcription of the images and files the teacher attached (`material/anhaenge.md` of the lesson folder), or holds `keine` when there are none. The planning agents and the board agents get that file as an input.
+
 The lines of `## Stand`:
 
-- `Schritt`: the step the lesson is in. `Planung` is the planning loop, `Prüfpunkt` the checkpoint (and the OneNote gate after it), `Tafelbild` the board loop, which exists only after the OneNote gate passed. `Fertig` and `Abgebrochen` end the procedure.
+- `Schritt`: the step the lesson is in. `Planung` is the planning loop, `Prüfpunkt` the checkpoint (and the OneNote gate after it), `Tafelbild` the board loop, which exists only after the OneNote gate passed, and `Tafelbild-Prüfpunkt` the board checkpoint after the board loop. `Fertig` and `Abgebrochen` end the procedure.
 - `Runde`: the round of the recorded draft in the current loop, `0` when the current loop has no draft yet. The current loop is the planning loop while `Schritt` is `Planung`, the board loop while it is `Tafelbild`.
 - `Planversion`: the number N of the last plan draft whose planner returned `DONE`, or `keine`. In the planning loop, the recorded draft is `planung_v<Planversion>.md`; its review is `review_v<Planversion>.md`.
 - `Freigegebener Plan`: the plan of the last `APPROVED` verdict or `So übernehmen` in the planning loop, written together with `Schritt: Prüfpunkt`; `keiner` before that, and again from the start of a revision until then. The checkpoint shows it to the teacher, and the board loop works from it.
@@ -84,16 +90,18 @@ The lines of `## Stand`:
 The lines of `## OneNote`:
 
 - `Abschnitt`: the name of the OneNote section of the page, `offen` until the OneNote gate passed.
+- `Elternseite`: the title of the page in that section under which the page lies as a subpage, `keine` when it lies directly in the section, `offen` until the OneNote gate passed.
 - `Seitentitel`: the title of the page, `offen` until the OneNote gate passed.
-- `Seiten-ID`: the ID of the page, written only from the board author's `DONE` line; `keine` until then.
-- `Alte Seite`: the title of the page of an earlier version of this lesson that the teacher should delete after a revision, or `keine`. The plugin never reads or writes that page.
+- `Seiten-ID`: the ID of the page, written only from the board author's `DONE` line; `keine` until then, and again from the moment a revision or the OneNote gate starts a new page.
+- `Alte Seite`: the title of the page of an earlier version of this lesson that the teacher should delete after a revision on a new page, or `keine`. The plugin never reads or writes that page.
 
 Rules:
 
 - The labels are German because the teacher may open the file. Keep them exactly as above.
 - Write the values in German. Numbers use a decimal comma, for example `Stundenlänge: 67,5 Minuten`.
 - `Stundenlänge` comes from `schulkontext.md` (`Quelle der Stundenlänge: schulkontext.md`), unless the request overrides it, for example `nur 45 Minuten` (`Quelle der Stundenlänge: Auftrag`).
-- When the lesson is created, write every line above: `Schritt: Planung`, `Runde: 0 von 3`, and the rest `keine`, `keiner`, or `offen`.
+- When the lesson is created, write every line above: `Anhänge` as the entry point says, `Schritt: Planung`, `Runde: 0 von 3`, and the rest `keine`, `keiner`, or `offen`.
+- A `stunde.md` of plugin 0.3.0 lacks `Anhänge` and `Elternseite`. A missing one counts as `keine` and is never a reason to stop. Every write of `## OneNote` adds a missing `Elternseite` line after `Abschnitt`, with the value it writes or `keine`.
 - Change `## Stand` and `## OneNote` only as the write table of `orchestration.md` says: each write is a single edit of `stunde.md`, made only after its step completed.
 - `## Verlauf` is a log for the teacher: append exactly one line for every write and every stop, and never rewrite earlier lines. It is written but never read to decide a step.
 - When the teacher accepts open Muss-Mängel at a cap (`So übernehmen`), list them under `## Übernommene Mängel`; otherwise that section holds `- keine`.

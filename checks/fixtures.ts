@@ -7,6 +7,7 @@ import { LANGUAGE_SENTENCE, REVIEWER_SENTENCE } from "./rules/agents.ts";
 import {
   AGENT_TYPES,
   BAD_REQUEST_MESSAGE,
+  BOARD_CHECKPOINT_QUESTION,
   CHECKPOINT_QUESTION,
   CONVENTIONS_REFERENCE,
   ENTRY_POINT_REFERENCES,
@@ -108,6 +109,7 @@ export function orchestrationFile(): string {
     "# Orchestration",
     "",
     CHECKPOINT_QUESTION,
+    BOARD_CHECKPOINT_QUESTION,
     SERVER_NOT_RUNNING_MESSAGE,
     BAD_REQUEST_MESSAGE,
     ...ESCALATION_LABELS,
@@ -152,25 +154,42 @@ export function examplePlanFile(): string {
   ].join("\n");
 }
 
-/** An example board that satisfies the examples rule: inside 1024 pt, every font size at least 20. */
+/**
+ * An example board that satisfies the examples rule: a Stundenthema, a banner, and a phase block ending with an
+ * image placeholder inside 1024 pt from y 71 with every font size at least 20, and notes for the teacher at x 1048.
+ */
 export function exampleBoardFile(): string {
   const text = (value: string, fields: Record<string, unknown> = {}) => ({ type: "paragraph", text: value, font_size: 20, ...fields });
+  const note = { font_size: 14, color: "#7030A0" };
   return JSON.stringify(
     {
       page_id: "beispiel",
       title: "Thema",
       outlines: [
-        { position: { x: 48, y: 24 }, width: 928, items: [text("Thema", { style: "h1", font_size: 32, color: "#1F4E79" })] },
+        { position: { x: 48, y: 71 }, width: 928, items: [text("Thema", { style: "h1", font_size: 32, color: "#1F4E79" })] },
         {
-          position: { x: 48, y: 90 },
+          position: { x: 48, y: 248.6 },
           width: 928,
           items: [
             text("Block", { style: "h2", font_size: 24 }),
             { type: "paragraph", segments: [{ text: "wichtig", font_size: 20, color: "#C00000" }] },
             { type: "list", style: "bullet", items: [{ segments: [{ text: "Punkt", font_size: 20 }] }] },
+            text("S. 152, Nr. 3"),
+            { type: "image_placeholder", description: "Screenshot S. 152, Nr. 3 hier einfügen", width: 928, height: 200 },
+          ],
+        },
+        {
+          position: { x: 1048, y: 136.6 },
+          width: 300,
+          items: [
+            { type: "paragraph", text: "7,5 Min. Plenum", ...note },
+            { type: "paragraph", segments: [{ text: "Lösung: 5/8", ...note }] },
+            { type: "list", style: "bullet", items: [{ segments: [{ text: "Pizzakarton", ...note }] }] },
           ],
         },
       ],
+      images: [{ handle: "mcpref:banner", width: 928, height: 88, position: { x: 48, y: 136.6 } }],
+      image_labels: [{ handle: "mcpref:banner", template: "banner", label: "Einstieg" }],
     },
     null,
     2,
@@ -205,8 +224,25 @@ export function templateFiles(): Record<string, string> {
       "## Ablage",
       "Notizbuch: [Name]",
       "Abschnitt: [Name]",
+      "Abschnitte der Klassen:",
+      "- [Klasse: Abschnitt]",
+      "Elternseite: [Titel]",
       "Seitentitel: [Schema]",
       "## Ansicht",
+      "Notizfarbe: [#RRGGBB]",
+      "## Vorlagen",
+      "Banner-Seite: [Abschnitt / Seitentitel]",
+      "Symbol-Seite: [Abschnitt / Seitentitel]",
+      "Vorbild-Seite: [Abschnitt / Seitentitel]",
+      "Banner je Phase:",
+      "- [Phase: Beschriftung]",
+      "## Seitenaufbau",
+      "Stundenthema als erste Zeile: ja",
+      "Inhalt ab: 71 pt",
+      "Text bei x: [Punkte] pt",
+      "Symbole bei x: [Punkte] pt",
+      "Banner bei x: [Punkte] pt",
+      "Bannerbreite: [Punkte] pt",
     ]),
     "plugin/templates/einstellungen.md": file([
       "# Einstellungen",

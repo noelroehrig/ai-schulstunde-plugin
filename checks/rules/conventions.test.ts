@@ -64,12 +64,22 @@ test("conventions reports a missing assignment key", () => {
   assertOneFinding(conventionsSkillBody().replace("page_title:", "title:"), /assignment key "page_title"/);
 });
 
+test("conventions reports each missing key of the template pages and the Elternseite", () => {
+  for (const key of ["parent_page_id", "banner_page_id", "symbol_page_id", "model_page_id"]) {
+    assertOneFinding(conventionsSkillBody().replace(`${key}:`, "x:"), new RegExp(`assignment key "${key}"`));
+  }
+});
+
+test("conventions does not count page_id inside a longer key", () => {
+  assertOneFinding(conventionsSkillBody().replace(/^page_id:/m, "x:"), /assignment key "page_id"/);
+});
+
 test("conventions reports a missing token", () => {
   assertOneFinding(conventionsSkillBody().replace(/FAILED/g, "ERROR"), /token "FAILED"/);
 });
 
 test("conventions reports each missing item separately", () => {
   const findings = check({ [SKILL]: "---\nname: lesson-conventions\n---\n" });
-  assert.equal(findings.length, 15 + 8 + 1 + 4 + 8 + 4);
+  assert.equal(findings.length, 15 + 8 + 1 + 4 + 12 + 4);
   assert.ok(findings.every((finding) => finding.rule === "conventions" && finding.file === SKILL));
 });
