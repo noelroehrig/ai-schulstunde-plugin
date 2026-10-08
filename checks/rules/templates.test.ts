@@ -107,6 +107,11 @@ test("templates reports a missing einstellungen heading", () => {
   assertOneFinding(files, "einstellungen.md", /heading "## Prüfpunkt" missing/);
 });
 
+test("templates reports a filled-in Notizbuch", () => {
+  const files = withFile("onenote.md", template("onenote.md").replace("Notizbuch: [Name]", "Notizbuch: Mathe"));
+  assertOneFinding(files, "onenote.md", /line starting with "Notizbuch: \[" missing/);
+});
+
 test("templates reports a missing time-sum criterion", () => {
   const files = withFile(
     "kriterien.md",

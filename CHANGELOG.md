@@ -1,5 +1,12 @@
 # Änderungen
 
+## 0.3.0 (2026-10-08)
+
+- Das Notizbuch steht jetzt in `onenote.md` (Zeile `Notizbuch:`) statt in den Plugin-Einstellungen. `/unterricht:einrichten` fragt nach dem Namen und gibt das Notizbuch nach deinem Ja einmal für Claude frei. Das funktioniert jetzt auch in der Desktop-App, in der sich die Plugin-Einstellungen nicht ändern lassen. Rufe nach dem Update einmal `/unterricht:einrichten` auf.
+- Für mehrere Fächer mit je einem Notizbuch richtest du je Fach einen Arbeitsordner ein. Alle freigegebenen Notizbücher bleiben freigegeben.
+- Ohne deine Freigabe nutzt Claude kein Notizbuch, auch keines, das „Unterricht“ heißt.
+- Server aktualisiert auf v1.1.0.
+
 ## 0.2.1 (2026-10-08)
 
 - Läuft die Sitzung in Cowork, sagt Claude jetzt, dass die OneNote-Verbindung nur im Tab „Code“ funktioniert. Die Anleitung sagt das auch.

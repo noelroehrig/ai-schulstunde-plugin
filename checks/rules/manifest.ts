@@ -131,7 +131,13 @@ function declaredOptions(repo: Repo): Set<string> {
 
 const USER_CONFIG_REF = /\$\{user_config\.([^}]*)\}/g;
 
-/** Reports every `${user_config.KEY}` under `plugin/` whose key `plugin.json` does not declare. */
+/** The only file whose `${user_config.KEY}` references the desktop app substitutes. */
+const USER_CONFIG_FILE = "plugin/.mcp.json";
+
+/**
+ * Reports every `${user_config.KEY}` under `plugin/` outside `.mcp.json`, where the desktop app leaves it
+ * unsubstituted, and every one whose key `plugin.json` does not declare.
+ */
 export const userConfigRefs: Rule = {
   name: "user-config-refs",
   run(repo: Repo): Finding[] {
@@ -141,7 +147,13 @@ export const userConfigRefs: Rule = {
       if (!file.startsWith("plugin/")) continue;
       for (const match of repo.readText(file).matchAll(USER_CONFIG_REF)) {
         const key = match[1];
-        if (!declared.has(key)) {
+        if (file !== USER_CONFIG_FILE) {
+          findings.push({
+            file,
+            rule: "user-config-refs",
+            message: `\${user_config.${key}} outside .mcp.json: the desktop app does not substitute it there`,
+          });
+        } else if (!declared.has(key)) {
           findings.push({
             file,
             rule: "user-config-refs",

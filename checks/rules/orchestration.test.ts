@@ -69,7 +69,7 @@ test("orchestration reports a token that appears only inside a longer word", () 
 });
 
 test("orchestration reports each missing token", () => {
-  for (const token of ["APPROVED", "REVISE", "DONE", "FAILED", "onenote_responsive"]) {
+  for (const token of ["APPROVED", "REVISE", "DONE", "FAILED", "onenote_responsive", "config_error"]) {
     const text = orchestrationFile().replace(new RegExp(`\\b${token}\\b`, "g"), "x");
     assertOneFinding(text, new RegExp(`token "${token}"`));
   }
@@ -91,7 +91,7 @@ test("SERVER_NOT_RUNNING_MESSAGE names the exe and the advice to use the Code ta
 
 test("orchestration reports each missing item separately", () => {
   const findings = check({ [GUIDE]: "# Orchestration\n" });
-  assert.equal(findings.length, 1 + 3 + 4 + 5 + 4 + 3 + 1 + 1 + 1 + 1);
+  assert.equal(findings.length, 1 + 3 + 4 + 6 + 4 + 3 + 1 + 1 + 1 + 1);
   assert.ok(findings.every((finding) => finding.rule === "orchestration" && finding.file === GUIDE));
 });
 

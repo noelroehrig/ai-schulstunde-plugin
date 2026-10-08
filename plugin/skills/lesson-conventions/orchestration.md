@@ -1,6 +1,6 @@
 # Orchestration
 
-The shared procedure of the entry points `stunde-planen` and `stunde-ueberarbeiten`: the settings, the planning loop, the checkpoint, a OneNote server that is not running, the OneNote gate, the board loop, escalation, failure handling, and the finish. Read it together with `<plugin root>/skills/lesson-conventions/SKILL.md`, which defines the assignment shape and the conventions, and `lesson-folder.md` of `lesson-conventions`. You run it in the main conversation; the agents run one level below you.
+The shared procedure of the entry points `stunde-planen` and `stunde-ueberarbeiten`: the settings, the notebook, the planning loop, the checkpoint, a OneNote server that is not running, the OneNote gate, the board loop, escalation, failure handling, and the finish. Read it together with `<plugin root>/skills/lesson-conventions/SKILL.md`, which defines the assignment shape and the conventions, and `lesson-folder.md` of `lesson-conventions`. You run it in the main conversation; the agents run one level below you.
 
 ## Inputs
 
@@ -9,7 +9,6 @@ The entry point states these values before it tells you to follow this file:
 - the plugin root: the absolute path of the plugin;
 - the working folder: the absolute path of the teacher's working folder;
 - the lesson folder: the absolute path of the lesson's folder in `Stunden/`, with its `stunde.md`;
-- the `notebook` setting: the name of the OneNote notebook;
 - the `plan_checkpoint` value: `true` or `false`;
 - the `planning_model` value: the model setting of the planning agents;
 - the `board_model` value: the model setting of the board agents.
@@ -101,6 +100,12 @@ The teacher's settings are lines of `einstellungen.md` in the working folder:
 
 The value is the text after the colon; letter case and surrounding spaces do not matter, and a model value is passed on as the table spells it. A setting is broken when its line is missing or its value is not allowed. Never assume a value for a broken setting. The preflight of each entry point checks all three before anything is written, and on a broken one stops with `Die Einstellung „<Bezeichnung>“ in einstellungen.md fehlt oder hat einen unbekannten Wert. Erlaubt ist <Werte>. Bitte trag einen erlaubten Wert ein, oder führe /unterricht:einrichten aus.` `<Bezeichnung>` is the line without its colon; `<Werte>` is `ja oder nein`, or `Opus, Sonnet, Haiku oder „wie die Sitzung“`.
 
+## The notebook
+
+The notebook of the working folder is the value of the line `Notizbuch:` under `## Ablage` in `onenote.md`. It is not set when the line is missing, its value is empty, or it is still a placeholder in square brackets. It is broken when it contains a comma, because the server separates the approved notebooks by commas.
+
+The server may use only the notebooks the teacher approved in Claude's user settings; `get_notebooks` lists only those. `ping` reports `config_error`: `null` when the approval is configured, a text when the server has no usable approval. A missing `config_error` field counts as `null`. Only `einrichten` writes the `Notizbuch:` line and the approval; every other procedure points the teacher to `/unterricht:einrichten`.
+
 ## Choosing the model
 
 `unterricht:lesson-planner` and `unterricht:plan-reviewer` run on the `planning_model` value, `unterricht:board-author` and `unterricht:board-reviewer` on the `board_model` value. The value decides the Agent tool's `model` parameter:
@@ -183,9 +188,9 @@ The plugin's OneNote tools are `mcp__plugin_unterricht_onenote__*`. When they ar
 
 The gate runs with `Schritt: Prüfpunkt`, before a board loop starts: after `weiter` at the checkpoint, when `plan_checkpoint` is `false`, or after `So übernehmen` in the planning loop. Check, in this order; nothing in `## Stand` or `## OneNote` changes before step 6. A resumed board loop (`Schritt: Tafelbild`) runs steps 1 to 4 only, to resolve `section_id`, and writes nothing. The OneNote tools of the main session are `mcp__plugin_unterricht_onenote__ping`, `mcp__plugin_unterricht_onenote__get_notebooks`, and `mcp__plugin_unterricht_onenote__list_pages` (for the title of a revised page, as `stunde-ueberarbeiten` says).
 
-1. The `notebook` setting is not blank and has no comma. Otherwise stop before any OneNote call, with `Die Einstellung „OneNote-Notizbuch“ ist leer oder enthält ein Komma. Trag dort mit /config genau den Namen eines Notizbuchs ein. Setze dann mit /unterricht:stunde-ueberarbeiten fort.`
-2. When the OneNote tools are not available, stop as OneNote server not running says. Otherwise call `ping`. When it reports `onenote_responsive: true`, go on. When it reports `onenote_responsive: false`, ask `OneNote reagiert gerade nicht. Bitte öffne OneNote und schließe alle offenen Dialoge. Antworte dann mit „weiter“.` and end your turn. After the answer, call `ping` once more; when it still reports `onenote_responsive: false`, stop and say that the plan is kept and that the board can be made later with `/unterricht:stunde-ueberarbeiten`.
-3. Call `get_notebooks`. The notebook whose name is exactly the `notebook` setting, case-sensitive, must be in the list. Otherwise stop before writing, with `Das Notizbuch „<notebook>“ wurde in OneNote nicht gefunden. Der Name muss genau stimmen, auch bei Groß- und Kleinschreibung. Du kannst ihn mit /config in der Einstellung „OneNote-Notizbuch“ ändern. Ich lege nie ein Notizbuch an.`
+1. Read the notebook from `onenote.md` (see The notebook). When it is not set or broken, stop before any OneNote call, with `In onenote.md ist noch kein gültiges Notizbuch eingetragen. Führe /unterricht:einrichten aus und setze dann mit /unterricht:stunde-ueberarbeiten fort.`
+2. When the OneNote tools are not available, stop as OneNote server not running says. Otherwise call `ping`. When it reports a `config_error` that is not `null`, stop with `Die Freigabe für OneNote ist noch nicht eingerichtet. Führe /unterricht:einrichten aus und setze dann mit /unterricht:stunde-ueberarbeiten fort.` When it reports `onenote_responsive: true`, go on. When it reports `onenote_responsive: false`, ask `OneNote reagiert gerade nicht. Bitte öffne OneNote und schließe alle offenen Dialoge. Antworte dann mit „weiter“.` and end your turn. After the answer, call `ping` once more; when it still reports `onenote_responsive: false`, stop and say that the plan is kept and that the board can be made later with `/unterricht:stunde-ueberarbeiten`.
+3. Call `get_notebooks`. The notebook must be in the list, with exactly that name, case-sensitive. Otherwise stop before writing, with `Das Notizbuch „<notebook>“ ist für mich nicht freigegeben, oder OneNote kennt kein Notizbuch mit genau diesem Namen. Führe /unterricht:einrichten aus, um das zu prüfen, und setze dann mit /unterricht:stunde-ueberarbeiten fort. Ich lege nie ein Notizbuch an.`
 4. The section. In a resumed board loop, it is the recorded `Abschnitt` of `## OneNote`: when the notebook has no section with exactly that name, stop with `Der Abschnitt „<Abschnitt>“, in dem das Tafelbild dieser Stunde liegt, ist im Notizbuch „<notebook>“ nicht mehr zu finden. Ich wähle keinen anderen Abschnitt. Stell den Abschnitt in OneNote wieder her und setze dann mit /unterricht:stunde-ueberarbeiten fort.` Otherwise read `Abschnitt` under `## Ablage` in `onenote.md`. When the line is missing, its value is empty, or it is still a placeholder in square brackets, handle it like a missing section: ask `In onenote.md ist noch kein Abschnitt für die Tafelbilder eingetragen. Bitte lege einen Abschnitt im Notizbuch „<notebook>“ an und nenne ihn, oder nenne einen vorhandenen Abschnitt.` and end your turn, then check the section the teacher named as below, against a fresh `get_notebooks` answer. `Abschnitt: Klasse` means the section named exactly like the `Klasse` in `## Auftrag` of `stunde.md`; any other value is the section name itself. The section must be one of the notebook's sections in the `get_notebooks` answer, with exactly that name; note its ID as `section_id`. When it is missing, ask `Im Notizbuch „<notebook>“ gibt es keinen Abschnitt „<Abschnitt>“. Bitte lege ihn in OneNote an und antworte mit „weiter“, oder nenne einen anderen vorhandenen Abschnitt.` and end your turn. After the teacher's answer to either question, call `get_notebooks` again before you check, because the teacher may just have created the section in OneNote: check the notebook as in step 3 and the section against that fresh answer only, with the section the teacher named, if any. A `timeout` on this call is handled like on every own read (Failure handling). Never create a section, and never change `onenote.md`.
 5. The page title, unless the entry point gives another rule for it: fill the `Seitentitel` scheme of `## Ablage` in `onenote.md`. When the line is missing, its value is empty, or it is still a placeholder in square brackets, use the default scheme `JJJJ-MM-TT Klasse Thema`, as the lesson folder did. `JJJJ-MM-TT` is the lesson date when `stunde.md` names one, else the date the lesson folder name starts with, else today; `Klasse` and `Thema` come from `## Auftrag` of `stunde.md`. Keep every other text of the scheme as it is.
 6. The gate passed: write `Schritt: Tafelbild`, `Runde: 0 von 3`, `Rückmeldung: keine`, `Abschnitt: <section name>`, and `Seitentitel: <page title>`. The board loop starts at round 1 with a fresh cap of 3.
@@ -251,8 +256,9 @@ The OneNote failures that concern you. An error of a OneNote tool arrives as `Er
 - A `backend_error` saying that OneNote is not registered or not installed: stop with `Für das Tafelbild brauche ich die OneNote-Desktop-App für Windows. Bitte installiere sie, melde dich an und setze dann mit /unterricht:stunde-ueberarbeiten fort.`
 - Any other `backend_error` on your own call: stop the board loop, show the error text, keep the plan, and explain how to resume.
 - `bad_request` on your own call: a plugin bug. Stop, show the error text, and ask the teacher to forward it to the maintainer of the plugin.
-- `notebook` blank or with a comma: step 1 of the OneNote gate.
-- Configured notebook not found: step 3 of the OneNote gate.
+- Notebook not set or broken in `onenote.md`: step 1 of the OneNote gate.
+- `config_error` reported by `ping`: step 2 of the OneNote gate.
+- Notebook not approved or not found: step 3 of the OneNote gate.
 - Target section missing: step 4 of the OneNote gate.
 
 ## Finish
