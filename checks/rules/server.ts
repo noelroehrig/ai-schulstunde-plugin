@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import type { Finding, Mode, Repo, Rule } from "../repo.ts";
+import { compareVersions, parseVersion, type Version } from "../version-bump.ts";
 
 const RULE = "server";
 
@@ -21,14 +22,18 @@ const SHA_LINE = /^([0-9a-f]{64}) [ *]onenote-mcp\.exe(\r?\n)?$/;
 
 const NOT_VENDORED = "server not vendored yet";
 
+/** The last server release that reads an empty allowlist as every notebook; the plugin's empty `notebook` default needs a newer one. */
+const LAST_FAIL_OPEN_RELEASE: Version = [1, 0, 1];
+
 /** Lists the files under `plugin/server/`. */
 function serverDirFiles(repo: Repo): string[] {
   return repo.listFiles().filter((file) => file.startsWith(DIR));
 }
 
 /**
- * Checks the vendored server: exactly the exe, `VERSION`, and a matching checksum.
- * A missing `plugin/server/` is expected during the build and a finding only in release mode.
+ * Checks the vendored server: exactly the exe, `VERSION`, and a matching checksum, and in release mode a
+ * version newer than the last one that fails open. A missing `plugin/server/` is expected during the build
+ * and a finding only in release mode.
  */
 export const server: Rule = {
   name: RULE,
@@ -37,7 +42,9 @@ export const server: Rule = {
     if (files.length === 0) {
       return mode === "release" ? [{ file: DIR, rule: RULE, message: "server not vendored" }] : [];
     }
-    return serverProblems(repo, files).map(([file, message]) => ({ file, rule: RULE, message }));
+    const problems = serverProblems(repo, files);
+    if (mode === "release") problems.push(...failOpenProblems(repo, files));
+    return problems.map(([file, message]) => ({ file, rule: RULE, message }));
   },
   notices(repo: Repo, mode: Mode): string[] {
     return mode === "build" && serverDirFiles(repo).length === 0 ? [NOT_VENDORED] : [];
@@ -64,6 +71,15 @@ function serverProblems(repo: Repo, files: string[]): [string, string][] {
     }
   }
   return problems;
+}
+
+/** Rejects a vendored server whose `VERSION` is not newer than the last release that fails open. */
+function failOpenProblems(repo: Repo, files: string[]): [string, string][] {
+  if (!files.includes(VERSION)) return [];
+  const version = parseVersion(repo.readText(VERSION).trim().replace(/^v/, ""));
+  if (version === undefined || compareVersions(version, LAST_FAIL_OPEN_RELEASE) > 0) return [];
+  const last = `v${LAST_FAIL_OPEN_RELEASE.join(".")}`;
+  return [[VERSION, `servers up to ${last} read an empty allowlist as every notebook; vendor a newer release`]];
 }
 
 /** The SHA-256 of `bytes` as lowercase hex. */

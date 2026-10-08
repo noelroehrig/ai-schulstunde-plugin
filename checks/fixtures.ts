@@ -230,7 +230,7 @@ export function serverFiles(exe = "fake exe"): Record<string, string> {
   const hash = createHash("sha256").update(exe).digest("hex");
   return {
     "plugin/server/onenote-mcp.exe": exe,
-    "plugin/server/VERSION": "v1.0.1\n",
+    "plugin/server/VERSION": "v1.1.0\n",
     "plugin/server/onenote-mcp.exe.sha256": `${hash}  onenote-mcp.exe\n`,
   };
 }

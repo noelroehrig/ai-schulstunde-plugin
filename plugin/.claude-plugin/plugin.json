@@ -10,7 +10,7 @@
       "type": "string",
       "title": "OneNote-Notizbücher",
       "description": "Namen der Notizbücher, in denen das Plugin Tafelbilder lesen und anlegen darf, durch Komma getrennt. /unterricht:einrichten trägt sie ein.",
-      "default": "Unterricht"
+      "default": ""
     }
   }
 }
