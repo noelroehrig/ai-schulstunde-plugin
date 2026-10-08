@@ -21,7 +21,7 @@ A page is written as one payload `{ page_id, title, outlines, images? }`. Use on
   - `font_family`: letters, digits, spaces, `,`, `.`, `-`; at most 64 characters.
 - Run: `{ text }` (a string) with the same optional `bold`, `italic`, `underline`, `strikethrough`, `color`, `highlight`, `font_size`, `font_family`. A run has no `style`.
 - List: `{ "type": "list", "style": "bullet" | "numbered", "items": [...] }`. Each list item is `{ text | segments, children? }`, with exactly one of `text` or `segments`; `children` is an array of list items, nested the same way. A list item has no formatting fields of its own: to size or color it, use `segments`.
-- Image placeholder: `{ "type": "image_placeholder", "description", "width", "height" }`, the space for a screenshot the teacher pastes later. `description` is a non-empty string, `width` and `height` are numbers greater than 0. It is the last item of its outline. The server writes it as one highlighted line `[INSERT IMAGE: <description>]` and does not reserve its height on the page, so the layout keeps that space free (Height estimate).
+- Image placeholder: `{ "type": "image_placeholder", "description", "width", "height" }`, the space for a screenshot the teacher pastes later. `description` is a non-empty string, `width` and `height` are numbers greater than 0. It is the last item of its outline. The server shows `description` verbatim as a highlighted label, so it is German, and reserves a box of exactly `width` by `height` below the label.
 - `images`: an array of floating images, placed on the page next to the outlines. Omit it when the page has none.
 - Floating image: `{ handle, width, height, position }`, all four required. `handle` is a string that starts with `mcpref:`; `width` and `height` are numbers greater than 0; `position` as for an outline.
 
@@ -62,10 +62,20 @@ Example:
 
 - Round 1 (`page_id:` empty): call `create_page` with the assignment's `section_id` and `page_title`, and with `parent_page_id` when the assignment's `parent_page_id` is not empty. It sets only the title and returns the new page ID. Then call `replace_page` with the content on that ID.
 - Later rounds, and round 1 with a `page_id`: call `replace_page` on the assignment's `page_id`. Never create a second page.
-- `replace_page` deletes everything on the page except the title (ink, images, tables included), without a conflict check. Call it only on the page of this board loop: the ID returned by your own `create_page`, or the `page_id` of your assignment. Never on any other page.
+- `replace_page` deletes everything on the page except the title and the objects of the top-level `unsupported` list of `get_page`, such as handwriting on the page, which stay in place. It has no conflict check. Call it only on the page of this board loop: the ID returned by your own `create_page`, or the `page_id` of your assignment. Never on any other page.
+- With a `page_id`, read the page first, as The existing page says.
 - Pass `page_id`, `title`, `outlines`, and `images` (when the payload has floating images) to `replace_page`. Never pass `image_labels`.
 - Never use `append_page` or a raw-XML tool to write the Tafelbild.
 - Finish with `DONE <output path> page_id=<id>`.
+
+## The existing page
+
+With a `page_id`, the page exists already, and the teacher may have written on it, for example at the board checkpoint or before a revision on the existing page. The author reads it with `get_page` before writing:
+
+- Every object of the top-level `unsupported` list, handwriting or a drawing on the page, stays in place through `replace_page`. It is an element at its `position`, `width`, and `height` that no other element may overlap: lay the page out around it.
+- An item with `type` `unsupported` and `kind` `ink` inside an outline is handwriting in a text box, which `replace_page` would delete. It is never deleted: the author stops with `FAILED`.
+- All other content of the page, typed text, tables, files, and pasted images included, is replaced.
+- An outline the author keeps unchanged, with the same items and width, takes its measured `height` from this read instead of the estimate.
 
 ## `tafelbild_vN.json`
 
@@ -104,22 +114,22 @@ Without a configured Ansicht:
 - `Symbole bei x`: the x of every symbol. When not set, a symbol stands at `Text bei x`, and its text outline starts 12 pt right of the symbol.
 - `Banner bei x` and `Bannerbreite`: the x and the width of every banner. When not set, a banner starts at `Text bei x`, or at 36 when that is not set either, and is as wide as the Sichtbare Breite allows from there; without a configured Ansicht it keeps the width of its template image.
 
-## Height estimate
+## Heights
 
-The server can neither set nor report the height of an outline. Estimate it like this:
+OneNote sets the height of an outline itself. `get_page` reports it as the outline's measured `height`, but only once the outline is written. Before writing, the author estimates it like this:
 
 - The line height is 1.3 times the font size.
 - A paragraph or list item takes `ceil(characters * 0.5 * font_size / width)` lines, at least 1. `characters` counts all characters of its text or of all its runs; with runs of different sizes, use the largest `font_size`.
-- An image placeholder takes its `height`.
+- An image placeholder takes its `height` plus one line for its label, counted at 26 pt.
 - An outline's height is the sum of the heights of its items.
 - A floating image's height is its `height`.
-- An element is an outline or a floating image. Its box runs from `x` to `x + width` and from `y` to `y + height`.
+- An element is an outline, a floating image, or an object of the top-level `unsupported` list of the existing page. Its box runs from `x` to `x + width` and from `y` to `y + height`.
 - A symbol and the text outline it marks start at the same `y`; together they are a row as tall as the taller of the two.
 - The next element below starts at least 24 pt below the estimated end of the element above: `y_next >= y + height + 24`.
-- A phase block runs from the top of its first element (its banner, when it has one) to the estimated end of its last element. The notes for the teacher do not count.
-- No two elements overlap: by the estimate, their boxes share no area.
+- A phase block runs from the top of its first element (its banner, when it has one) to the end of its last element. The notes for the teacher do not count.
+- No two elements overlap: their boxes share no area.
 
-Without a positioned layout, estimate only outlines that have a `width`. Author and reviewer use the same estimate. The reviewer always calls it an estimate (`geschätzt`), never a measurement.
+Without a positioned layout, estimate only outlines that have a `width`. The author lays the page out by the estimate, using the measured `height` of every outline it keeps unchanged from the existing page. The reviewer uses the measured heights of the read-back and calls them measured (`gemessen`); only for an outline without a measured `height` it uses the estimate and calls it an estimate (`geschätzt`).
 
 ## Layout
 
@@ -153,19 +163,20 @@ A placeholder is as large as the screenshot of its task should appear on the pag
 
 ## Review
 
-The `board-reviewer` reads the page back with `get_page`. The read-back has the title, outlines with position and width, paragraphs and lists with text, heading level, and inline formatting, and floating images with position, width, and height. It has no outline height, no tables, and no ink, and it loses formatting: a paragraph's `font_size` can vanish, and runs can come back merged into one plain paragraph. An image gets a new handle on the page, so a handle of the read-back never matches the payload. An image placeholder comes back as a paragraph that contains its `description`.
+The `board-reviewer` reads the page back with `get_page`. The read-back has the title, outlines with position, width, and measured height, paragraphs and lists with text, heading level, and inline formatting, floating images with position, width, and height, and as `unsupported` what the server cannot write: tables, files, and handwriting, inside outlines or in the top-level `unsupported` list. It loses formatting: a paragraph's `font_size` can vanish, and runs can come back merged into one plain paragraph. An image gets a new handle on the page, so a handle of the read-back never matches the payload. An image placeholder comes back as a paragraph with its `description`; how its box comes back is not documented, so an item without text of its own directly after that paragraph, in the same outline, belongs to the placeholder.
 
 Each of these is a Muss-Mangel. On the read-back:
 
 - The title differs from `page_title`.
 - With `Stundenthema als erste Zeile: ja`, the Stundenthema is not the first element.
 - The phase blocks are not in the phase order of the plan.
-- An item of `## Tafelbild (Inhalt)` is missing, or content is on the page that the plan does not name. The exception and the additions that Layout allows are neither.
+- An item of `## Tafelbild (Inhalt)` is missing, or content is on the page that the plan does not name. The exception and the additions that Layout allows are neither, and neither is the teacher's handwriting of the top-level `unsupported` list.
 - Text that is not German, or a glossary term that is not verbatim.
 - In a positioned layout, an outline without `position` and `width`.
 - With a configured Ansicht, an element with `x + width` greater than the Sichtbare Breite, the notes for the teacher excepted.
 - An element whose `y` is less than `Inhalt ab`.
 - Text of the page that differs from the text of the payload, a number of floating images that differs from the payload, or a floating image more than 1 pt away from its position in the payload.
+- A phase block taller than the Sichtbare Höhe, or two elements that overlap, by the measured heights (Heights); an overlap with an object of the top-level `unsupported` list included.
 
 On `tafelbild_vN.json`:
 
@@ -174,9 +185,8 @@ On `tafelbild_vN.json`:
 - A Stundenthema without the `h1` style.
 - With a Banner-Seite, a phase block that does not start with the banner `Banner je Phase` maps its phase to, by `image_labels`; or a label in `image_labels` that its template page does not have.
 - An item starting with `Buchaufgabe:` without its image placeholder; a placeholder wider than its outline; or one whose `width / height` differs by more than 5 % from the `Seitenverhältnis` that `material/anhaenge.md` records for its task.
-- A phase block taller than the Sichtbare Höhe, or two elements that overlap, by the estimate.
 - Notes for the teacher that are not in the Notizfarbe, that start left of the Sichtbare Breite plus 24, or that hold content the plan does not name.
 
-Under `## Nachrechnung`, write one line per element with `x + width`, for example `48 + 928 = 976 (Sichtbare Breite 1024): erfüllt`, one line per block with the estimated height including its images and placeholders, for example `geschätzte Höhe 88 + 24 + 26 + 26 = 164 (Sichtbare Höhe 768): erfüllt`, and one line with the smallest `y`, for example `kleinstes y 71 (Inhalt ab 71): erfüllt`.
+Under `## Nachrechnung`, write one line per element with `x + width`, for example `48 + 928 = 976 (Sichtbare Breite 1024): erfüllt`, one line per block with its height from the top of its first element to the end of its last, for example `Einstieg: 136,6 bis 331,8, Höhe 195,2 gemessen (Sichtbare Höhe 768): erfüllt`, and one line with the smallest `y`, for example `kleinstes y 71 (Inhalt ab 71): erfüllt`.
 
 OneNote rewrites colors (`#C00000` can come back as `#9C0000`) and loses paragraph formatting in the read-back. A formatting difference between `tafelbild_vN.json` and the read-back is therefore never a finding. Rendering on the presenting device and contrast cannot be checked; the teacher's look at the page covers them.

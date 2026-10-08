@@ -61,7 +61,7 @@ Wenn nach drei Runden noch Muss-Mängel offen sind, zeigt Claude sie dir und du 
 
 Am Ende nennt Claude dir die Datei mit dem fertigen Plan und die Seite in OneNote. Öffne die Seite vor der Stunde einmal auf dem Gerät, mit dem du sie zeigst, damit sie dort synchronisiert ist.
 
-Eine fertige Tafelbild-Seite überarbeitet Claude nur, wenn du es ausdrücklich willst. Überarbeitest du eine fertige Stunde, fragt Claude dich, ob es die bisherige Seite überarbeiten oder eine neue anlegen soll. Auf der bisherigen Seite ersetzt Claude dabei alles, was du dort getippt oder eingefügt hast. Eine neue Seite bekommt „(überarbeitet)“ im Titel, und Claude sagt dir, welche alte Seite du löschen kannst.
+Eine fertige Tafelbild-Seite überarbeitet Claude nur, wenn du es ausdrücklich willst. Überarbeitest du eine fertige Stunde, fragt Claude dich, ob es die bisherige Seite überarbeiten oder eine neue anlegen soll. Auf der bisherigen Seite ersetzt Claude dabei alles, was du dort getippt oder eingefügt hast. Deine Handschrift bleibt erhalten, und Claude setzt neuen Inhalt nicht darüber. Steht Handschrift in einem Textfeld, hält Claude an und bittet dich, sie aus dem Textfeld herauszuziehen, damit sie nicht verloren geht. Eine neue Seite bekommt „(überarbeitet)“ im Titel, und Claude sagt dir, welche alte Seite du löschen kannst.
 
 Schickst du `/unterricht:stunde-planen` Bilder oder Dateien mit, zum Beispiel Screenshots aus dem Buch, schreibt Claude ab, was darauf steht, in den Ordner `material/` der Stunde. Dateien, die auf deinem Rechner liegen, kopiert Claude dorthin. Planung und Prüfung arbeiten mit dieser Abschrift.
 
@@ -95,7 +95,7 @@ Unterricht/
         └── ...
 ```
 
-Du musst `onenote.md` nicht vorher ausfüllen, Claude plant die Stunde trotzdem. Steht dort noch kein Seitentitel, heißen der Stundenordner und die Seite in OneNote nach dem Schema `JJJJ-MM-TT Klasse Thema`. Mit `NN` im Schema, zum Beispiel `NN Thema`, bekommt die Seite die nächste freie Nummer, und Claude fragt dich vorher, ob der Titel passt. Steht dort noch kein Abschnitt, fragt dich Claude vor dem Tafelbild, in welchen Abschnitt die Seite soll. Mit einer „Elternseite“ legt Claude das Tafelbild als Unterseite unter diese Seite, zum Beispiel unter „Kapitel 6 - Flächeninhalt“; mit „Elternseite: fragen“ fragt Claude dich bei jeder Stunde, unter welche Seite es gehört.
+Du musst `onenote.md` nicht vorher ausfüllen, Claude plant die Stunde trotzdem. Steht dort noch kein Seitentitel, heißen der Stundenordner und die Seite in OneNote nach dem Schema `JJJJ-MM-TT Klasse Thema`. Mit `NN` im Schema, zum Beispiel `NN Thema`, bekommt die Seite die nächste freie Nummer unter den Seiten, neben denen sie steht. Steht dort noch kein Abschnitt, fragt dich Claude vor dem Tafelbild, in welchen Abschnitt die Seite soll. Mit einer „Elternseite“ legt Claude das Tafelbild als Unterseite unter diese Seite, zum Beispiel unter „Kapitel 6 - Flächeninhalt“; mit „Elternseite: fragen“ fragt Claude dich bei jeder Stunde, unter welche Seite es gehört.
 
 Die Dateien gehören dir. Das Plugin überschreibt `schulkontext.md`, `kriterien.md`, `onenote.md`, `einstellungen.md`, `CLAUDE.md` und deinen `material/`-Ordner nie. Änderungen daran schlägt `/unterricht:einrichten` nur vor und schreibt sie erst nach deinem Ja.
 

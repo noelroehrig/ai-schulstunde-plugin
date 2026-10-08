@@ -84,12 +84,12 @@ Line height is `1.3 * font_size`: 41.6 at 32 pt, 31.2 at 24 pt, 26 at 20 pt, 18.
 | Banner Sicherung | 616.6 | 88 | 704.6 |
 | Merksatz with symbol | 728.6 | larger of 26 and 66 = 66 | 794.6 |
 | Beispiele | 818.6 | 26 + 3 * 26 = 104 | 922.6 |
-| Buchaufgabe | 946.6 | 26 + 285 = 311 | 1257.6 |
+| Buchaufgabe | 946.6 | 26 + 26 + 285 = 337 | 1283.6 |
 
 Each `y` is the previous estimated end plus 24, for example `112.6 + 24 = 136.6`. The blocks:
 
 - Einstieg: 136.6 to 331.8, `88 + 24 + 83.2 = 195.2`.
 - Erarbeitung: 355.8 to 592.6, `88 + 24 + 124.8 = 236.8`.
-- Sicherung: 616.6 to 1257.6, `88 + 24 + 66 + 24 + 104 + 24 + 311 = 641`.
+- Sicherung: 616.6 to 1283.6, `88 + 24 + 66 + 24 + 104 + 24 + 337 = 667`.
 
-The whole board ends at an estimated 1257.6 pt, taller than the Sichtbare Höhe of 768 pt, so it is split into the three phase blocks, each at most 768 pt: the teacher scrolls down once per block. The placeholder's 285 pt count in the height of its block, so that any element below it would start below them: the server does not reserve them. These heights are estimates: the server cannot report them.
+The whole board ends at an estimated 1283.6 pt, taller than the Sichtbare Höhe of 768 pt, so it is split into the three phase blocks, each at most 768 pt: the teacher scrolls down once per block. The placeholder counts with one label line of 26 pt and its box of 285 pt, which the server reserves. These heights are the author's estimates: once the page is written, `get_page` reports the measured height of every outline, and the reviewer checks those.
