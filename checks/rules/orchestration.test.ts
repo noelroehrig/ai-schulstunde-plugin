@@ -81,10 +81,10 @@ test("orchestration reports a missing or changed server-not-running message", ()
   assertOneFinding(orchestrationFile().split(SERVER_NOT_RUNNING_MESSAGE).join(changed), /server-not-running message/);
 });
 
-test("SERVER_NOT_RUNNING_MESSAGE names the exe and the advice to restart and to check Windows", () => {
+test("SERVER_NOT_RUNNING_MESSAGE names the exe and the advice to use the Code tab, to restart, and to check Windows", () => {
   assert.equal(
     SERVER_NOT_RUNNING_MESSAGE,
-    "Die OneNote-Verbindung des Plugins läuft nicht. Starte die Claude-App neu. Wenn das nicht hilft, prüfe, ob Windows Defender oder SmartScreen die Datei onenote-mcp.exe blockiert.",
+    "Die OneNote-Verbindung des Plugins läuft nicht. In Cowork gibt es sie nicht: Öffne deinen Arbeitsordner im Tab „Code“. Bist du schon im Tab „Code“, starte die Claude-App neu. Wenn das nicht hilft, prüfe, ob Windows Defender oder SmartScreen die Datei onenote-mcp.exe blockiert.",
   );
   assert.ok(SERVER_NOT_RUNNING_MESSAGE.includes(SERVER_EXE));
 });

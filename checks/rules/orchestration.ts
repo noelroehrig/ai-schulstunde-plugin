@@ -44,7 +44,8 @@ export const SERVER_EXE = "onenote-mcp.exe";
 
 /** The German message for a OneNote server that did not start, written once, in the guide. */
 export const SERVER_NOT_RUNNING_MESSAGE =
-  "Die OneNote-Verbindung des Plugins läuft nicht. Starte die Claude-App neu. Wenn das nicht hilft, prüfe, ob Windows Defender oder SmartScreen die Datei " +
+  "Die OneNote-Verbindung des Plugins läuft nicht. In Cowork gibt es sie nicht: Öffne deinen Arbeitsordner im Tab „Code“. " +
+  "Bist du schon im Tab „Code“, starte die Claude-App neu. Wenn das nicht hilft, prüfe, ob Windows Defender oder SmartScreen die Datei " +
   SERVER_EXE +
   " blockiert.";
 
