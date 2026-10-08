@@ -84,10 +84,97 @@ test("examples leaves an example board that does not parse to json-valid", () =>
   assert.deepEqual(check({ [BOARD]: "{" }), []);
 });
 
-test("examples reports an example board that fails validateBoardPayload", () => {
+test("examples reports an example board that fails validateBoardFile", () => {
+  const inline = board();
+  inline.outlines[0].items.push({ type: "inline_image", handle: "mcpref:a" });
+  assertOneBoardFinding(inline, /^outlines\[0\]\.items\[1\]\.type: "inline_image" is not allowed/);
+  const unlabeled = board();
+  delete unlabeled.image_labels;
+  assertOneBoardFinding(unlabeled, /^image_labels: required when images is present/);
+});
+
+test("examples reports a floating image wider than the example Ansicht", () => {
   const value = board();
-  value.images = [];
-  assertOneBoardFinding(value, /^images: .*non-goal/);
+  value.images[0].width = 1024 - value.images[0].position.x + 1;
+  assertOneBoardFinding(value, /^images\[0\]: x \+ width = 48 \+ 977 = 1025, more than 1024$/);
+});
+
+test("examples reports an outline or a floating image that starts above Inhalt ab", () => {
+  const outline = board();
+  outline.outlines[0].position.y = 70;
+  assertOneBoardFinding(outline, /^outlines\[0\]: y = 70, less than 71 \(Inhalt ab\)$/);
+  const image = board();
+  image.images[0].position.y = 70.5;
+  assertOneBoardFinding(image, /^images\[0\]: y = 70\.5, less than 71 \(Inhalt ab\)$/);
+  const notes = board();
+  notes.outlines[2].position.y = 0;
+  assertOneBoardFinding(notes, /^outlines\[2\]: y = 0, less than 71 \(Inhalt ab\)$/);
+});
+
+test("examples skips image placeholders in the font size check", () => {
+  const value = board();
+  const items = value.outlines[1].items;
+  assert.equal(items.at(-1).type, "image_placeholder");
+  assert.deepEqual(check({ [BOARD]: JSON.stringify(value) }), []);
+});
+
+test("examples exempts the notes for the teacher from the visible width and the minimum font size", () => {
+  const value = board();
+  assert.ok(value.outlines[2].position.x + value.outlines[2].width > 1024);
+  value.outlines[2].position.x = 1047;
+  const findings = check({ [BOARD]: JSON.stringify(value) });
+  assert.deepEqual(
+    findings.map((finding) => finding.message),
+    [
+      "outlines[2]: x + width = 1047 + 300 = 1347, more than 1024",
+      "outlines[2].items[0]: font_size 14 is less than 20",
+      "outlines[2].items[1].segments[0]: font_size 14 is less than 20",
+      "outlines[2].items[2].items[0].segments[0]: font_size 14 is less than 20",
+    ],
+  );
+});
+
+test("examples requires position and width for the notes for the teacher", () => {
+  const value = board();
+  delete value.outlines[2].width;
+  assertOneBoardFinding(value, /^outlines\[2\]: position and width are required/);
+});
+
+test("examples requires the Notizfarbe on every paragraph with text and every run of the notes", () => {
+  const paragraph = board();
+  delete paragraph.outlines[2].items[0].color;
+  assertOneBoardFinding(paragraph, /^outlines\[2\]\.items\[0\]: color must be #7030A0 in the notes for the teacher$/);
+  const run = board();
+  run.outlines[2].items[1].segments[0].color = "#C00000";
+  assertOneBoardFinding(run, /^outlines\[2\]\.items\[1\]\.segments\[0\]: color must be #7030A0/);
+  const listRun = board();
+  listRun.outlines[2].items[2].items[0].segments[0].color = "#7030a0";
+  assertOneBoardFinding(listRun, /^outlines\[2\]\.items\[2\]\.items\[0\]\.segments\[0\]: color must be #7030A0/);
+  const own = board();
+  own.outlines[2].items[1].color = "#1F4E79";
+  assertOneBoardFinding(own, /^outlines\[2\]\.items\[1\]: color must be #7030A0/);
+});
+
+test("examples requires an explicit font size in the notes for the teacher", () => {
+  const paragraph = board();
+  delete paragraph.outlines[2].items[0].font_size;
+  assertOneBoardFinding(paragraph, /^outlines\[2\]\.items\[0\]: no explicit font_size$/);
+  const run = board();
+  delete run.outlines[2].items[1].segments[0].font_size;
+  assertOneBoardFinding(run, /^outlines\[2\]\.items\[1\]\.segments\[0\]: no explicit font_size$/);
+});
+
+test("examples reports a list item with text in the notes, which can carry neither font size nor color", () => {
+  const value = board();
+  value.outlines[2].items[2].items[0] = { text: "Pizzakarton" };
+  const findings = check({ [BOARD]: JSON.stringify(value) });
+  assert.deepEqual(
+    findings.map((finding) => finding.message),
+    [
+      "outlines[2].items[2].items[0]: no explicit font_size",
+      "outlines[2].items[2].items[0]: color must be #7030A0 in the notes for the teacher",
+    ],
+  );
 });
 
 test("examples reports an outline wider than the example Ansicht", () => {

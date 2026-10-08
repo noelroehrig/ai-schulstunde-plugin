@@ -55,6 +55,10 @@ export const ASSIGNMENT_KEYS = [
   "section_id",
   "page_title",
   "page_id",
+  "parent_page_id",
+  "banner_page_id",
+  "symbol_page_id",
+  "model_page_id",
 ];
 
 /** Verdict tokens and result-line tokens. */

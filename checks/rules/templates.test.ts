@@ -102,6 +102,57 @@ test("templates reports a settings line whose value differs from the default", (
   assertOneFinding(files, "einstellungen.md", /line "Modell für das Tafelbild: Sonnet" missing/);
 });
 
+test("templates reports a missing or changed board checkpoint setting", () => {
+  const line = "Tafelbild vor Abschluss prüfen: ja";
+  const changed = (to: string) => withFile("einstellungen.md", template("einstellungen.md").replace(line, to));
+  assertOneFinding(changed(""), "einstellungen.md", /line "Tafelbild vor Abschluss prüfen: ja" missing/);
+  assertOneFinding(changed("Tafelbild vor Abschluss prüfen: nein"), "einstellungen.md", /line "Tafelbild vor Abschluss prüfen: ja" missing/);
+});
+
+test("templates reports a missing Vorlagen or Seitenaufbau heading in onenote.md", () => {
+  for (const heading of ["## Vorlagen", "## Seitenaufbau"]) {
+    const files = withFile("onenote.md", template("onenote.md").replace(`${heading}\n`, ""));
+    assertOneFinding(files, "onenote.md", new RegExp(`heading "${heading}" missing`));
+  }
+});
+
+test("templates reports each new onenote.md line that is no longer a placeholder", () => {
+  const prefixes = [
+    "Elternseite: [",
+    "Notizfarbe: [",
+    "Banner-Seite: [",
+    "Symbol-Seite: [",
+    "Vorbild-Seite: [",
+    "Text bei x: [",
+    "Symbole bei x: [",
+    "Banner bei x: [",
+    "Bannerbreite: [",
+  ];
+  for (const prefix of prefixes) {
+    const filled = prefix.replace("[", "48 [");
+    const files = withFile("onenote.md", template("onenote.md").replace(prefix, filled));
+    const findings = check(files);
+    assert.deepEqual(findings.map((finding) => finding.message), [`line starting with "${prefix}" missing`]);
+  }
+});
+
+test("templates reports a changed default of the Seitenaufbau", () => {
+  const changed = (from: string, to: string) => withFile("onenote.md", template("onenote.md").replace(from, to));
+  assertOneFinding(
+    changed("Stundenthema als erste Zeile: ja", "Stundenthema als erste Zeile: nein"),
+    "onenote.md",
+    /line "Stundenthema als erste Zeile: ja" missing/,
+  );
+  assertOneFinding(changed("Inhalt ab: 71 pt", "Inhalt ab: 80 pt"), "onenote.md", /line "Inhalt ab: 71 pt" missing/);
+});
+
+test("templates reports a missing list of the Abschnitte der Klassen or the Banner je Phase", () => {
+  for (const phrase of ["Abschnitte der Klassen:", "Banner je Phase:"]) {
+    const files = withFile("onenote.md", template("onenote.md").replace(phrase, "Liste:"));
+    assertOneFinding(files, "onenote.md", new RegExp(`"${phrase}" missing`));
+  }
+});
+
 test("templates reports a missing einstellungen heading", () => {
   const files = withFile("einstellungen.md", template("einstellungen.md").replace("## Prüfpunkt\n", ""));
   assertOneFinding(files, "einstellungen.md", /heading "## Prüfpunkt" missing/);

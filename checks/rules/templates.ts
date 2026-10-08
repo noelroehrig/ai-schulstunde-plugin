@@ -10,6 +10,7 @@ export const PRIVACY_SENTENCE = "Hier stehen keine Namen oder anderen persönlic
 /** The settings of `einstellungen.md`: each line's label with the template's value. */
 export const SETTINGS: Record<string, string> = {
   "Plan vor dem Tafelbild prüfen:": "ja",
+  "Tafelbild vor Abschluss prüfen:": "ja",
   "Modell für Plan und Planprüfung:": "Opus",
   "Modell für das Tafelbild:": "Sonnet",
 };
@@ -49,10 +50,23 @@ export const TEMPLATES: Record<string, TemplateSpec> = {
     phrases: ["Die Phasen ergeben zusammen genau die Stundenlänge."],
   },
   "onenote.md": {
-    headings: ["## Ablage", "## Ansicht"],
-    lines: [],
-    linePrefixes: ["Notizbuch: [", "Abschnitt: [", "Seitentitel: ["],
-    phrases: [],
+    headings: ["## Ablage", "## Ansicht", "## Vorlagen", "## Seitenaufbau"],
+    lines: ["Stundenthema als erste Zeile: ja", "Inhalt ab: 71 pt"],
+    linePrefixes: [
+      "Notizbuch: [",
+      "Abschnitt: [",
+      "Elternseite: [",
+      "Seitentitel: [",
+      "Notizfarbe: [",
+      "Banner-Seite: [",
+      "Symbol-Seite: [",
+      "Vorbild-Seite: [",
+      "Text bei x: [",
+      "Symbole bei x: [",
+      "Banner bei x: [",
+      "Bannerbreite: [",
+    ],
+    phrases: ["Abschnitte der Klassen:", "Banner je Phase:"],
   },
   "einstellungen.md": {
     headings: ["## Prüfpunkt", "## Modelle"],

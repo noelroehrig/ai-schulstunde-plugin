@@ -5,6 +5,7 @@ import { createMemoryRepo } from "../repo.ts";
 import {
   AGENT_TYPES,
   BAD_REQUEST_MESSAGE,
+  BOARD_CHECKPOINT_QUESTION,
   CHECKPOINT_QUESTION,
   CONVENTIONS_REFERENCE,
   ENTRY_POINT_REFERENCES,
@@ -49,7 +50,23 @@ test("orchestration passes when orchestration.md does not exist yet", () => {
 
 test("orchestration reports a changed checkpoint question", () => {
   const text = orchestrationFile().replace(CHECKPOINT_QUESTION, CHECKPOINT_QUESTION.replace("„weiter“", "\"weiter\""));
-  assertOneFinding(text, /checkpoint question/);
+  assertOneFinding(text, /^checkpoint question missing or changed$/);
+});
+
+test("BOARD_CHECKPOINT_QUESTION asks whether the Tafelbild fits, with the answers of the plan checkpoint", () => {
+  assert.equal(
+    BOARD_CHECKPOINT_QUESTION,
+    "Passt das Tafelbild so? Antworte mit „weiter“, oder schreib, was geändert werden soll.",
+  );
+});
+
+test("orchestration reports a missing or changed board checkpoint question", () => {
+  assertOneFinding(orchestrationFile().split(BOARD_CHECKPOINT_QUESTION).join("x"), /^board checkpoint question missing or changed$/);
+  const changed = BOARD_CHECKPOINT_QUESTION.replace("„weiter“", "\"weiter\"");
+  assertOneFinding(
+    orchestrationFile().split(BOARD_CHECKPOINT_QUESTION).join(changed),
+    /^board checkpoint question missing or changed$/,
+  );
 });
 
 test("orchestration reports each missing escalation label", () => {
@@ -91,7 +108,7 @@ test("SERVER_NOT_RUNNING_MESSAGE names the exe and the advice to use the Code ta
 
 test("orchestration reports each missing item separately", () => {
   const findings = check({ [GUIDE]: "# Orchestration\n" });
-  assert.equal(findings.length, 1 + 3 + 4 + 6 + 4 + 3 + 1 + 1 + 1 + 1);
+  assert.equal(findings.length, 1 + 1 + 3 + 4 + 6 + 4 + 4 + 1 + 1 + 1 + 1);
   assert.ok(findings.every((finding) => finding.rule === "orchestration" && finding.file === GUIDE));
 });
 
@@ -109,6 +126,16 @@ test("orchestration passes on entry points that reference the guide and every se
 
 test("orchestration passes when the entry points do not exist yet", () => {
   assert.deepEqual(check({ "plugin/skills/lesson-conventions/SKILL.md": "Instructions.\n" }), []);
+});
+
+test("ENTRY_POINT_REFERENCES are the guide and every setting the entry points pass on", () => {
+  assert.deepEqual(ENTRY_POINT_REFERENCES, [
+    "${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md",
+    "the `plan_checkpoint` value",
+    "the `board_checkpoint` value",
+    "the `planning_model` value",
+    "the `board_model` value",
+  ]);
 });
 
 test("orchestration reports each missing entry-point reference", () => {
@@ -180,7 +207,7 @@ test("orchestration does not count an allow rule that appears only inside a long
 const LESSON_FOLDER = "plugin/skills/lesson-conventions/lesson-folder.md";
 
 test("STATE_LINES are the state-model lines the rule requires in lesson-folder.md", () => {
-  assert.deepEqual(STATE_LINES, ["Prüfbericht:", "Rückmeldung:", "Alte Seite:"]);
+  assert.deepEqual(STATE_LINES, ["Prüfbericht:", "Rückmeldung:", "Alte Seite:", "Elternseite:", "Anhänge:"]);
 });
 
 test("orchestration passes on a lesson-folder.md that holds every state line", () => {
@@ -195,6 +222,15 @@ test("orchestration reports each state line missing from lesson-folder.md", () =
     assert.equal(findings[0].rule, "orchestration");
     assert.equal(findings[0].file, LESSON_FOLDER);
     assert.ok(findings[0].message.includes(line), findings[0].message);
+  }
+});
+
+test("orchestration reports a missing Elternseite or Anhänge state line", () => {
+  for (const label of ["Elternseite:", "Anhänge:"]) {
+    const text = lessonFolderFile().replace(new RegExp(`^${label}`, "m"), `Die ${label}`);
+    const findings = check({ [LESSON_FOLDER]: text });
+    assert.equal(findings.length, 1, JSON.stringify(findings));
+    assert.equal(findings[0].message, `state line "${label}" missing`);
   }
 });
 
@@ -221,9 +257,10 @@ test("orchestration reports each missing row of the model table", () => {
   }
 });
 
-test("SETTING_LABELS are the three lines of einstellungen.md as code spans", () => {
+test("SETTING_LABELS are the four lines of einstellungen.md as code spans", () => {
   assert.deepEqual(SETTING_LABELS, [
     "`Plan vor dem Tafelbild prüfen:`",
+    "`Tafelbild vor Abschluss prüfen:`",
     "`Modell für Plan und Planprüfung:`",
     "`Modell für das Tafelbild:`",
   ]);
