@@ -51,7 +51,7 @@ export const TEMPLATES: Record<string, TemplateSpec> = {
   "onenote.md": {
     headings: ["## Ablage", "## Ansicht"],
     lines: [],
-    linePrefixes: ["Abschnitt: [", "Seitentitel: ["],
+    linePrefixes: ["Notizbuch: [", "Abschnitt: [", "Seitentitel: ["],
     phrases: [],
   },
   "einstellungen.md": {

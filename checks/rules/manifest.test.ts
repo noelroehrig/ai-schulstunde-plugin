@@ -147,22 +147,31 @@ function repoWith(files: Record<string, string>) {
   return createMemoryRepo({ [FILE]: manifestJson(), ...files });
 }
 
-test("user-config-refs passes when every reference is declared", () => {
+test("user-config-refs passes when every reference is declared and in .mcp.json", () => {
   const repo = repoWith({
-    "plugin/.mcp.json": '{ "x": "${user_config.notebook}" }',
-    "plugin/skills/a/SKILL.md": "Checkpoint: ${user_config.plan_checkpoint}\r\n",
+    "plugin/.mcp.json": '{ "x": "${user_config.notebook}", "y": "${user_config.plan_checkpoint}" }',
     "README.md": "${user_config.outside_plugin_is_ignored}",
   });
   assert.deepEqual(userConfigRefs.run(repo, "build"), []);
 });
 
 test("user-config-refs reports an undeclared key with file and key", () => {
-  const repo = repoWith({ "plugin/agents/a.md": "Use ${user_config.notebok} here.\n" });
+  const repo = repoWith({ "plugin/.mcp.json": '{ "x": "${user_config.notebok}" }' });
   const findings = userConfigRefs.run(repo, "build");
   assert.equal(findings.length, 1);
   assert.equal(findings[0].rule, "user-config-refs");
-  assert.equal(findings[0].file, "plugin/agents/a.md");
-  assert.match(findings[0].message, /notebok/);
+  assert.equal(findings[0].file, "plugin/.mcp.json");
+  assert.match(findings[0].message, /notebok.*does not declare/);
+});
+
+test("user-config-refs reports a declared key in skill or agent text", () => {
+  for (const file of ["plugin/skills/a/SKILL.md", "plugin/agents/a.md"]) {
+    const findings = userConfigRefs.run(repoWith({ [file]: "Checkpoint: ${user_config.plan_checkpoint}\r\n" }), "build");
+    assert.equal(findings.length, 1, JSON.stringify(findings));
+    assert.equal(findings[0].rule, "user-config-refs");
+    assert.equal(findings[0].file, file);
+    assert.match(findings[0].message, /plan_checkpoint.*outside \.mcp\.json/);
+  }
 });
 
 test("user-config-refs treats every key as undeclared without a readable manifest", () => {

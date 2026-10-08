@@ -10,7 +10,6 @@ disable-model-invocation: true
 The teacher wants to work on an existing lesson in `Stunden/`. You either resume an interrupted run at the step where it stopped, or revise a finished or aborted lesson with the teacher's changes: both loops again, from the latest plan, with the board on a new page. Everything you say to the teacher is German; use the wording quoted here where it is given.
 
 Plugin root: ${CLAUDE_PLUGIN_ROOT}
-OneNote notebook: ${user_config.notebook}
 Request: $ARGUMENTS
 
 The working folder is the current working directory: use its absolute path, with forward slashes. Every file named below without a folder is in the working folder.
@@ -38,8 +37,8 @@ The lessons are the folders in `Stunden/` that hold a `stunde.md`. When there is
 
    End your turn. When the answer also holds changes, keep them as the teacher's changes.
 3. Read `stunde.md` of the chosen lesson and `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/lesson-folder.md`. When `## Stand` or `## OneNote` of `stunde.md` lacks a line of the format of `lesson-folder.md`, or `Schritt` is not one of its values, stop with `Die Datei stunde.md im Ordner <Name des Stundenordners> kann ich nicht lesen: <was fehlt>. Ich ändere nichts.`
-4. The `notebook` setting (`OneNote notebook` above) is not blank and has no comma. Otherwise do not call any OneNote tool, say `Hinweis: Die Einstellung „OneNote-Notizbuch“ ist leer oder enthält ein Komma. Für das Tafelbild trag mit /config genau den Namen eines Notizbuchs ein.`, skip item 5, and continue with item 6.
-5. When the plugin's OneNote tools are not available in this session, the OneNote server did not start: read OneNote server not running in `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md`, call no OneNote tool, say `Hinweis: ` and its message, then `Ich mache trotzdem weiter und prüfe vor dem Tafelbild noch einmal.`, and continue. Otherwise call `mcp__plugin_unterricht_onenote__ping`. When it reports `onenote_responsive: false`, or the call fails, say `Hinweis: OneNote reagiert gerade nicht. Ich mache trotzdem weiter und prüfe vor dem Tafelbild noch einmal. Bitte öffne bis dahin OneNote und schließe offene Dialoge.` and continue. Never stop here because of OneNote.
+4. The notebook, as The notebook in `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md` defines it, is set and not broken. Otherwise do not call any OneNote tool, say `Hinweis: In onenote.md ist noch kein gültiges Notizbuch eingetragen. Für das Tafelbild führe vorher /unterricht:einrichten aus.`, skip item 5, and continue with item 6.
+5. When the plugin's OneNote tools are not available in this session, the OneNote server did not start: read OneNote server not running in `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md`, call no OneNote tool, say `Hinweis: ` and its message, then `Ich mache trotzdem weiter und prüfe vor dem Tafelbild noch einmal.`, and continue. Otherwise call `mcp__plugin_unterricht_onenote__ping`. When it reports a `config_error` that is not `null`, say `Hinweis: Die Freigabe für OneNote ist noch nicht eingerichtet. Ich mache trotzdem weiter. Für das Tafelbild führe vorher /unterricht:einrichten aus.` and continue. When it reports `onenote_responsive: false`, or the call fails, say `Hinweis: OneNote reagiert gerade nicht. Ich mache trotzdem weiter und prüfe vor dem Tafelbild noch einmal. Bitte öffne bis dahin OneNote und schließe offene Dialoge.` and continue. Never stop here because of OneNote.
 6. Only after items 4 and 5, go by `Schritt`: `Planung`, `Prüfpunkt`, or `Tafelbild` resume (step 3); `Fertig` or `Abgebrochen` revise (step 4).
 
 ## 3. Resume
@@ -84,7 +83,6 @@ Read `${CLAUDE_PLUGIN_ROOT}/skills/lesson-conventions/orchestration.md` and foll
 - the plugin root: `Plugin root` above;
 - the working folder: the absolute path of the working folder;
 - the lesson folder: the absolute path of the chosen lesson folder;
-- the `notebook` setting: `OneNote notebook` above;
 - the `plan_checkpoint` value: from step 1;
 - the `planning_model` value: from step 1;
 - the `board_model` value: from step 1.

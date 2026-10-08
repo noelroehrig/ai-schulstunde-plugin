@@ -17,16 +17,21 @@ Du brauchst kein Terminal. Alles geht mit Klicks und mit Nachrichten an Claude.
 1. Öffne claude.ai im Browser und gehe zu *Customize → Plugins → Add marketplace*.
 2. Gib als Marktplatz `noelroehrig/ai-schulstunde-plugin` ein und installiere dort das Plugin `unterricht`.
 3. Starte eine neue Sitzung im Tab „Code“ der Desktop-App. Das Plugin erscheint dort beim nächsten Start einer Sitzung.
-4. Trag in der Einstellung **OneNote-Notizbuch** des Plugins mit `/config` den Namen deines Notizbuchs ein, genau so geschrieben wie in OneNote, mit Groß- und Kleinschreibung. Nur in diesem Notizbuch darf das Plugin lesen und Seiten anlegen.
-5. Lege einen Arbeitsordner an, zum Beispiel `Dokumente\Unterricht`, und öffne ihn im Tab „Code“.
+4. Lege einen Arbeitsordner an, zum Beispiel `Dokumente\Unterricht`, und öffne ihn im Tab „Code“.
 
 ## Erste Schritte
 
-1. Tippe `/unterricht:einrichten`. Claude legt die nötigen Dateien an und fragt dich nach deiner Schule, der Stundenlänge, deinen Klassen und deinen Kriterien. Wenn du schon Anweisungen in einem Claude-Projekt hast, kannst du sie einfügen, und Claude sortiert sie ein. Claude schreibt nur, wenn du zugestimmt hast.
+1. Tippe `/unterricht:einrichten`. Claude legt die nötigen Dateien an und fragt dich nach deiner Schule, der Stundenlänge, deinen Klassen, deinen Kriterien und deinem OneNote-Notizbuch. Wenn du schon Anweisungen in einem Claude-Projekt hast, kannst du sie einfügen, und Claude sortiert sie ein. Claude schreibt nur, wenn du zugestimmt hast.
 2. Lege Lehrpläne und anderes Material in den Ordner `material/`. Word-Dateien speicherst du vorher als PDF.
 3. Plane deine erste Stunde, zum Beispiel:
 
    `/unterricht:stunde-planen Brüche als Anteile, 6b, Einstieg mit Pizza-Beispiel`
+
+## Freigabe für OneNote
+
+Claude darf nur in den Notizbüchern lesen und Seiten anlegen, die du freigegeben hast. `/unterricht:einrichten` fragt dich nach dem Namen deines Notizbuchs, trägt ihn in `onenote.md` ein und gibt das Notizbuch nach deinem Ja einmal frei. Die Freigabe steht in deinen Claude-Einstellungen, in der Datei `.claude\settings.json` in deinem Benutzerordner. Claude fragt dich vorher, ob es diese Datei ändern darf. Die Freigabe gilt ab dem nächsten Chat: Öffne danach einen neuen Chat in deinem Arbeitsordner und starte `/unterricht:einrichten` noch einmal.
+
+Unterrichtest du mehrere Fächer mit je einem Notizbuch, lege für jedes Fach einen eigenen Arbeitsordner an und richte ihn mit `/unterricht:einrichten` ein. Jeder Ordner bekommt sein Notizbuch, und die Freigaben der anderen Ordner bleiben bestehen.
 
 ## Einstellungen
 
@@ -63,7 +68,7 @@ Unterricht/
 ├── CLAUDE.md          kurze Übersicht über den Ordner
 ├── schulkontext.md    Schule, Stundenlänge, Phasenmodell, Regeln
 ├── kriterien.md       deine Kriterien, aufgeteilt in Muss und Soll
-├── onenote.md         Abschnitt, Seitentitel und sichtbare Fläche in OneNote
+├── onenote.md         Notizbuch, Abschnitt, Seitentitel und sichtbare Fläche
 ├── einstellungen.md   Prüfpunkt und Modelle
 ├── material/          Lehrpläne, Vorlagen
 └── Stunden/
@@ -90,7 +95,7 @@ Dieses Repository ist öffentlich und enthält keine Inhalte von Lehrkräften. D
 
 - **OneNote reagiert nicht oder zeigt einen Dialog:** Öffne OneNote und schließe offene Dialoge, zum Beispiel eine Anmeldung oder eine Meldung zur Synchronisierung. Claude versucht es dann noch einmal. Klappt es trotzdem nicht, bleibt der Plan erhalten, und du machst später mit `/unterricht:stunde-ueberarbeiten` weiter.
 - **Claude meldet, dass die OneNote-Verbindung des Plugins nicht läuft:** Prüfe, ob du im Tab „Code“ arbeitest, denn in Cowork gibt es die Verbindung nicht. Im Tab „Code“ starte die Claude-App neu. Wenn das nicht hilft, prüfe, ob Windows Defender oder SmartScreen die Datei `onenote-mcp.exe` blockiert, und gib sie dort frei. Die Datei ist der OneNote-Server des Plugins aus github.com/noelroehrig/onenote-mcp; welche Version es ist, steht in `plugin/server/VERSION`, ihre Prüfsumme in `plugin/server/onenote-mcp.exe.sha256`. Bis dahin plant Claude die Stunde trotzdem, und das Tafelbild machst du danach mit `/unterricht:stunde-ueberarbeiten`.
-- **Das Notizbuch wird nicht gefunden:** Der Name in der Einstellung „OneNote-Notizbuch“ muss genau so geschrieben sein wie in OneNote, mit Groß- und Kleinschreibung und ohne Komma. Ändere ihn mit `/config`.
+- **Das Notizbuch wird nicht gefunden oder ist nicht freigegeben:** Starte `/unterricht:einrichten`. Es prüft den Namen in `onenote.md` und die Freigabe und hilft dir, beides zu korrigieren. Der Name muss genau so geschrieben sein wie in OneNote, mit Groß- und Kleinschreibung und ohne Komma.
 - **Der Abschnitt fehlt:** Das Plugin legt keine Abschnitte an. Lege den Abschnitt in OneNote an oder nenne Claude einen anderen. Abschnitte in Abschnittsgruppen werden nicht unterstützt.
 - **Claude fragt bei jedem Schritt um Erlaubnis:** `/unterricht:einrichten` bietet dir an, die nötigen Freigaben in `.claude/settings.json` in deinem Arbeitsordner einzutragen. Stimme zu, dann fragt Claude seltener.
 - **Eine Planung wurde unterbrochen:** Tippe `/unterricht:stunde-ueberarbeiten`. Claude zeigt dir deine Stunden und macht dort weiter, wo es aufgehört hat.

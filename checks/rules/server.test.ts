@@ -35,6 +35,14 @@ test("server accepts a VERSION without a newline and CRLF files", () => {
   assert.deepEqual(check(files), []);
 });
 
+test("server rejects a release with a server that reads an empty allowlist as every notebook", () => {
+  for (const version of ["v1.0.1\n", "v0.9.0\n"]) {
+    const files = { ...serverFiles(), [VERSION]: version };
+    assertOneFinding(files, VERSION, /up to v1\.0\.1 read an empty allowlist as every notebook/, "release");
+    assert.deepEqual(check(files, "build"), []);
+  }
+});
+
 test("server is only a notice in build mode when not vendored", () => {
   const repo = createMemoryRepo({ "plugin/.mcp.json": "{}" });
   assert.deepEqual(server.run(repo, "build"), []);
