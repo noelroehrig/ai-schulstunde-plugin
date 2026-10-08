@@ -11,6 +11,7 @@
 - Heißen die Abschnitte anders als die Klassen, zum Beispiel „Mathe 5a“ für die Klasse 5a, trägst du das in `onenote.md` unter „Abschnitte der Klassen“ ein. Steht eine Klasse nicht in `schulkontext.md`, fragt Claude vor dem Planen nach.
 - Neuer Prüfpunkt: Claude zeigt dir das Tafelbild in OneNote, bevor die Stunde fertig ist. Deine Rückmeldung geht direkt in die Überarbeitung des Tafelbilds. Abschalten kannst du ihn in `einstellungen.md`.
 - Beim Überarbeiten einer fertigen Stunde kannst du jetzt wählen, ob Claude die bisherige Seite überschreibt oder eine neue anlegt. Auf der bisherigen Seite ersetzt Claude dabei alles, was du dort getippt oder eingefügt hast.
+- Server aktualisiert auf v1.2.0.
 - Rufe nach dem Update einmal `/unterricht:einrichten` auf: Es ergänzt die neue Einstellung in `einstellungen.md` und fragt nach Vorlagen und Seitenaufbau. Ohne die neue Einstellung hält Claude vor dem Planen an und verweist auf `/unterricht:einrichten`.
 
 ## 0.3.0 (2026-10-08)
