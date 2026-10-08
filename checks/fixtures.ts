@@ -203,6 +203,7 @@ export function templateFiles(): Record<string, string> {
     "plugin/templates/onenote.md": file([
       "# OneNote",
       "## Ablage",
+      "Notizbuch: [Name]",
       "Abschnitt: [Name]",
       "Seitentitel: [Schema]",
       "## Ansicht",

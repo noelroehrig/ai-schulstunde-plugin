@@ -36,8 +36,8 @@ export const AGENT_TYPES = [
   "unterricht:board-reviewer",
 ];
 
-/** Verdict tokens, result-line tokens, and the `ping` field the orchestrator reads. */
-export const ORCHESTRATION_TOKENS = ["APPROVED", "REVISE", "DONE", "FAILED", "onenote_responsive"];
+/** Verdict tokens, result-line tokens, and the `ping` fields the orchestrator reads. */
+export const ORCHESTRATION_TOKENS = ["APPROVED", "REVISE", "DONE", "FAILED", "onenote_responsive", "config_error"];
 
 /** The file name of the OneNote server, which Windows may block because it is unsigned. */
 export const SERVER_EXE = "onenote-mcp.exe";
@@ -70,7 +70,6 @@ const ENTRY_POINT_FILES = ["plugin/skills/stunde-planen/SKILL.md", "plugin/skill
 /** What each entry point that follows the guide must reference: the guide's path and the settings it passes on. */
 export const ENTRY_POINT_REFERENCES = [
   GUIDE_REFERENCE,
-  "${user_config.notebook}",
   "the `plan_checkpoint` value",
   "the `planning_model` value",
   "the `board_model` value",
